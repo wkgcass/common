@@ -1,6 +1,7 @@
 package cass.toolbox.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -171,8 +172,9 @@ public class LocalClassRetriever {
 			if(suffix.equalsIgnoreCase(".jar")){
 				//====
 				this.jars.put(jar.getName(), path+File.separatorChar+jar.getName());
+				JarFile jarFile=null;
 				try {
-					JarFile jarFile=new JarFile(jar);
+					jarFile=new JarFile(jar);
 					Enumeration<JarEntry> entries=jarFile.entries();
 					this.dependency.put(jar.getName(), new HashSet<String>());
 					if(null!=depend){
@@ -198,6 +200,14 @@ public class LocalClassRetriever {
 					}
 				} catch (Exception e) {
 					return false;
+				}finally{
+					if(null!=jarFile){
+						try {
+							jarFile.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
 				}
 				//====
 				return true;

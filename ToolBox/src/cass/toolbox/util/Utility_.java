@@ -2,7 +2,6 @@ package cass.toolbox.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 
 public class Utility_ {
 	private Utility_() {
