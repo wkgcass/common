@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hotplug>
+	<init>
+		<list name="do-not-load" value="name">
+			<class name="cass.hotplugging.run.Entrance" />
+		</list>
+		<list name="base-dirs" value="path">
+			<base-dir path="D:\Workspace\MyEclipse\Hotplugging\bin\" />
+			<base-dir path="C:\Users\Administrator\Workspaces\MyEclipse 8.5\HotSwap\bin\" />
+		</list>
+		<map name="jars" key="name" value="path">
+			<jar name="cass.hotplugging.core.jar" path="D:\cass.hotplugging.core.jar" />
+		</map>
+		<map name="class" key="name" value="path">
+		</map>
+		<list name="load-at-init" value="name">
+			<class name="cass.hotplugging.island.ObjectManager" />
+		</list>
+		<list name="aware" value="#node">
+			<aware interface="cass.hotplugging.core.aware.ClassInfoAware" />
+			<aware interface="cass.hotplugging.core.aware.CLManagerAware" />
+		</list>
+	</init>
+	<launch>
+		<list name="invocations" value="#node">
+			<invoke class="test.SubMain" static-method="subMain"  />
+		</list>
+	</launch>
+</hotplug>

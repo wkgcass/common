@@ -1,0 +1,13 @@
+package cass.toolbox.ioc.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Bean {
+	public String[] name();
+	public boolean isSingleton() default true;
+}

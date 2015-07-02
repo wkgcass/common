@@ -1,0 +1,30 @@
+Version 0.0.0
+
+Let your class extends AutoWire, then simply 
+"new" the class, you can get all members injected
+
+You can use this tool with Struts2, Spring,actually
+it is able to work with all kinds of frameworks.
+
+Note that
+Circular dependency may not function well.
+Classes which occurs circular dependency must 
+be singletons.
+And one millisecond must be wait or sleep for after 
+constructing finished in order to let the injection 
+complete, otherwise you may get a null value.
+
+Also, multiple-thread environment haven't been 
+strictly handled (only some basic measures taken),
+use with care.
+
+There are some logical faults i am already aware.
+But I will try to fix these problems in later versions.
+
+
+
+Version 0.1.0
+
+Listener for 8 main methods in IOCController is provided
+You can implement IOCListener and register the implementation to IOCController to use.
+Also a DefaultIOCListener is provided, which contains empty methods, with which the coding would be neater.
