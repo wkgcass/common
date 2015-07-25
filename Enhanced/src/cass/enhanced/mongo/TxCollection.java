@@ -38,19 +38,13 @@ public class TxCollection implements MongoCollection<Document> {
 
 	@SuppressWarnings("unchecked")
 	private Bson modifyQuery(Bson query) {
-		if (query instanceof Map) {
-			BasicDBObject bdo = new BasicDBObject((Map<String, Object>) query);
-			Object _id = bdo.remove("_id");
-			if (null != _id) {
-				bdo.append(Transaction.TX_REF, _id);
-			}
-			bdo.append(Transaction.TX_MAP_COLL, coll.getNamespace().getCollectionName());
-			return bdo;
-		} else {
-			// throw new UnsupportedOperationException("query Bson should be an
-			// instance of Map");
-			return query;
+		BasicDBObject bdo = new BasicDBObject((Map<String, Object>) query);
+		Object _id = bdo.remove("_id");
+		if (null != _id) {
+			bdo.append("$or", new BasicDBObject(Transaction.TX_REF, _id).append(Transaction.TX_TARGET_ID, _id));
 		}
+		bdo.append(Transaction.TX_MAP_COLL, coll.getNamespace().getCollectionName());
+		return bdo;
 	}
 
 	public TxCollection(MongoCollection<Document> coll, Transaction tx) {
@@ -262,8 +256,8 @@ public class TxCollection implements MongoCollection<Document> {
 	@Override
 	public void insertMany(List<? extends Document> arg0) {
 		if (tx.started()) {
+			tx.beforeInsertMany(coll, arg0);
 			tx.getTxCollection().insertMany(arg0);
-			tx.afterInsertMany(coll, arg0);
 		} else {
 			coll.insertMany(arg0);
 		}
@@ -272,8 +266,8 @@ public class TxCollection implements MongoCollection<Document> {
 	@Override
 	public void insertMany(List<? extends Document> arg0, InsertManyOptions arg1) {
 		if (tx.started()) {
+			tx.beforeInsertMany(coll, arg0);
 			tx.getTxCollection().insertMany(arg0, arg1);
-			tx.afterInsertMany(coll, arg0);
 		} else {
 			coll.insertMany(arg0, arg1);
 		}
@@ -282,8 +276,8 @@ public class TxCollection implements MongoCollection<Document> {
 	@Override
 	public void insertOne(Document arg0) {
 		if (tx.started()) {
+			tx.beforeInsertOne(coll, arg0);
 			tx.getTxCollection().insertOne(arg0);
-			tx.afterInsertOne(coll, arg0.get("_id"));
 		} else {
 			coll.insertOne(arg0);
 		}

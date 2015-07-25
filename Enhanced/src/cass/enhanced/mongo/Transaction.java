@@ -28,7 +28,11 @@ public class Transaction implements Closeable {
 	private static final String TX_BKUP = "j-tx-backup";
 	private static final String TX_REQUIRE_ROLLBACK_ON_ERROR = "j-tx-req-rolbk-on-err";
 	private static final String TX_COLL_PREFIX = "j_transaction_";
-	static final String TX_DELETE = "j-tx-del";
+	static final String TX_OPERATION = "j-transaction-op";
+	static final String TX_TARGET_ID = "j-tx-target-id";
+	static final String TX_OP_UPDATE = "update";
+	static final String TX_OP_INSERT = "insert";
+	static final String TX_OP_DELETE = "delete";
 	private static List<Integer> transactionId = new LinkedList<Integer>();
 	/**
 	 * cache of id.<br/>
@@ -130,9 +134,9 @@ public class Transaction implements Closeable {
 			return false;
 		}
 		// set mapping properties
+		doc.put(TX_BKUP, new Document(doc));
 		doc.put(TX_REF, _id);
 		doc.put(TX_MAP_COLL, collName);
-		doc.put(TX_BKUP, new Document(doc));
 		return true;
 	}
 
@@ -143,7 +147,7 @@ public class Transaction implements Closeable {
 			if (null != doc) {
 				if (requireDocCopy(coll, doc)) {
 					// back up the document
-					txColl.insertOne(doc);
+					txColl.insertOne(doc.append(TX_OPERATION, TX_OP_UPDATE));
 				}
 			}
 		}
@@ -157,7 +161,7 @@ public class Transaction implements Closeable {
 			for (Document doc : res) {
 				if (requireDocCopy(coll, doc)) {
 					// add into list( with TX_
-					listToInsert.add(doc);
+					listToInsert.add(doc.append(TX_OPERATION, TX_OP_UPDATE));
 				}
 			}
 			// do insert
@@ -165,46 +169,63 @@ public class Transaction implements Closeable {
 		}
 	}
 
-	void afterInsertOne(MongoCollection<Document> coll, Object _id) {
+	void beforeInsertOne(MongoCollection<Document> coll, Document doc) {
 		// (document already inserted)
 		if (started) {
-			// add TX_MAP_COLL property
-			txColl.updateOne(new BasicDBObject("_id", _id),
-					new BasicDBObject("$set", new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName())));
-		}
-	}
-
-	void afterInsertMany(MongoCollection<Document> coll, List<? extends Document> docList) {
-		// (document already inserted)
-		if (started) {
-			List<Object> _ids = new ArrayList<Object>(docList.size());
-			for (Document doc : docList) {
-				Object _id = doc.get("_id");
-				_ids.add(_id);
+			// add TX_MAP_COLL and TX_TARGET_ID property
+			doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+			Object _id = doc.remove("_id");
+			if (null != _id) {
+				doc.append(TX_TARGET_ID, _id).append(TX_OPERATION, TX_OP_INSERT);
 			}
-			// add TX_MAP_COLL property
-			txColl.updateMany(new BasicDBObject("_id", new BasicDBObject("$in", _ids)),
-					new BasicDBObject("$set", new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName())));
 		}
 	}
 
+	void beforeInsertMany(MongoCollection<Document> coll, List<? extends Document> docList) {
+		// (document already inserted)
+		if (started) {
+			for (Document doc : docList) {
+				// add TX_MAP_COLL property
+				doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+				Object _id = doc.remove("_id");
+				if (null != _id) {
+					doc.append(TX_TARGET_ID, _id).append(TX_OPERATION, TX_OP_INSERT);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
 	DeleteResult deleteOne(MongoCollection<Document> coll, Bson query) {
 		Document doc = coll.find(query).first();
-		if (null != doc) {
+		if (null == doc) {
+			// doc not in collection
+			// assume it was insert
+			Document sample = new Document((Map<String, Object>) query);
+			Object _id = sample.remove("_id");
+			if (null != _id) {
+				sample.append(TX_TARGET_ID, _id).append(TX_REF, null);
+			}
+			return txColl.deleteOne(sample);
+		} else {
+			// doc exist in collection
 			if (requireDocCopy(coll, doc)) {
-				doc.append(TX_DELETE, true); // add TX_DELETE property
+				// in tx collection
+				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
 				txColl.insertOne(doc);
-				return new MannualDeleteResult(1L, true);
 			} else {
+				// not in tx collection
+				// if it was update
 				txColl.updateOne(
 						new BasicDBObject(TX_REF, doc.get("_id")).append(TX_MAP_COLL,
 								coll.getNamespace().getCollectionName()),
-						new BasicDBObject("$set", new BasicDBObject(TX_DELETE, true)));
+						new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)));
 			}
+			return new MannualDeleteResult(1L, true);
 		}
-		return new MannualDeleteResult(0L, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	DeleteResult deleteMany(MongoCollection<Document> coll, Bson query) {
 		FindIterable<Document> res = coll.find(query);
 		Iterator<Document> it = res.iterator();
@@ -214,18 +235,26 @@ public class Transaction implements Closeable {
 		while (it.hasNext()) {
 			Document doc = it.next();
 			if (requireDocCopy(coll, doc)) {
-				doc.append(TX_DELETE, true); // add TX_DELETE property
+				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
 				listToInsert.add(doc);
 				++count;
 			} else {
-				listToUpdate.add(doc.get("_id"));
+				listToUpdate.add(doc.get("_id")); // update already existed tx
+													// documents
 			}
 		}
-		txColl.insertMany(listToInsert);
 		txColl.updateMany(
 				new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_REF,
 						new BasicDBObject("$in", listToUpdate)),
-				new BasicDBObject("$set", new BasicDBObject(TX_DELETE, true)));
+				new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)));
+		txColl.insertMany(listToInsert);
+		// assume inserted documents would be deleted
+		Document sample = new Document((Map<String, Object>) query);
+		Object _id = sample.remove("_id");
+		if (null != _id) {
+			sample.append(TX_TARGET_ID, _id).append(TX_REF, null);
+		}
+		count += txColl.deleteOne(sample).getDeletedCount();
 		return new MannualDeleteResult(count, true);
 	}
 
@@ -250,18 +279,31 @@ public class Transaction implements Closeable {
 		// get all documents in transaction collection
 		FindIterable<Document> toCommit = txColl.find();
 		for (Document doc : toCommit) {
-			// remove _id, TX_MAP_COLL and TX_BKUP so that the document can be
-			// used
-			// directly (TX_REF would be removed later if exist)
+			// remove _id, TX_MAP_COLL, TX_OPERATION and TX_BKUP so that the
+			// document can be used directly (TX_REF would be removed later if
+			// exist)
+			String op = (String) doc.remove(TX_OPERATION);
 			String collName = (String) doc.remove(TX_MAP_COLL);
 			doc.remove(TX_BKUP);
 			MongoCollection<Document> coll = db.getCollection(collName);
 			Object tx_id = doc.remove("_id");
-			if (doc.containsKey(TX_REF)) {
+			if (op.equals(TX_OP_INSERT)) {
+				// insert
+				Object _id = doc.remove(TX_TARGET_ID);
+				if (null != _id) {
+					doc.append("_id", _id);
+				}
+				coll.insertOne(doc);
+				if (null == _id) {
+					_id = doc.get("_id");
+				}
+				// change state and set tx_ref
+				txColl.updateOne(new BasicDBObject("_id", tx_id), new BasicDBObject("$set",
+						new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true).append(TX_REF, _id)));
+			} else {
 				// remove TX_REF
 				Object _id = doc.remove(TX_REF);
-				boolean isDelete = doc.getBoolean(TX_DELETE, false);
-				if (isDelete) {
+				if (op.equals(TX_OP_DELETE)) {
 					// delete
 					coll.deleteOne(new BasicDBObject("_id", _id));
 				} else {
@@ -271,13 +313,6 @@ public class Transaction implements Closeable {
 				// change state
 				txColl.updateOne(new BasicDBObject("_id", tx_id),
 						new BasicDBObject("$set", new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true)));
-			} else {
-				// insert
-				coll.insertOne(doc);
-				Object _id = doc.get("_id");
-				// change state and set tx_ref
-				txColl.updateOne(new BasicDBObject("_id", tx_id), new BasicDBObject("$set",
-						new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true).append(TX_REF, _id)));
 			}
 		}
 		clear();
@@ -296,28 +331,25 @@ public class Transaction implements Closeable {
 		state = ROLLINGBACK;
 		if (state == COMMITTING) {
 			// get all documents in transaction collection
-			FindIterable<Document> res = txColl.find();
+			FindIterable<Document> res = txColl.find(new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true));
 			for (Document doc : res) {
-				boolean rollback = doc.getBoolean(TX_REQUIRE_ROLLBACK_ON_ERROR, false);
-				if (rollback) {
-					// state require rolling back
-					String collName = doc.getString(TX_MAP_COLL);
-					MongoCollection<Document> coll = db.getCollection(collName);
-					if (doc.containsKey(TX_REF)) {
-						if (doc.containsKey(TX_BKUP)) {
-							// update - rollback updated obj
-							Document bkup = new Document((Map<String, Object>) doc.get(TX_BKUP));
-							bkup.put("_id", doc.get(TX_REF));
-							coll.replaceOne(new BasicDBObject("_id", doc.get(TX_REF)), bkup);
-						} else {
-							// insert - delete inserted obj
-							coll.deleteOne(new BasicDBObject("_id", doc.get(TX_REF)));
-						}
-					} else {
-						// delete - insert updated obj
+				// state require rolling back
+				String collName = doc.getString(TX_MAP_COLL);
+				MongoCollection<Document> coll = db.getCollection(collName);
+				if (doc.getString(TX_OPERATION).equals(TX_OP_DELETE)) {
+					// delete - insert updated obj
+					Document bkup = new Document((Map<String, Object>) doc.get(TX_BKUP));
+					bkup.put("_id", doc.get(TX_REF));
+					coll.replaceOne(new BasicDBObject("_id", doc.get(TX_REF)), bkup);
+				} else {
+					if (doc.getString(TX_OPERATION).equals(TX_OP_UPDATE)) {
+						// update - rollback updated obj
 						Document bkup = new Document((Map<String, Object>) doc.get(TX_BKUP));
 						bkup.put("_id", doc.get(TX_REF));
 						coll.replaceOne(new BasicDBObject("_id", doc.get(TX_REF)), bkup);
+					} else {
+						// insert - delete inserted obj
+						coll.deleteOne(new BasicDBObject("_id", doc.get(TX_REF)));
 					}
 				}
 			}
