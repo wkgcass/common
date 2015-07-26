@@ -1,5 +1,6 @@
 package cass.enhanced.mongo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,11 +38,14 @@ public class TxCollection implements MongoCollection<Document> {
 	private final Transaction tx;
 
 	@SuppressWarnings("unchecked")
-	private Bson modifyQuery(Bson query) {
+	private BasicDBObject modifyQuery(Bson query) {
 		BasicDBObject bdo = new BasicDBObject((Map<String, Object>) query);
 		Object _id = bdo.remove("_id");
 		if (null != _id) {
-			bdo.append("$or", new BasicDBObject(Transaction.TX_REF, _id).append(Transaction.TX_TARGET_ID, _id));
+			List<BasicDBObject> tmpList = new ArrayList<BasicDBObject>(2);
+			tmpList.add(new BasicDBObject(Transaction.TX_REF, _id));
+			tmpList.add(new BasicDBObject(Transaction.TX_TARGET_ID, _id));
+			bdo.append("$or", tmpList);
 		}
 		bdo.append(Transaction.TX_MAP_COLL, coll.getNamespace().getCollectionName());
 		return bdo;
@@ -362,7 +366,7 @@ public class TxCollection implements MongoCollection<Document> {
 	@Override
 	public UpdateResult updateOne(Bson arg0, Bson arg1) {
 		if (tx.started()) {
-			tx.beforeUpdateMany(coll, arg0);
+			tx.beforeUpdateOne(coll, arg0);
 			return tx.getTxCollection().updateOne(modifyQuery(arg0), arg1);
 		} else {
 			return coll.updateOne(arg0, arg1);
@@ -372,7 +376,7 @@ public class TxCollection implements MongoCollection<Document> {
 	@Override
 	public UpdateResult updateOne(Bson arg0, Bson arg1, UpdateOptions arg2) {
 		if (tx.started()) {
-			tx.beforeUpdateMany(coll, arg0);
+			tx.beforeUpdateOne(coll, arg0);
 			return tx.getTxCollection().updateOne(modifyQuery(arg0), arg1, arg2);
 		} else {
 			return coll.updateOne(arg0, arg1, arg2);

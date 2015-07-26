@@ -165,7 +165,8 @@ public class Transaction implements Closeable {
 				}
 			}
 			// do insert
-			txColl.insertMany(listToInsert);
+			if (!listToInsert.isEmpty())
+				txColl.insertMany(listToInsert);
 		}
 	}
 
@@ -173,10 +174,10 @@ public class Transaction implements Closeable {
 		// (document already inserted)
 		if (started) {
 			// add TX_MAP_COLL and TX_TARGET_ID property
-			doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+			doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_OPERATION, TX_OP_INSERT);
 			Object _id = doc.remove("_id");
 			if (null != _id) {
-				doc.append(TX_TARGET_ID, _id).append(TX_OPERATION, TX_OP_INSERT);
+				doc.append(TX_TARGET_ID, _id);
 			}
 		}
 	}
@@ -186,10 +187,10 @@ public class Transaction implements Closeable {
 		if (started) {
 			for (Document doc : docList) {
 				// add TX_MAP_COLL property
-				doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+				doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_OPERATION, TX_OP_INSERT);
 				Object _id = doc.remove("_id");
 				if (null != _id) {
-					doc.append(TX_TARGET_ID, _id).append(TX_OPERATION, TX_OP_INSERT);
+					doc.append(TX_TARGET_ID, _id);
 				}
 			}
 		}
@@ -200,28 +201,44 @@ public class Transaction implements Closeable {
 		Document doc = coll.find(query).first();
 		if (null == doc) {
 			// doc not in collection
-			// assume it was insert
+			// for insert
 			Document sample = new Document((Map<String, Object>) query);
 			Object _id = sample.remove("_id");
 			if (null != _id) {
-				sample.append(TX_TARGET_ID, _id).append(TX_REF, null);
+				sample.append(TX_TARGET_ID, _id);
 			}
-			return txColl.deleteOne(sample);
+			sample.append(TX_REF, null).append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+			if (txColl.deleteOne(sample).getDeletedCount() == 0) {
+				// for update
+				sample.remove(TX_TARGET_ID);
+				if (null == _id) {
+					sample.put(TX_REF, new BasicDBObject("$ne", null));
+				} else {
+					sample.put(TX_REF, _id);
+				}
+				return new MannualDeleteResult(txColl
+						.updateOne(sample, new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)))
+						.getModifiedCount(), true);
+			} else {
+				return new MannualDeleteResult(1L, true);
+			}
 		} else {
 			// doc exist in collection
+			Object _id = doc.get("_id");
 			if (requireDocCopy(coll, doc)) {
-				// in tx collection
+				// not in tx collection
 				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
 				txColl.insertOne(doc);
+				return new MannualDeleteResult(1L, true);
 			} else {
-				// not in tx collection
-				// if it was update
-				txColl.updateOne(
-						new BasicDBObject(TX_REF, doc.get("_id")).append(TX_MAP_COLL,
-								coll.getNamespace().getCollectionName()),
-						new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)));
+				// in tx collection
+				return new MannualDeleteResult(
+						txColl.updateOne(
+								new BasicDBObject(TX_REF, _id).append(TX_MAP_COLL,
+										coll.getNamespace().getCollectionName()),
+						new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE))).getModifiedCount(),
+						true);
 			}
-			return new MannualDeleteResult(1L, true);
 		}
 	}
 
@@ -229,32 +246,47 @@ public class Transaction implements Closeable {
 	DeleteResult deleteMany(MongoCollection<Document> coll, Bson query) {
 		FindIterable<Document> res = coll.find(query);
 		Iterator<Document> it = res.iterator();
-		long count = 0;
 		List<Document> listToInsert = new ArrayList<Document>();
 		List<Object> listToUpdate = new ArrayList<Object>();
 		while (it.hasNext()) {
 			Document doc = it.next();
+			Object _id = doc.get("_id");
 			if (requireDocCopy(coll, doc)) {
 				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
 				listToInsert.add(doc);
-				++count;
 			} else {
-				listToUpdate.add(doc.get("_id")); // update already existed tx
-													// documents
+				listToUpdate.add(_id); // update already existed tx
+										// documents
 			}
 		}
-		txColl.updateMany(
-				new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_REF,
-						new BasicDBObject("$in", listToUpdate)),
-				new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)));
-		txColl.insertMany(listToInsert);
-		// assume inserted documents would be deleted
+		long count = 0;
+		if (!listToUpdate.isEmpty()) {
+			count += txColl.updateMany(
+					new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_REF,
+							new BasicDBObject("$in", listToUpdate)),
+					new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE))).getModifiedCount();
+		}
+		if (!listToInsert.isEmpty()) {
+			txColl.insertMany(listToInsert);
+			count += listToInsert.size();
+		}
+		// for inserted documents, which would be deleted
 		Document sample = new Document((Map<String, Object>) query);
 		Object _id = sample.remove("_id");
 		if (null != _id) {
-			sample.append(TX_TARGET_ID, _id).append(TX_REF, null);
+			sample.append(TX_TARGET_ID, _id);
 		}
-		count += txColl.deleteOne(sample).getDeletedCount();
+		sample.append(TX_REF, null).append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+		count += txColl.deleteMany(sample).getDeletedCount();
+		// for updated documents
+		sample.remove(TX_TARGET_ID);
+		if (null == _id) {
+			sample.put(TX_REF, new BasicDBObject("$ne", null));
+		} else {
+			sample.put(TX_REF, _id);
+		}
+		count += txColl.updateMany(sample, new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)))
+				.getModifiedCount();
 		return new MannualDeleteResult(count, true);
 	}
 
