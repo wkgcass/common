@@ -35,7 +35,7 @@ public class MongoTransactionDemo {
 		// updateOne(bank1, bank2);
 		// updateMany(bank1, bank2);
 		// deleteOne(bank1, bank2);
-		// deleteMany(bank1, bank2);
+		deleteMany(bank1, bank2);
 		System.out.println("----uncommitted state----");
 		printState(bank1, bank2, txColl);
 

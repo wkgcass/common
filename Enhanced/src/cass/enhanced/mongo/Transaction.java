@@ -322,7 +322,9 @@ public class Transaction implements Closeable {
 			if (op.equals(TX_OP_INSERT)) {
 				// insert
 				Object _id = doc.remove(TX_TARGET_ID);
-				if (null != _id) {
+				if (null == _id) {
+					doc.append("_id", tx_id);
+				} else {
 					doc.append("_id", _id);
 				}
 				coll.insertOne(doc);
