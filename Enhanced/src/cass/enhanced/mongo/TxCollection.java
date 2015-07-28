@@ -43,11 +43,11 @@ public class TxCollection implements MongoCollection<Document> {
 		Object _id = bdo.remove("_id");
 		if (null != _id) {
 			List<BasicDBObject> tmpList = new ArrayList<BasicDBObject>(2);
-			tmpList.add(new BasicDBObject(Transaction.TX_REF, _id));
-			tmpList.add(new BasicDBObject(Transaction.TX_TARGET_ID, _id));
+			tmpList.add(new BasicDBObject(Constants.TX_REF, _id));
+			tmpList.add(new BasicDBObject(Constants.TX_TARGET_ID, _id));
 			bdo.append("$or", tmpList);
 		}
-		bdo.append(Transaction.TX_MAP_COLL, coll.getNamespace().getCollectionName());
+		bdo.append(Constants.TX_MAP_COLL, coll.getNamespace().getCollectionName());
 		return bdo;
 	}
 

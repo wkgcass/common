@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,51 +19,25 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 
 public class Transaction implements Closeable {
-	private static final int INITIAL = 0;
-	private static final int COMMITTING = 1;
-	private static final int ROLLINGBACK = -1;
-	static final String TX_MAP_COLL = "j-tx-map-coll";
-	static final String TX_REF = "j-transaction-ref";
-	private static final String TX_BKUP = "j-tx-backup";
-	private static final String TX_REQUIRE_ROLLBACK_ON_ERROR = "j-tx-req-rolbk-on-err";
-	private static final String TX_COLL_PREFIX = "j_transaction_";
-	static final String TX_OPERATION = "j-transaction-op";
-	static final String TX_TARGET_ID = "j-tx-target-id";
-	static final String TX_OP_UPDATE = "update";
-	static final String TX_OP_INSERT = "insert";
-	static final String TX_OP_DELETE = "delete";
-	private static List<Integer> transactionId = new LinkedList<Integer>();
-	/**
-	 * cache of id.<br/>
-	 * Map&lt;TransactionID, Map&lt;CollectionName, Set&lt;IdObject&gt;&gt;&gt;
-	 */
-	private static Map<Integer, Map<String, Set<Object>>> txIdCache = new HashMap<Integer, Map<String, Set<Object>>>();
+	private static Map<Thread, Transaction> lastTxMap = new HashMap<Thread, Transaction>();
 
-	/**
-	 * Get an id not in use
-	 * 
-	 * @return an ID for transaction
-	 */
-	private static Integer findId() {
-		synchronized (transactionId) {
-			int i = 0;
-			while (transactionId.contains(i)) {
-				++i;
-			}
-			Integer tmp = new Integer(i);
-			transactionId.add(tmp);
-			return tmp;
+	public static Transaction getLastTransaction() {
+		synchronized (lastTxMap) {
+			return lastTxMap.get(Thread.currentThread());
 		}
 	}
 
 	private boolean started = false;
-	private int state = INITIAL;
+	private int state = Constants.INITIAL;
 	private Integer id;
 	private MongoDatabase db;
 	private MongoCollection<Document> txColl;
 
 	protected Transaction(MongoDatabase db) {
 		this.db = db;
+	}
+
+	Transaction() {
 	}
 
 	/**
@@ -83,12 +56,12 @@ public class Transaction implements Closeable {
 	 */
 	private boolean requireCaching(MongoCollection<Document> coll, Object ref_id) {
 		Map<String, Set<Object>> collMap;
-		synchronized (txIdCache) {
-			if (txIdCache.containsKey(id)) {
-				collMap = txIdCache.get(id);
+		synchronized (Constants.txIdCache) {
+			if (Constants.txIdCache.containsKey(id)) {
+				collMap = Constants.txIdCache.get(id);
 			} else {
 				collMap = new HashMap<String, Set<Object>>();
-				txIdCache.put(id, collMap);
+				Constants.txIdCache.put(id, collMap);
 			}
 		}
 		Set<Object> idSet;
@@ -134,9 +107,9 @@ public class Transaction implements Closeable {
 			return false;
 		}
 		// set mapping properties
-		doc.put(TX_BKUP, new Document(doc));
-		doc.put(TX_REF, _id);
-		doc.put(TX_MAP_COLL, collName);
+		doc.put(Constants.TX_BKUP, new Document(doc));
+		doc.put(Constants.TX_REF, _id);
+		doc.put(Constants.TX_MAP_COLL, collName);
 		return true;
 	}
 
@@ -147,7 +120,7 @@ public class Transaction implements Closeable {
 			if (null != doc) {
 				if (requireDocCopy(coll, doc)) {
 					// back up the document
-					txColl.insertOne(doc.append(TX_OPERATION, TX_OP_UPDATE));
+					txColl.insertOne(doc.append(Constants.TX_OPERATION, Constants.TX_OP_UPDATE));
 				}
 			}
 		}
@@ -161,7 +134,7 @@ public class Transaction implements Closeable {
 			for (Document doc : res) {
 				if (requireDocCopy(coll, doc)) {
 					// add into list( with TX_
-					listToInsert.add(doc.append(TX_OPERATION, TX_OP_UPDATE));
+					listToInsert.add(doc.append(Constants.TX_OPERATION, Constants.TX_OP_UPDATE));
 				}
 			}
 			// do insert
@@ -174,10 +147,11 @@ public class Transaction implements Closeable {
 		// (document already inserted)
 		if (started) {
 			// add TX_MAP_COLL and TX_TARGET_ID property
-			doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_OPERATION, TX_OP_INSERT);
+			doc.append(Constants.TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(Constants.TX_OPERATION,
+					Constants.TX_OP_INSERT);
 			Object _id = doc.remove("_id");
 			if (null != _id) {
-				doc.append(TX_TARGET_ID, _id);
+				doc.append(Constants.TX_TARGET_ID, _id);
 			}
 		}
 	}
@@ -187,10 +161,11 @@ public class Transaction implements Closeable {
 		if (started) {
 			for (Document doc : docList) {
 				// add TX_MAP_COLL property
-				doc.append(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_OPERATION, TX_OP_INSERT);
+				doc.append(Constants.TX_MAP_COLL, coll.getNamespace().getCollectionName())
+						.append(Constants.TX_OPERATION, Constants.TX_OP_INSERT);
 				Object _id = doc.remove("_id");
 				if (null != _id) {
-					doc.append(TX_TARGET_ID, _id);
+					doc.append(Constants.TX_TARGET_ID, _id);
 				}
 			}
 		}
@@ -205,19 +180,22 @@ public class Transaction implements Closeable {
 			Document sample = new Document((Map<String, Object>) query);
 			Object _id = sample.remove("_id");
 			if (null != _id) {
-				sample.append(TX_TARGET_ID, _id);
+				sample.append(Constants.TX_TARGET_ID, _id);
 			}
-			sample.append(TX_REF, null).append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+			sample.append(Constants.TX_REF, null).append(Constants.TX_MAP_COLL,
+					coll.getNamespace().getCollectionName());
 			if (txColl.deleteOne(sample).getDeletedCount() == 0) {
 				// for update
-				sample.remove(TX_TARGET_ID);
+				sample.remove(Constants.TX_TARGET_ID);
 				if (null == _id) {
-					sample.put(TX_REF, new BasicDBObject("$ne", null));
+					sample.put(Constants.TX_REF, new BasicDBObject("$ne", null));
 				} else {
-					sample.put(TX_REF, _id);
+					sample.put(Constants.TX_REF, _id);
 				}
 				return new MannualDeleteResult(txColl
-						.updateOne(sample, new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)))
+						.updateOne(sample,
+								new BasicDBObject("$set",
+										new BasicDBObject(Constants.TX_OPERATION, Constants.TX_OP_DELETE)))
 						.getModifiedCount(), true);
 			} else {
 				return new MannualDeleteResult(1L, true);
@@ -227,17 +205,19 @@ public class Transaction implements Closeable {
 			Object _id = doc.get("_id");
 			if (requireDocCopy(coll, doc)) {
 				// not in tx collection
-				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
+				doc.append(Constants.TX_OPERATION, Constants.TX_OP_DELETE); // mark
+																			// as
+																			// delete
 				txColl.insertOne(doc);
 				return new MannualDeleteResult(1L, true);
 			} else {
 				// in tx collection
-				return new MannualDeleteResult(
-						txColl.updateOne(
-								new BasicDBObject(TX_REF, _id).append(TX_MAP_COLL,
+				return new MannualDeleteResult(txColl
+						.updateOne(
+								new BasicDBObject(Constants.TX_REF, _id).append(Constants.TX_MAP_COLL,
 										coll.getNamespace().getCollectionName()),
-						new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE))).getModifiedCount(),
-						true);
+						new BasicDBObject("$set", new BasicDBObject(Constants.TX_OPERATION, Constants.TX_OP_DELETE)))
+						.getModifiedCount(), true);
 			}
 		}
 	}
@@ -252,7 +232,9 @@ public class Transaction implements Closeable {
 			Document doc = it.next();
 			Object _id = doc.get("_id");
 			if (requireDocCopy(coll, doc)) {
-				doc.append(TX_OPERATION, TX_OP_DELETE); // mark as delete
+				doc.append(Constants.TX_OPERATION, Constants.TX_OP_DELETE); // mark
+																			// as
+																			// delete
 				listToInsert.add(doc);
 			} else {
 				listToUpdate.add(_id); // update already existed tx
@@ -261,10 +243,12 @@ public class Transaction implements Closeable {
 		}
 		long count = 0;
 		if (!listToUpdate.isEmpty()) {
-			count += txColl.updateMany(
-					new BasicDBObject(TX_MAP_COLL, coll.getNamespace().getCollectionName()).append(TX_REF,
-							new BasicDBObject("$in", listToUpdate)),
-					new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE))).getModifiedCount();
+			count += txColl
+					.updateMany(
+							new BasicDBObject(Constants.TX_MAP_COLL, coll.getNamespace().getCollectionName())
+									.append(Constants.TX_REF, new BasicDBObject("$in", listToUpdate)),
+					new BasicDBObject("$set", new BasicDBObject(Constants.TX_OPERATION, Constants.TX_OP_DELETE)))
+					.getModifiedCount();
 		}
 		if (!listToInsert.isEmpty()) {
 			txColl.insertMany(listToInsert);
@@ -274,18 +258,20 @@ public class Transaction implements Closeable {
 		Document sample = new Document((Map<String, Object>) query);
 		Object _id = sample.remove("_id");
 		if (null != _id) {
-			sample.append(TX_TARGET_ID, _id);
+			sample.append(Constants.TX_TARGET_ID, _id);
 		}
-		sample.append(TX_REF, null).append(TX_MAP_COLL, coll.getNamespace().getCollectionName());
+		sample.append(Constants.TX_REF, null).append(Constants.TX_MAP_COLL, coll.getNamespace().getCollectionName());
 		count += txColl.deleteMany(sample).getDeletedCount();
 		// for updated documents
-		sample.remove(TX_TARGET_ID);
+		sample.remove(Constants.TX_TARGET_ID);
 		if (null == _id) {
-			sample.put(TX_REF, new BasicDBObject("$ne", null));
+			sample.put(Constants.TX_REF, new BasicDBObject("$ne", null));
 		} else {
-			sample.put(TX_REF, _id);
+			sample.put(Constants.TX_REF, _id);
 		}
-		count += txColl.updateMany(sample, new BasicDBObject("$set", new BasicDBObject(TX_OPERATION, TX_OP_DELETE)))
+		count += txColl
+				.updateMany(sample,
+						new BasicDBObject("$set", new BasicDBObject(Constants.TX_OPERATION, Constants.TX_OP_DELETE)))
 				.getModifiedCount();
 		return new MannualDeleteResult(count, true);
 	}
@@ -296,8 +282,8 @@ public class Transaction implements Closeable {
 
 	public void start() {
 		if (!this.started) {
-			id = findId();
-			txColl = db.getCollection(TX_COLL_PREFIX + id);
+			id = Constants.findId();
+			txColl = db.getCollection(Constants.TX_COLL_PREFIX + id);
 			started = true;
 		}
 	}
@@ -307,21 +293,21 @@ public class Transaction implements Closeable {
 	}
 
 	public void commit() {
-		state = COMMITTING;
+		state = Constants.COMMITTING;
 		// get all documents in transaction collection
 		FindIterable<Document> toCommit = txColl.find();
 		for (Document doc : toCommit) {
 			// remove _id, TX_MAP_COLL, TX_OPERATION and TX_BKUP so that the
 			// document can be used directly (TX_REF would be removed later if
 			// exist)
-			String op = (String) doc.remove(TX_OPERATION);
-			String collName = (String) doc.remove(TX_MAP_COLL);
-			doc.remove(TX_BKUP);
+			String op = (String) doc.remove(Constants.TX_OPERATION);
+			String collName = (String) doc.remove(Constants.TX_MAP_COLL);
+			doc.remove(Constants.TX_BKUP);
 			MongoCollection<Document> coll = db.getCollection(collName);
 			Object tx_id = doc.remove("_id");
-			if (op.equals(TX_OP_INSERT)) {
+			if (op.equals(Constants.TX_OP_INSERT)) {
 				// insert
-				Object _id = doc.remove(TX_TARGET_ID);
+				Object _id = doc.remove(Constants.TX_TARGET_ID);
 				if (null == _id) {
 					doc.append("_id", tx_id);
 				} else {
@@ -333,11 +319,11 @@ public class Transaction implements Closeable {
 				}
 				// change state and set tx_ref
 				txColl.updateOne(new BasicDBObject("_id", tx_id), new BasicDBObject("$set",
-						new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true).append(TX_REF, _id)));
+						new BasicDBObject(Constants.TX_REQUIRE_ROLLBACK_ON_ERROR, true).append(Constants.TX_REF, _id)));
 			} else {
 				// remove TX_REF
-				Object _id = doc.remove(TX_REF);
-				if (op.equals(TX_OP_DELETE)) {
+				Object _id = doc.remove(Constants.TX_REF);
+				if (op.equals(Constants.TX_OP_DELETE)) {
 					// delete
 					coll.deleteOne(new BasicDBObject("_id", _id));
 				} else {
@@ -346,59 +332,58 @@ public class Transaction implements Closeable {
 				}
 				// change state
 				txColl.updateOne(new BasicDBObject("_id", tx_id),
-						new BasicDBObject("$set", new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true)));
+						new BasicDBObject("$set", new BasicDBObject(Constants.TX_REQUIRE_ROLLBACK_ON_ERROR, true)));
 			}
 		}
 		clear();
-		state = INITIAL;
+		state = Constants.INITIAL;
 	}
 
 	private void clear() {
 		txColl.drop();
-		synchronized (txIdCache) {
-			txIdCache.remove(id);
+		synchronized (Constants.txIdCache) {
+			Constants.txIdCache.remove(id);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	public void rollback() {
-		state = ROLLINGBACK;
-		if (state == COMMITTING) {
+		state = Constants.ROLLINGBACK;
+		if (state == Constants.COMMITTING) {
 			// get all documents in transaction collection
-			FindIterable<Document> res = txColl.find(new BasicDBObject(TX_REQUIRE_ROLLBACK_ON_ERROR, true));
+			FindIterable<Document> res = txColl.find(new BasicDBObject(Constants.TX_REQUIRE_ROLLBACK_ON_ERROR, true));
 			for (Document doc : res) {
 				// state require rolling back
-				String collName = doc.getString(TX_MAP_COLL);
+				String collName = doc.getString(Constants.TX_MAP_COLL);
 				MongoCollection<Document> coll = db.getCollection(collName);
-				if (doc.getString(TX_OPERATION).equals(TX_OP_DELETE)) {
+				if (doc.getString(Constants.TX_OPERATION).equals(Constants.TX_OP_DELETE)) {
 					// delete - insert updated obj
-					Document bkup = new Document((Map<String, Object>) doc.get(TX_BKUP));
-					bkup.put("_id", doc.get(TX_REF));
-					coll.replaceOne(new BasicDBObject("_id", doc.get(TX_REF)), bkup);
+					Document bkup = new Document((Map<String, Object>) doc.get(Constants.TX_BKUP));
+					bkup.put("_id", doc.get(Constants.TX_REF));
+					coll.replaceOne(new BasicDBObject("_id", doc.get(Constants.TX_REF)), bkup);
 				} else {
-					if (doc.getString(TX_OPERATION).equals(TX_OP_UPDATE)) {
+					if (doc.getString(Constants.TX_OPERATION).equals(Constants.TX_OP_UPDATE)) {
 						// update - rollback updated obj
-						Document bkup = new Document((Map<String, Object>) doc.get(TX_BKUP));
-						bkup.put("_id", doc.get(TX_REF));
-						coll.replaceOne(new BasicDBObject("_id", doc.get(TX_REF)), bkup);
+						Document bkup = new Document((Map<String, Object>) doc.get(Constants.TX_BKUP));
+						bkup.put("_id", doc.get(Constants.TX_REF));
+						coll.replaceOne(new BasicDBObject("_id", doc.get(Constants.TX_REF)), bkup);
 					} else {
 						// insert - delete inserted obj
-						coll.deleteOne(new BasicDBObject("_id", doc.get(TX_REF)));
+						coll.deleteOne(new BasicDBObject("_id", doc.get(Constants.TX_REF)));
 					}
 				}
 			}
 		}
 		clear();
-		txColl = db.getCollection(TX_COLL_PREFIX + id);
-		state = INITIAL;
+		state = Constants.INITIAL;
 	}
 
 	@Override
 	public void close() {
 		if (started) {
 			clear();
-			synchronized (transactionId) {
-				transactionId.remove(id);
+			synchronized (Constants.transactionId) {
+				Constants.transactionId.remove(id);
 			}
 		}
 		started = false;
