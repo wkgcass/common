@@ -1,4 +1,4 @@
-package net.cassite.function.loopcontrol;
+package net.cassite.style.control;
 
 public class Continue extends RuntimeException {
 

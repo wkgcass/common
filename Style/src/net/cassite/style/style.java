@@ -1,5 +1,6 @@
-package net.cassite.function;
+package net.cassite.style;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,26 +8,28 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
-import net.cassite.function.interfaces.Void2ArgInterface;
-import net.cassite.function.interfaces.R0ArgInterface;
-import net.cassite.function.interfaces.R1ArgInterface;
-import net.cassite.function.interfaces.R2ArgsInterface;
-import net.cassite.function.interfaces.R3ArgsInterface;
-import net.cassite.function.interfaces.R4ArgsInterface;
-import net.cassite.function.interfaces.R5ArgsInterface;
-import net.cassite.function.interfaces.R6ArgsInterface;
-import net.cassite.function.interfaces.R7ArgsInterface;
-import net.cassite.function.interfaces.Void0ArgInterface;
-import net.cassite.function.interfaces.Void1ArgInterface;
-import net.cassite.function.interfaces.RNArgsInterface;
-import net.cassite.function.loopcontrol.Break;
-import net.cassite.function.loopcontrol.Continue;
-import net.cassite.function.loopcontrol.Remove;
+import net.cassite.style.control.Break;
+import net.cassite.style.control.Continue;
+import net.cassite.style.control.Remove;
+import net.cassite.style.interfaces.R0ArgInterface;
+import net.cassite.style.interfaces.R1ArgInterface;
+import net.cassite.style.interfaces.R2ArgsInterface;
+import net.cassite.style.interfaces.R3ArgsInterface;
+import net.cassite.style.interfaces.R4ArgsInterface;
+import net.cassite.style.interfaces.R5ArgsInterface;
+import net.cassite.style.interfaces.R6ArgsInterface;
+import net.cassite.style.interfaces.R7ArgsInterface;
+import net.cassite.style.interfaces.RNArgsInterface;
+import net.cassite.style.interfaces.Void0ArgInterface;
+import net.cassite.style.interfaces.Void1ArgInterface;
+import net.cassite.style.interfaces.Void2ArgInterface;
+import net.cassite.style.style.StyleRuntimeException.Throw;
 
-public class $f {
+public class style {
 	public static final Break Break = new Break();
 	public static final Remove Remove = new Remove();
 	public static final Continue Continue = new Continue();
+	public static final Throw Throw = new Throw();
 
 	public static class ArrayFuncSup<T> {
 		private final T[] array;
@@ -39,6 +42,23 @@ public class $f {
 			for (T t : array) {
 				try {
 					func.accept(t);
+				} catch (Throwable throwable) {
+					if (throwable instanceof Break) {
+						break;
+					} else if (throwable instanceof Continue) {
+						continue;
+					} else {
+						throw new RuntimeException(throwable);
+					}
+				}
+			}
+		}
+
+		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func) {
+			for (T t : array) {
+				try {
+					if (predicate.test(t))
+						func.accept(t);
 				} catch (Throwable throwable) {
 					if (throwable instanceof Break) {
 						break;
@@ -101,6 +121,27 @@ public class $f {
 			while (it.hasNext()) {
 				try {
 					func.accept(it.next());
+				} catch (Throwable throwable) {
+					if (throwable instanceof Break) {
+						break;
+					} else if (throwable instanceof Remove) {
+						it.remove();
+					} else if (throwable instanceof Continue) {
+						continue;
+					} else {
+						throw new RuntimeException(throwable);
+					}
+				}
+			}
+		}
+
+		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func) {
+			Iterator<T> it = iterable.iterator();
+			while (it.hasNext()) {
+				try {
+					T t = it.next();
+					if (predicate.test(t))
+						func.accept(t);
 				} catch (Throwable throwable) {
 					if (throwable instanceof Break) {
 						break;
@@ -181,6 +222,28 @@ public class $f {
 				K k = it.next();
 				try {
 					func.accept(k, map.get(k));
+				} catch (Throwable t) {
+					if (t instanceof Break) {
+						break;
+					} else if (t instanceof Remove) {
+						it.remove();
+					} else if (t instanceof Continue) {
+						continue;
+					} else {
+						throw new RuntimeException(t);
+					}
+				}
+			}
+		}
+
+		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, Void2ArgInterface<K, V> func) {
+			Iterator<K> it = map.keySet().iterator();
+			while (it.hasNext()) {
+				K k = it.next();
+				V v = map.get(k);
+				try {
+					if (predicate.apply(k, v))
+						func.accept(k, v);
 				} catch (Throwable t) {
 					if (t instanceof Break) {
 						break;
@@ -389,6 +452,10 @@ public class $f {
 				throw new RuntimeException(t);
 			}
 		}
+
+		public Async<R> async(Object... args) {
+			return new Async<>(this, args);
+		}
 	}
 
 	public static <R> function<R> $(RNArgsInterface<R> body) {
@@ -425,5 +492,81 @@ public class $f {
 
 	public static <R> function<R> $(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
 		return new function<R>(body);
+	}
+
+	public static class AsyncGroup {
+		private Async<?>[] group;
+
+		AsyncGroup(Async<?>... group) {
+			if (group.length == 0)
+				throw new IllegalArgumentException("at least one Async object should be passed in");
+			this.group = Arrays.copyOf(group, group.length);
+		}
+
+		public void callback(function<Class<Void>> func) {
+			try {
+				Object[] awaits = new Object[group.length];
+				int i = 0;
+				for (Async<?> async : group) {
+					awaits[i] = async.await();
+					++i;
+				}
+				func.apply(awaits);
+			} catch (Throwable e) {
+				throw $(e);
+			}
+		}
+	}
+
+	public static AsyncGroup $(Async<?>... asyncs) {
+		return new AsyncGroup(asyncs);
+	}
+
+	public static <R> R await(Async<R> async) {
+		return async.await();
+	}
+
+	public static class StyleRuntimeException extends RuntimeException {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 3062353717153173710L;
+
+		public StyleRuntimeException(Throwable t) {
+			super(t);
+		}
+
+		public void throwIn(@SuppressWarnings("unchecked") Class<? extends Throwable>... classes) {
+			for (Class<? extends Throwable> cls : classes) {
+				if (cls.isInstance(getCause())) {
+					throw this;
+				}
+			}
+		}
+
+		public void throwNotIn(@SuppressWarnings("unchecked") Class<? extends Throwable>... classes) {
+			boolean toThrow = true;
+			for (Class<? extends Throwable> cls : classes) {
+				if (cls.isInstance(getCause())) {
+					toThrow = false;
+					break;
+				}
+			}
+			if (toThrow) {
+				throw this;
+			}
+		}
+
+		public static class Throw extends RuntimeException {
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 6078525941988051342L;
+		}
+	}
+
+	public static StyleRuntimeException $(Throwable t) {
+		return new StyleRuntimeException(t);
 	}
 }

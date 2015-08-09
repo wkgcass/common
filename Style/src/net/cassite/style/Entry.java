@@ -1,4 +1,4 @@
-package net.cassite.function;
+package net.cassite.style;
 
 public class Entry<K2, V2> {
 	public Entry() {

@@ -7,11 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.cassite.function.$f;
 
-import net.cassite.function.Entry;
+import net.cassite.style.style;
+import net.cassite.style.Async;
+import net.cassite.style.Entry;
 
-public class Demo extends $f {
+public class Demo extends style {
+	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		System.out.println("forEach===================");
 		System.out.println("on array:");
@@ -87,5 +89,64 @@ public class Demo extends $f {
 			}
 		});
 		System.out.println(func.apply(1, 10, func));
+
+		System.out.println("async/await and callback=============");
+		function<Double> oneToTen = $(() -> {
+			System.out.println(Thread.currentThread());
+			double mul = 1;
+			for (double i = 10; i >= 1; --i) {
+				mul *= i;
+			}
+			return mul;
+		});
+		function<Double> elevenToTwenty = $(() -> {
+			System.out.println(Thread.currentThread());
+			double mul = 1;
+			for (double i = 20; i >= 11; --i) {
+				mul *= i;
+			}
+			return mul;
+		});
+		function<Double> twentyOneToThirty = $(() -> {
+			System.out.println(Thread.currentThread());
+			double mul = 1;
+			for (double i = 30; i >= 21; --i) {
+				mul *= i;
+			}
+			return mul;
+		});
+		function<Double> ThirtyOneToForty = $(() -> {
+			System.out.println(Thread.currentThread());
+			double mul = 1;
+			for (double i = 40; i >= 31; --i) {
+				mul *= i;
+			}
+			return mul;
+		});
+
+		$(oneToTen.async(), elevenToTwenty.async(), twentyOneToThirty.async(), ThirtyOneToForty.async())
+				.callback($((Double r1, Double r2, Double r3, Double r4) -> {
+					System.out.println(r1 * r2 * r3 * r4);
+					return Void.TYPE;
+				}));
+		System.out.println("\nasync a function and retrieve values at the end of the program...");
+		Async<Double> async = oneToTen.async();
+
+		System.out.println("Throwable support============");
+		try {
+			Thread.sleep(1);
+		} catch (InterruptedException e1) {
+			$(e1).throwIn(RuntimeException.class);
+			$(e1).throwNotIn(Error.class);
+		}
+
+		System.out.println("\nCollection enhanced with forThose");
+		$(strList).forThose((e) -> true, (e) -> System.out.println(e));
+		$(map).forThose((k, v) -> true, (k, v) -> System.out.println(k + " " + v));
+
+		System.out.println("\nretrieve the async value using await:");
+		System.out.println(await(async));
+		System.out.println("or use async.await()");
+		System.out.println(async.await());
 	}
 }

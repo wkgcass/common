@@ -1,4 +1,4 @@
-package net.cassite.function.interfaces;
+package net.cassite.style.interfaces;
 
 @FunctionalInterface
 public interface R2ArgsInterface<R, T0, T1> {
