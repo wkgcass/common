@@ -148,5 +148,9 @@ public class Demo extends style {
 		System.out.println(await(async));
 		System.out.println("or use async.await()");
 		System.out.println(async.await());
+
+		System.out.println("\nCollection builder===============");
+		List<Integer> list = $(new ArrayList<Integer>(), 1, 2, 3, 4);
+		$(list).forEach((e) -> System.out.println(e));
 	}
 }

@@ -11,6 +11,7 @@ import java.util.Set;
 import net.cassite.style.style;
 import net.cassite.style.Async;
 import net.cassite.style.Entry;
+import net.cassite.style.Store;
 
 public class FuncGramma extends style {
 	@SuppressWarnings("unchecked")
@@ -125,5 +126,15 @@ public class FuncGramma extends style {
 
 		System.out.println(await(async));
 		System.out.println(async.await());
+
+		List<Integer> list = $(new ArrayList<Integer>(), 1, 2, 3, 4);
+		$(list).forEach((e) -> System.out.println(e));
+
+		int tmp = 1;
+		Store<Integer> tmpS = store(tmp);
+		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
+			System.out.println("case 2:" + tmpS);
+			throw Break;
+		}).Case(3, () -> System.out.println("case 3:" + tmpS));
 	}
 }

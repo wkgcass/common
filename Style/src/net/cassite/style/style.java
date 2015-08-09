@@ -1,5 +1,6 @@
 package net.cassite.style;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -23,13 +24,17 @@ import net.cassite.style.interfaces.RNArgsInterface;
 import net.cassite.style.interfaces.Void0ArgInterface;
 import net.cassite.style.interfaces.Void1ArgInterface;
 import net.cassite.style.interfaces.Void2ArgInterface;
-import net.cassite.style.style.StyleRuntimeException.Throw;
+import net.cassite.style.interfaces.Void3ArgInterface;
+import net.cassite.style.interfaces.Void4ArgInterface;
+import net.cassite.style.interfaces.Void5ArgInterface;
+import net.cassite.style.interfaces.Void6ArgInterface;
+import net.cassite.style.interfaces.Void7ArgInterface;
+import net.cassite.style.interfaces.VoidNArgInterface;
 
 public class style {
 	public static final Break Break = new Break();
 	public static final Remove Remove = new Remove();
 	public static final Continue Continue = new Continue();
-	public static final Throw Throw = new Throw();
 
 	public static class ArrayFuncSup<T> {
 		private final T[] array;
@@ -39,33 +44,51 @@ public class style {
 		}
 
 		public void forEach(Void1ArgInterface<T> func) {
+			forEach($(func));
+		}
+
+		public void forEach(function<Object> func) {
 			for (T t : array) {
 				try {
-					func.accept(t);
+					func.apply(t);
 				} catch (Throwable throwable) {
-					if (throwable instanceof Break) {
-						break;
-					} else if (throwable instanceof Continue) {
-						continue;
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(throwable);
+						throw $(throwable);
 					}
 				}
 			}
 		}
 
 		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func) {
+			forThose(predicate, $(func));
+		}
+
+		public void forThose(Predicate<T> predicate, function<Object> func) {
 			for (T t : array) {
 				try {
 					if (predicate.test(t))
-						func.accept(t);
+						func.apply(t);
 				} catch (Throwable throwable) {
-					if (throwable instanceof Break) {
-						break;
-					} else if (throwable instanceof Continue) {
-						continue;
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(throwable);
+						throw $(throwable);
 					}
 				}
 			}
@@ -89,17 +112,26 @@ public class style {
 			}
 
 			public Coll via(R1ArgInterface<R, T> method) {
+				return via($(method));
+			}
+
+			public Coll via(function<R> method) {
 				for (T t : array) {
 					R ret;
 					try {
 						ret = method.apply(t);
 					} catch (Throwable e) {
-						if (e instanceof Break) {
-							break;
-						} else if (e instanceof Continue) {
-							continue;
+						if (e instanceof StyleRuntimeException) {
+							Throwable origin = ((StyleRuntimeException) e).origin();
+							if (origin instanceof Break) {
+								break;
+							} else if (origin instanceof Continue) {
+								continue;
+							} else {
+								throw ((StyleRuntimeException) e);
+							}
 						} else {
-							throw new RuntimeException(e);
+							throw $(e);
 						}
 					}
 					collection.add(ret);
@@ -117,40 +149,58 @@ public class style {
 		}
 
 		public void forEach(Void1ArgInterface<T> func) {
+			forEach($(func));
+		}
+
+		public void forEach(function<Object> func) {
 			Iterator<T> it = iterable.iterator();
 			while (it.hasNext()) {
 				try {
-					func.accept(it.next());
+					func.apply(it.next());
 				} catch (Throwable throwable) {
-					if (throwable instanceof Break) {
-						break;
-					} else if (throwable instanceof Remove) {
-						it.remove();
-					} else if (throwable instanceof Continue) {
-						continue;
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else if (origin instanceof Remove) {
+							it.remove();
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(throwable);
+						throw $(throwable);
 					}
 				}
 			}
 		}
 
 		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func) {
+			forThose(predicate, $(func));
+		}
+
+		public void forThose(Predicate<T> predicate, function<Object> func) {
 			Iterator<T> it = iterable.iterator();
 			while (it.hasNext()) {
 				try {
 					T t = it.next();
 					if (predicate.test(t))
-						func.accept(t);
+						func.apply(t);
 				} catch (Throwable throwable) {
-					if (throwable instanceof Break) {
-						break;
-					} else if (throwable instanceof Remove) {
-						it.remove();
-					} else if (throwable instanceof Continue) {
-						continue;
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else if (origin instanceof Remove) {
+							it.remove();
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(throwable);
+						throw $(throwable);
 					}
 				}
 			}
@@ -174,17 +224,26 @@ public class style {
 			}
 
 			public Coll via(R1ArgInterface<R, T> method) {
+				return via($(method));
+			}
+
+			public Coll via(function<R> method) {
 				for (T t : iterable) {
 					R ret;
 					try {
 						ret = method.apply(t);
 					} catch (Throwable e) {
-						if (e instanceof Break) {
-							break;
-						} else if (e instanceof Continue) {
-							continue;
+						if (e instanceof StyleRuntimeException) {
+							Throwable origin = ((StyleRuntimeException) e).origin();
+							if (origin instanceof Break) {
+								break;
+							} else if (origin instanceof Continue) {
+								continue;
+							} else {
+								throw ((StyleRuntimeException) e);
+							}
 						} else {
-							throw new RuntimeException(e);
+							throw $(e);
 						}
 					}
 					collection.add(ret);
@@ -200,9 +259,6 @@ public class style {
 		}
 
 		public CollectionFuncSup<T> add(T t) {
-			if (!(iterable instanceof Collection)) {
-				throw new UnsupportedOperationException();
-			}
 			Collection<T> coll = (Collection<T>) iterable;
 			coll.add(t);
 			return this;
@@ -217,42 +273,60 @@ public class style {
 		}
 
 		public void forEach(Void2ArgInterface<K, V> func) {
+			forEach($(func));
+		}
+
+		public void forEach(function<Object> func) {
 			Iterator<K> it = map.keySet().iterator();
 			while (it.hasNext()) {
 				K k = it.next();
 				try {
-					func.accept(k, map.get(k));
-				} catch (Throwable t) {
-					if (t instanceof Break) {
-						break;
-					} else if (t instanceof Remove) {
-						it.remove();
-					} else if (t instanceof Continue) {
-						continue;
+					func.apply(k, map.get(k));
+				} catch (Throwable throwable) {
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else if (origin instanceof Remove) {
+							it.remove();
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(t);
+						throw $(throwable);
 					}
 				}
 			}
 		}
 
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, Void2ArgInterface<K, V> func) {
+			forThose(predicate, $(func));
+		}
+
+		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, function<Object> func) {
 			Iterator<K> it = map.keySet().iterator();
 			while (it.hasNext()) {
 				K k = it.next();
 				V v = map.get(k);
 				try {
 					if (predicate.apply(k, v))
-						func.accept(k, v);
-				} catch (Throwable t) {
-					if (t instanceof Break) {
-						break;
-					} else if (t instanceof Remove) {
-						it.remove();
-					} else if (t instanceof Continue) {
-						continue;
+						func.apply(k, v);
+				} catch (Throwable throwable) {
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else if (origin instanceof Remove) {
+							it.remove();
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
 					} else {
-						throw new RuntimeException(t);
+						throw $(throwable);
 					}
 				}
 			}
@@ -273,17 +347,26 @@ public class style {
 			}
 
 			public Coll via(R2ArgsInterface<R, K, V> method) {
+				return via($(method));
+			}
+
+			public Coll via(function<R> method) {
 				for (K key : map.keySet()) {
 					try {
 						R val = method.apply(key, map.get(key));
 						collection.add(val);
 					} catch (Throwable e) {
-						if (e instanceof Continue) {
-							continue;
-						} else if (e instanceof Break) {
-							break;
+						if (e instanceof StyleRuntimeException) {
+							Throwable origin = ((StyleRuntimeException) e).origin();
+							if (origin instanceof Break) {
+								break;
+							} else if (origin instanceof Continue) {
+								continue;
+							} else {
+								throw ((StyleRuntimeException) e);
+							}
 						} else {
-							throw new RuntimeException(e);
+							throw $(e);
 						}
 					}
 				}
@@ -305,17 +388,26 @@ public class style {
 			}
 
 			public M via(R2ArgsInterface<Entry<K2, V2>, K, V> method) {
+				return via($(method));
+			}
+
+			public M via(function<Entry<K2, V2>> method) {
 				for (K key : map.keySet()) {
 					try {
 						Entry<K2, V2> val = method.apply(key, map.get(key));
 						toMap.put(val.key, val.value);
 					} catch (Throwable e) {
-						if (e instanceof Continue) {
-							continue;
-						} else if (e instanceof Break) {
-							break;
+						if (e instanceof StyleRuntimeException) {
+							Throwable origin = ((StyleRuntimeException) e).origin();
+							if (origin instanceof Break) {
+								break;
+							} else if (origin instanceof Continue) {
+								continue;
+							} else {
+								throw ((StyleRuntimeException) e);
+							}
 						} else {
-							throw new RuntimeException(e);
+							throw $(e);
 						}
 					}
 				}
@@ -352,7 +444,7 @@ public class style {
 				if (t instanceof Break) {
 					break;
 				} else {
-					throw new RuntimeException(t);
+					throw $(t);
 				}
 			}
 		}
@@ -366,13 +458,23 @@ public class style {
 				if (t instanceof Break) {
 					break;
 				} else {
-					throw new RuntimeException(t);
+					throw $(t);
 				}
 			}
 		}
 	}
 
 	public static class function<R> {
+
+		private VoidNArgInterface voidN;
+		private Void0ArgInterface void0;
+		private Void1ArgInterface<Object> void1;
+		private Void2ArgInterface<Object, Object> void2;
+		private Void3ArgInterface<Object, Object, Object> void3;
+		private Void4ArgInterface<Object, Object, Object, Object> void4;
+		private Void5ArgInterface<Object, Object, Object, Object, Object> void5;
+		private Void6ArgInterface<Object, Object, Object, Object, Object, Object> void6;
+		private Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object> void7;
 
 		private RNArgsInterface<R> body;
 		private R0ArgInterface<R> body0;
@@ -383,6 +485,49 @@ public class style {
 		private R5ArgsInterface<R, Object, Object, Object, Object, Object> body5;
 		private R6ArgsInterface<R, Object, Object, Object, Object, Object, Object> body6;
 		private R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object> body7;
+
+		function(VoidNArgInterface body) {
+			this.voidN = body;
+		}
+
+		function(Void0ArgInterface body) {
+			this.void0 = body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void1ArgInterface<?> body) {
+			this.void1 = (Void1ArgInterface<Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void2ArgInterface<?, ?> body) {
+			this.void2 = (Void2ArgInterface<Object, Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void3ArgInterface<?, ?, ?> body) {
+			this.void3 = (Void3ArgInterface<Object, Object, Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void4ArgInterface<?, ?, ?, ?> body) {
+			this.void4 = (Void4ArgInterface<Object, Object, Object, Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void5ArgInterface<?, ?, ?, ?, ?> body) {
+			this.void5 = (Void5ArgInterface<Object, Object, Object, Object, Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
+			this.void6 = (Void6ArgInterface<Object, Object, Object, Object, Object, Object>) body;
+		}
+
+		@SuppressWarnings("unchecked")
+		function(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
+			this.void7 = (Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object>) body;
+		}
 
 		function(RNArgsInterface<R> body) {
 			this.body = body;
@@ -430,32 +575,113 @@ public class style {
 		public R apply(Object... args) {
 			try {
 				if (args.length == 0) {
-					return body0.apply();
+					if (body0 == null) {
+						void0.invoke();
+						return null;
+					} else {
+						return body0.apply();
+					}
 				} else if (args.length == 1) {
-					return body1.apply(args[0]);
+					if (body1 == null) {
+						void1.accept(args[0]);
+						return null;
+					} else {
+						return body1.apply(args[0]);
+					}
 				} else if (args.length == 2) {
-					return body2.apply(args[0], args[1]);
+					if (body2 == null) {
+						void2.accept(args[0], args[1]);
+						return null;
+					} else {
+						return body2.apply(args[0], args[1]);
+					}
 				} else if (args.length == 3) {
-					return body3.apply(args[0], args[1], args[2]);
+					if (body3 == null) {
+						void3.accept(args[0], args[1], args[2]);
+						return null;
+					} else {
+						return body3.apply(args[0], args[1], args[2]);
+					}
 				} else if (args.length == 4) {
-					return body4.apply(args[0], args[1], args[2], args[3]);
+					if (body4 == null) {
+						void4.accept(args[0], args[1], args[2], args[3]);
+						return null;
+					} else {
+						return body4.apply(args[0], args[1], args[2], args[3]);
+					}
 				} else if (args.length == 5) {
-					return body5.apply(args[0], args[1], args[2], args[3], args[4]);
+					if (body5 == null) {
+						void5.accept(args[0], args[1], args[2], args[3], args[4]);
+						return null;
+					} else {
+						return body5.apply(args[0], args[1], args[2], args[3], args[4]);
+					}
 				} else if (args.length == 6) {
-					return body6.apply(args[0], args[1], args[2], args[3], args[4], args[5]);
+					if (body6 == null) {
+						void6.accept(args[0], args[1], args[2], args[3], args[4], args[5]);
+						return null;
+					} else {
+						return body6.apply(args[0], args[1], args[2], args[3], args[4], args[5]);
+					}
 				} else if (args.length == 7) {
-					return body7.apply(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+					if (body7 == null) {
+						void7.accept(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+						return null;
+					} else {
+						return body7.apply(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+					}
 				} else {
-					return body.invoke(args);
+					if (body == null) {
+						voidN.accept(args);
+						return null;
+					} else {
+						return body.invoke(args);
+					}
 				}
 			} catch (Throwable t) {
-				throw new RuntimeException(t);
+				throw $(t);
 			}
 		}
 
 		public Async<R> async(Object... args) {
 			return new Async<>(this, args);
 		}
+	}
+
+	public static function<Object> $(VoidNArgInterface body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void0ArgInterface body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void1ArgInterface<?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void2ArgInterface<?, ?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void3ArgInterface<?, ?, ?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void4ArgInterface<?, ?, ?, ?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void5ArgInterface<?, ?, ?, ?, ?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
+		return new function<Object>(body);
+	}
+
+	public static function<Object> $(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
+		return new function<Object>(body);
 	}
 
 	public static <R> function<R> $(RNArgsInterface<R> body) {
@@ -557,16 +783,73 @@ public class style {
 			}
 		}
 
-		public static class Throw extends RuntimeException {
+		public Throwable origin() {
+			return super.getCause();
+		}
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 6078525941988051342L;
+		@Override
+		public Throwable getCause() {
+			Throwable target = super.getCause();
+			if (target instanceof InvocationTargetException) {
+				return ((InvocationTargetException) target).getTargetException();
+			} else {
+				return target.getCause();
+			}
 		}
 	}
 
 	public static StyleRuntimeException $(Throwable t) {
 		return new StyleRuntimeException(t);
+	}
+
+	@SafeVarargs
+	public static <E, Coll extends Collection<E>> Coll $(Coll collection, E... elements) {
+		for (E e : elements) {
+			collection.add(e);
+		}
+		return collection;
+	}
+
+	public static class SwitchBlock<T> {
+		private T toSwitch;
+		private boolean doNext = false;
+
+		SwitchBlock(T t) {
+			this.toSwitch = t;
+		}
+
+		public SwitchBlock<T> Case(T ca, function<?> func) {
+			if (toSwitch.equals(ca) || doNext) {
+				try {
+					func.apply();
+					doNext = true;
+				} catch (Throwable t) {
+					if (t instanceof StyleRuntimeException) {
+						if (((StyleRuntimeException) t).origin() instanceof Break) {
+							doNext = false;
+						}
+					} else {
+						throw $(t);
+					}
+				}
+			}
+			return this;
+		}
+
+		public SwitchBlock<T> Case(T ca, Void0ArgInterface func) {
+			return Case(ca, $(func));
+		}
+	}
+
+	public static <T> SwitchBlock<T> Switch(T t) {
+		return new SwitchBlock<T>(t);
+	}
+
+	public static <T> Store<T> store(T o) {
+		return new Store<T>(o);
+	}
+
+	public static <T> T $(Store<T> store) {
+		return store.o;
 	}
 }
