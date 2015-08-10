@@ -1,4 +1,4 @@
-package test;
+package tutorial;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,8 +11,10 @@ import java.util.Set;
 import net.cassite.style.style;
 import net.cassite.style.Async;
 import net.cassite.style.Entry;
+import net.cassite.style.Store;
+import net.cassite.style.Supportters.function;
 
-public class Demo extends style {
+public class Sum extends style {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		System.out.println("forEach===================");
@@ -68,15 +70,15 @@ public class Demo extends style {
 		System.out.println("break and continue");
 		$(intArr).forEach((e) -> {
 			if (e == 3)
-				throw Continue;
+				Continue();
 			if (e == 8)
-				throw Break;
+				Break();
 			System.out.println(e);
 		});
 		System.out.println("remove");
 		$(map).forEach((k, v) -> {
 			if (k.equals("john"))
-				throw Remove;
+				Remove();
 		});
 		System.out.println(map);
 
@@ -152,5 +154,17 @@ public class Demo extends style {
 		System.out.println("\nCollection builder===============");
 		List<Integer> list = $(new ArrayList<Integer>(), 1, 2, 3, 4);
 		$(list).forEach((e) -> System.out.println(e));
+
+		System.out.println("\nSwitch-Case============");
+		int tmp = 1;
+		Store<Integer> tmpS = store(tmp);
+		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
+			System.out.println("case 2:" + tmpS);
+			Break();
+		}).Case(3, () -> System.out.println("case 3:" + tmpS));
+
+		System.out.println("\nMap builder and JSONLike===============");
+		Map<String, Integer> testMap = $(new HashMap<>(), $("cass", 1995).$("cassie", 1996).$("unknown", 2001));
+		$(testMap).forThose((k, v) -> v < 2000, (k, v) -> System.out.println("key:" + k + " value:" + v));
 	}
 }

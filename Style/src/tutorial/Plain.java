@@ -1,4 +1,4 @@
-package test;
+package tutorial;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +12,9 @@ import net.cassite.style.style;
 import net.cassite.style.Async;
 import net.cassite.style.Entry;
 import net.cassite.style.Store;
+import net.cassite.style.Supportters.function;
 
-public class FuncGramma extends style {
+public class Plain extends style {
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		Integer[] intArr = new Integer[] { 1, 2, 3, 5, 8, 10 };
@@ -52,15 +53,15 @@ public class FuncGramma extends style {
 
 		$(intArr).forEach((e) -> {
 			if (e == 3)
-				throw Continue;
+				Continue();
 			if (e == 8)
-				throw Break;
+				Break();
 			System.out.println(e);
 		});
 
 		$(map).forEach((k, v) -> {
 			if (k.equals("john"))
-				throw Remove;
+				Remove();
 		});
 		System.out.println(map);
 
@@ -134,7 +135,10 @@ public class FuncGramma extends style {
 		Store<Integer> tmpS = store(tmp);
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
-			throw Break;
+			Break();
 		}).Case(3, () -> System.out.println("case 3:" + tmpS));
+
+		Map<String, Integer> testMap = $(new HashMap<>(), $("cass", 1995).$("cassie", 1996).$("unknown", 2001));
+		$(testMap).forThose((k, v) -> v < 2000, (k, v) -> System.out.println("key:" + k + " value:" + v));
 	}
 }

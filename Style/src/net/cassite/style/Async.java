@@ -1,6 +1,6 @@
 package net.cassite.style;
 
-import net.cassite.style.style.function;
+import net.cassite.style.Supportters.function;
 
 public class Async<R> {
 	private Container<R> container;
