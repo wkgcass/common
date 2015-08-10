@@ -39,6 +39,9 @@ import net.cassite.style.interfaces.VoidNArgInterface;
 
 public class style {
 
+	protected style() {
+	}
+
 	// ┌─────────────────────────────────┐
 	// │............function.............│
 	// └─────────────────────────────────┘

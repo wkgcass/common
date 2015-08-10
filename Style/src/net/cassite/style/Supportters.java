@@ -268,7 +268,7 @@ public class Supportters extends style {
 		}
 
 		public void forEach(Void2ArgInterface<K, V> func) {
-			forEach($(func));
+			forEach(style.$(func));
 		}
 
 		public void forEach(function<Object> func) {
@@ -290,14 +290,14 @@ public class Supportters extends style {
 							throw ((StyleRuntimeException) throwable);
 						}
 					} else {
-						throw $(throwable);
+						throw style.$(throwable);
 					}
 				}
 			}
 		}
 
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, Void2ArgInterface<K, V> func) {
-			forThose(predicate, $(func));
+			forThose(predicate, style.$(func));
 		}
 
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, function<Object> func) {
@@ -321,7 +321,7 @@ public class Supportters extends style {
 							throw ((StyleRuntimeException) throwable);
 						}
 					} else {
-						throw $(throwable);
+						throw style.$(throwable);
 					}
 				}
 			}
@@ -342,7 +342,7 @@ public class Supportters extends style {
 			}
 
 			public Coll via(R2ArgsInterface<R, K, V> method) {
-				return via($(method));
+				return via(style.$(method));
 			}
 
 			public Coll via(function<R> method) {
@@ -361,7 +361,7 @@ public class Supportters extends style {
 								throw ((StyleRuntimeException) e);
 							}
 						} else {
-							throw $(e);
+							throw style.$(e);
 						}
 					}
 				}
@@ -383,7 +383,7 @@ public class Supportters extends style {
 			}
 
 			public M via(R2ArgsInterface<Entry<K2, V2>, K, V> method) {
-				return via($(method));
+				return via(style.$(method));
 			}
 
 			public M via(function<Entry<K2, V2>> method) {
@@ -402,7 +402,7 @@ public class Supportters extends style {
 								throw ((StyleRuntimeException) e);
 							}
 						} else {
-							throw $(e);
+							throw style.$(e);
 						}
 					}
 				}
@@ -412,6 +412,10 @@ public class Supportters extends style {
 
 		public <K2, V2, M extends Map<K2, V2>> TransformerMap<K, V, K2, V2, M> to(M m) {
 			return new TransformerMap<K, V, K2, V2, M>(map, m);
+		}
+
+		public V $(K key) {
+			return map.get(key);
 		}
 	}
 

@@ -140,5 +140,7 @@ public class Plain extends style {
 
 		Map<String, Integer> testMap = $(new HashMap<>(), $("cass", 1995).$("cassie", 1996).$("unknown", 2001));
 		$(testMap).forThose((k, v) -> v < 2000, (k, v) -> System.out.println("key:" + k + " value:" + v));
+
+		System.out.println($(testMap).$("cass"));
 	}
 }
