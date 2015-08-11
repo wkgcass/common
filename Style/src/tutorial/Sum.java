@@ -169,5 +169,15 @@ public class Sum extends style {
 
 		System.out.println("\nEasy way of retrieving values from a map");
 		System.out.println($(testMap).$("cass"));
+
+		System.out.println("\nSimplfied Thread creation===========");
+		run(() -> System.out.println(Thread.currentThread()));
+
+		System.out.println("For start to end");
+		For(1).to(11).step(2).loop(i -> {
+			if (i > 7)
+				Break();
+			System.out.println(i);
+		});
 	}
 }

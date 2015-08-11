@@ -142,5 +142,13 @@ public class Plain extends style {
 		$(testMap).forThose((k, v) -> v < 2000, (k, v) -> System.out.println("key:" + k + " value:" + v));
 
 		System.out.println($(testMap).$("cass"));
+
+		run(() -> System.out.println(Thread.currentThread()));
+
+		For(1).to(11).step(2).loop(i -> {
+			if (i > 7)
+				Break();
+			System.out.println(i);
+		});
 	}
 }

@@ -14,6 +14,7 @@ import net.cassite.style.Supportters.function;
  */
 public class FunctionAsyncAwaitCallback extends style {
 	public static void main(String[] args) {
+		System.out.println("This demo might not print in order of the code.");
 		System.out.println("function===========");
 		function<Integer> func = $((Integer i, Integer end, function<Integer> fun) -> {
 			if (i < end) {
@@ -69,5 +70,8 @@ public class FunctionAsyncAwaitCallback extends style {
 		System.out.println(await(async));
 		System.out.println("or use async.await()");
 		System.out.println(async.await());
+
+		System.out.println("\nSimplfied Thread creation===========");
+		run(() -> System.out.println(Thread.currentThread()));
 	}
 }

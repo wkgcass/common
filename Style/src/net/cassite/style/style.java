@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 import net.cassite.style.Supportters.ArrayFuncSup;
 import net.cassite.style.Supportters.AsyncGroup;
 import net.cassite.style.Supportters.CollectionFuncSup;
+import net.cassite.style.Supportters.ForSupport;
 import net.cassite.style.Supportters.IterableFuncSup;
 import net.cassite.style.Supportters.JSONLike;
 import net.cassite.style.Supportters.MapFuncSup;
@@ -142,6 +143,12 @@ public class style {
 		return async.await();
 	}
 
+	public static Thread run(Runnable runnable) {
+		Thread t = new Thread(runnable);
+		t.start();
+		return t;
+	}
+
 	// ┌─────────────────────────────────┐
 	// │........iteration control........│
 	// └─────────────────────────────────┘
@@ -210,6 +217,10 @@ public class style {
 				}
 			}
 		}
+	}
+
+	public static <N extends Number> ForSupport<N> For(N start) {
+		return new ForSupport<N>(start);
 	}
 
 	// while

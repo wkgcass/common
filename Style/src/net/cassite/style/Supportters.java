@@ -529,6 +529,13 @@ public class Supportters extends style {
 
 		public R apply(Object... args) {
 			try {
+				if (body != null) {
+					return body.invoke(args);
+				}
+				if (voidN != null) {
+					voidN.accept(args);
+					return null;
+				}
 				if (args.length == 0) {
 					if (body0 == null) {
 						void0.invoke();
@@ -586,12 +593,7 @@ public class Supportters extends style {
 						return body7.apply(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 					}
 				} else {
-					if (body == null) {
-						voidN.accept(args);
-						return null;
-					} else {
-						return body.invoke(args);
-					}
+					throw new IllegalArgumentException();
 				}
 			} catch (Throwable t) {
 				throw $(t);
@@ -690,6 +692,8 @@ public class Supportters extends style {
 					if (t instanceof StyleRuntimeException) {
 						if (((StyleRuntimeException) t).origin() instanceof Break) {
 							doNext = false;
+						} else {
+							throw ((StyleRuntimeException) t);
 						}
 					} else {
 						throw $(t);
@@ -718,6 +722,229 @@ public class Supportters extends style {
 		public JSONLike<K, V> $(K key, V value) {
 			put(key, value);
 			return this;
+		}
+	}
+
+	public static class ForSupport<N extends Number> {
+		private N start;
+
+		ForSupport(N start) {
+			this.start = start;
+		}
+
+		public ToSupport<N> to(N end) {
+			return new ToSupport<>(start, end);
+		}
+
+		public static class ToSupport<N extends Number> {
+			private N start;
+			private N end;
+			private N step;
+
+			ToSupport(N start, N end) {
+				this.start = start;
+				this.end = end;
+			}
+
+			public ToSupport<N> step(N s) {
+				this.step = s;
+				return this;
+			}
+
+			@SuppressWarnings("hiding")
+			private <N extends Number> int privateDoLoop(function<Object> func, N num) {
+				try {
+					func.apply(num);
+				} catch (Throwable t) {
+					if (t instanceof StyleRuntimeException) {
+						if (((StyleRuntimeException) t).origin() instanceof Break) {
+							return 1;
+						} else if (((StyleRuntimeException) t).origin() instanceof Continue) {
+							return 2;
+						} else {
+							throw ((StyleRuntimeException) t);
+						}
+					} else {
+						throw $(t);
+					}
+				}
+				return 0;
+			}
+
+			@SuppressWarnings("unchecked")
+			public void loop(function<Object> doLoop) {
+				if (start.equals(end)) {
+					privateDoLoop(doLoop, start);
+					return;
+				}
+				if (start instanceof Integer) {
+					if (((Integer) start).compareTo((Integer) end) > 0) {
+						if (null == step) {
+							step = (N) new Integer(-1);
+						}
+						for (Integer i = (Integer) start; i.compareTo((Integer) end) >= 0; i += (Integer) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Integer(1);
+						}
+						for (Integer i = (Integer) start; i.compareTo((Integer) end) <= 0; i += (Integer) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else if (start instanceof Double) {
+					if (((Double) start).compareTo((Double) end) > 0) {
+						if (null == step) {
+							step = (N) new Double(-1);
+						}
+						for (Double i = (Double) start; i.compareTo((Double) end) >= 0; i += (Double) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Double(1);
+						}
+						for (Double i = (Double) start; i.compareTo((Double) end) <= 0; i += (Double) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else if (start instanceof Long) {
+					if (((Long) start).compareTo((Long) end) > 0) {
+						if (null == step) {
+							step = (N) new Long(-1);
+						}
+						for (Long i = (Long) start; i.compareTo((Long) end) >= 0; i += (Long) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Long(1);
+						}
+						for (Long i = (Long) start; i.compareTo((Long) end) <= 0; i += (Long) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else if (start instanceof Short) {
+					if (((Short) start).compareTo((Short) end) > 0) {
+						if (null == step) {
+							step = (N) new Short((short) -1);
+						}
+						for (Short i = (Short) start; i
+								.compareTo((Short) end) >= 0; i = (short) (step.shortValue() + i.shortValue())) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Short((short) 1);
+						}
+						for (Short i = (Short) start; i
+								.compareTo((Short) end) <= 0; i = (short) (step.shortValue() + i.shortValue())) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else if (start instanceof Float) {
+					if (((Float) start).compareTo((Float) end) > 0) {
+						if (null == step) {
+							step = (N) new Float(-1);
+						}
+						for (Float i = (Float) start; i.compareTo((Float) end) >= 0; i += (Float) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Float(1);
+						}
+						for (Float i = (Float) start; i.compareTo((Float) end) <= 0; i += (Float) step) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else if (start instanceof Byte) {
+					if (((Byte) start).compareTo((Byte) end) > 0) {
+						if (null == step) {
+							step = (N) new Byte((byte) -1);
+						}
+						for (Byte i = (Byte) start; i
+								.compareTo((Byte) end) >= 0; i = (byte) (step.byteValue() + i.byteValue())) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					} else {
+						if (null == step) {
+							step = (N) new Byte((byte) 1);
+						}
+						for (Byte i = (Byte) start; i
+								.compareTo((Byte) end) <= 0; i = (byte) (step.byteValue() + i.byteValue())) {
+							int ret = privateDoLoop(doLoop, i);
+							if (ret == 1) {
+								break;
+							} else if (ret == 2) {
+								continue;
+							}
+						}
+					}
+				} else {
+					throw new IllegalArgumentException();
+				}
+			}
+
+			public void loop(Void1ArgInterface<N> doLoop) {
+				loop($(doLoop));
+			}
 		}
 	}
 }

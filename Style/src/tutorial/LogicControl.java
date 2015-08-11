@@ -38,6 +38,12 @@ public class LogicControl extends style {
 		System.out.println("\nLoop===========");
 		System.out.println("For:");
 		For(0, (i) -> i < 10, (i) -> i + 1, (i) -> System.out.println(i));
+		System.out.println("For start to end");
+		For(1).to(11).step(2).loop(i -> {
+			if (i > 7)
+				Break();
+			System.out.println(i);
+		});
 		System.out.println("While:");
 		Iterator<String> strIt = strList.iterator();
 		While(() -> strIt.hasNext(), () -> System.out.println(strIt.next()));
