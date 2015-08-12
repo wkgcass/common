@@ -5,12 +5,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import net.cassite.style.control.Add;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
+import net.cassite.style.control.Previous;
 import net.cassite.style.control.Remove;
+import net.cassite.style.control.$Set;
 import net.cassite.style.interfaces.R0ArgInterface;
 import net.cassite.style.interfaces.R1ArgInterface;
 import net.cassite.style.interfaces.R2ArgsInterface;
@@ -46,6 +51,31 @@ public class Supportters extends style {
 			for (T t : array) {
 				try {
 					func.apply(t);
+				} catch (Throwable throwable) {
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
+					} else {
+						throw $(throwable);
+					}
+				}
+			}
+		}
+
+		public void toSelf(R1ArgInterface<T, T> func) {
+			toSelf($(func));
+		}
+
+		public void toSelf(function<T> func) {
+			for (int i = 0; i < array.length; ++i) {
+				try {
+					array[i] = func.apply(array[i]);
 				} catch (Throwable throwable) {
 					if (throwable instanceof StyleRuntimeException) {
 						Throwable origin = ((StyleRuntimeException) throwable).origin();
@@ -148,27 +178,7 @@ public class Supportters extends style {
 		}
 
 		public void forEach(function<Object> func) {
-			Iterator<T> it = iterable.iterator();
-			while (it.hasNext()) {
-				try {
-					func.apply(it.next());
-				} catch (Throwable throwable) {
-					if (throwable instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) throwable).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else if (origin instanceof Remove) {
-							it.remove();
-						} else {
-							throw ((StyleRuntimeException) throwable);
-						}
-					} else {
-						throw $(throwable);
-					}
-				}
-			}
+			forThose($.alwaysTrue(), func);
 		}
 
 		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func) {
@@ -210,8 +220,8 @@ public class Supportters extends style {
 		}
 
 		public static class Tramsformer<R, T, Coll extends Collection<R>> {
-			private final Coll collection;
-			private final Iterable<T> iterable;
+			protected final Coll collection;
+			protected final Iterable<T> iterable;
 
 			Tramsformer(Iterable<T> iterable, Coll collection) {
 				this.iterable = iterable;
@@ -253,10 +263,133 @@ public class Supportters extends style {
 			super(collection);
 		}
 
-		public CollectionFuncSup<T> add(T t) {
+		@SuppressWarnings("unchecked")
+		public <Coll extends CollectionFuncSup<T>> Coll add(T t) {
 			Collection<T> coll = (Collection<T>) iterable;
 			coll.add(t);
-			return this;
+			return (Coll) this;
+		}
+	}
+
+	public static class ListFuncSup<T> extends CollectionFuncSup<T> {
+		ListFuncSup(List<T> collection) {
+			super(collection);
+		}
+
+		public static class ListIteratorInfo {
+			public final int previousIndex;
+			public final int nextIndex;
+			public final boolean hasPrevious;
+			public final boolean hasNext;
+
+			ListIteratorInfo(int previousIndex, int nextIndex, boolean hasPrevious, boolean hasNext) {
+				this.previousIndex = previousIndex;
+				this.nextIndex = nextIndex;
+				this.hasPrevious = hasPrevious;
+				this.hasNext = hasNext;
+			}
+		}
+
+		public void toSelf(R1ArgInterface<T, T> func) {
+			toSelf($(func));
+		}
+
+		public void toSelf(function<T> func) {
+			ListIterator<T> it = ((List<T>) iterable).listIterator();
+			while (it.hasNext()) {
+				T t = it.next();
+				try {
+					it.set(func.apply(t));
+				} catch (Throwable throwable) {
+					if (throwable instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) throwable).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							continue;
+						} else if (origin instanceof Remove) {
+							it.remove();
+						} else {
+							throw ((StyleRuntimeException) throwable);
+						}
+					} else {
+						throw $(throwable);
+					}
+				}
+			}
+		}
+
+		public void forEach(Void1ArgInterface<T> func) {
+			forEach($(func));
+		}
+
+		public void forEach(Void1ArgInterface<T> func, int index) {
+			forEach($(func), index);
+		}
+
+		public void forEach(function<Object> func, int index) {
+			forThose($.alwaysTrue(), func, index);
+		}
+
+		public void forThose(Predicate<T> predicate, Void1ArgInterface<T> func, int index) {
+			forThose(predicate, $(func), index);
+		}
+
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, ListIteratorInfo> func) {
+			forThose(predicate, $(func));
+		}
+
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, ListIteratorInfo> func, int index) {
+			forThose(predicate, $(func), index);
+		}
+
+		@Override
+		public void forThose(Predicate<T> predicate, function<Object> func) {
+			forThose(predicate, func, 0);
+		}
+
+		public void forThose(Predicate<T> predicate, function<Object> func, int index) {
+			ListIterator<T> it = ((List<T>) iterable).listIterator(index);
+			T t;
+			if (it.hasNext()) {
+				t = it.next();
+			} else {
+				t = null;
+			}
+			while (it.hasNext()) {
+				try {
+					if (predicate.test(t)) {
+						if (func.argCount() == function.ARG_UNDEFINED || func.argCount() == 2) {
+							ListIteratorInfo info = new ListIteratorInfo(it.previousIndex(), it.nextIndex(),
+									it.hasPrevious(), it.hasNext());
+							func.apply(t, info);
+						} else
+							func.apply(t);
+					}
+					t = it.next();
+				} catch (Throwable e) {
+					if (e instanceof StyleRuntimeException) {
+						Throwable origin = ((StyleRuntimeException) e).origin();
+						if (origin instanceof Break) {
+							break;
+						} else if (origin instanceof Continue) {
+							t = it.next();
+							continue;
+						} else if (origin instanceof Add) {
+							it.add(((Add) origin).getAdd());
+						} else if (origin instanceof Previous) {
+							t = it.previous();
+						} else if (origin instanceof $Set) {
+							it.set((($Set) origin).getSet());
+							t = it.next();
+						} else {
+							throw ((StyleRuntimeException) e);
+						}
+					} else {
+						throw $(e);
+					}
+				}
+			}
 		}
 	}
 
@@ -420,6 +553,12 @@ public class Supportters extends style {
 	}
 
 	public static class function<R> {
+		public static final int ARG_UNDEFINED = -1;
+		private final int argCount;
+
+		public int argCount() {
+			return argCount;
+		}
 
 		private VoidNArgInterface voidN;
 		private Void0ArgInterface void0;
@@ -442,88 +581,106 @@ public class Supportters extends style {
 		private R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object> body7;
 
 		function(VoidNArgInterface body) {
+			argCount = ARG_UNDEFINED;
 			this.voidN = body;
 		}
 
 		function(Void0ArgInterface body) {
+			argCount = 0;
 			this.void0 = body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void1ArgInterface<?> body) {
+			argCount = 1;
 			this.void1 = (Void1ArgInterface<Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void2ArgInterface<?, ?> body) {
+			argCount = 2;
 			this.void2 = (Void2ArgInterface<Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void3ArgInterface<?, ?, ?> body) {
+			argCount = 3;
 			this.void3 = (Void3ArgInterface<Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void4ArgInterface<?, ?, ?, ?> body) {
+			argCount = 4;
 			this.void4 = (Void4ArgInterface<Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void5ArgInterface<?, ?, ?, ?, ?> body) {
+			argCount = 5;
 			this.void5 = (Void5ArgInterface<Object, Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
+			argCount = 6;
 			this.void6 = (Void6ArgInterface<Object, Object, Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
+			argCount = 7;
 			this.void7 = (Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object>) body;
 		}
 
 		function(RNArgsInterface<R> body) {
+			argCount = ARG_UNDEFINED;
 			this.body = body;
 		}
 
 		function(R0ArgInterface<R> body) {
+			argCount = 0;
 			this.body0 = body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R1ArgInterface<R, ?> body) {
+			argCount = 1;
 			this.body1 = (R1ArgInterface<R, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R2ArgsInterface<R, ?, ?> body) {
+			argCount = 2;
 			this.body2 = (R2ArgsInterface<R, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R3ArgsInterface<R, ?, ?, ?> body) {
+			argCount = 3;
 			this.body3 = (R3ArgsInterface<R, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R4ArgsInterface<R, ?, ?, ?, ?> body) {
+			argCount = 4;
 			this.body4 = (R4ArgsInterface<R, Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R5ArgsInterface<R, ?, ?, ?, ?, ?> body) {
+			argCount = 5;
 			this.body5 = (R5ArgsInterface<R, Object, Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R6ArgsInterface<R, ?, ?, ?, ?, ?, ?> body) {
+			argCount = 6;
 			this.body6 = (R6ArgsInterface<R, Object, Object, Object, Object, Object, Object>) body;
 		}
 
 		@SuppressWarnings("unchecked")
 		function(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
+			argCount = 7;
 			this.body7 = (R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object>) body;
 		}
 

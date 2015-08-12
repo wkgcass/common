@@ -1,5 +1,7 @@
 package net.cassite.style;
 
+import java.util.function.Predicate;
+
 import net.cassite.style.Supportters.function;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
@@ -11,9 +13,21 @@ public class $ extends style {
 	private $() {
 	}
 
-	public static R1ArgInterface<?, ?> copy = (e) -> e;
+	private static Predicate<?> alwaysTrue = t -> true;
+
+	@SuppressWarnings("unchecked")
+	public static <T> Predicate<T> alwaysTrue() {
+		return (Predicate<T>) alwaysTrue;
+	}
+
+	// TODO
+	public static R1ArgInterface<?, ?> copy = e -> e;
 
 	public static function<?> copyFunc = $(copy);
+
+	public static R1ArgInterface<String, String> trim = s -> s.trim();
+
+	public static function<String> trimFunc = $(trim);
 
 	public static R2ArgsInterface<?, ?, ?> values = (k, v) -> v;
 
@@ -29,7 +43,7 @@ public class $ extends style {
 
 	public static R2ArgsInterface<Entry<?, ?>, ?, ?> mapCopy = entries;
 
-	public static function<Entry<?, ?>> mapCopyFunc = $(entries);
+	public static function<Entry<?, ?>> mapCopyFunc = entriesFunc;
 
 	static final Break Control_Break = new Break();
 	static final Remove Control_Remove = new Remove();
