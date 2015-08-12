@@ -20,30 +20,87 @@ public class $ extends style {
 		return (Predicate<T>) alwaysTrue;
 	}
 
-	// TODO
-	public static R1ArgInterface<?, ?> copy = e -> e;
+	private static R1ArgInterface<?, ?> copy = e -> e;
 
-	public static function<?> copyFunc = $(copy);
+	@SuppressWarnings("unchecked")
+	public static <T> R1ArgInterface<T, T> copy() {
+		return (R1ArgInterface<T, T>) copy;
+	}
 
-	public static R1ArgInterface<String, String> trim = s -> s.trim();
+	private static function<?> copyFunc = $(copy);
 
-	public static function<String> trimFunc = $(trim);
+	@SuppressWarnings("unchecked")
+	public static <T> function<T> copyFunc() {
+		return (function<T>) copyFunc;
+	}
 
-	public static R2ArgsInterface<?, ?, ?> values = (k, v) -> v;
+	private static R1ArgInterface<String, String> trim = s -> s.trim();
 
-	public static function<?> valuesFunc = $(values);
+	public static R1ArgInterface<String, String> trim() {
+		return trim;
+	}
 
-	public static R2ArgsInterface<?, ?, ?> keys = (k, v) -> k;
+	private static function<String> trimFunc = $(trim);
 
-	public static function<?> keysFunc = $(keys);
+	public static function<String> trimFunc() {
+		return trimFunc;
+	}
 
-	public static R2ArgsInterface<Entry<?, ?>, ?, ?> entries = (k, v) -> new Entry<>(k, v);
+	private static R2ArgsInterface<?, ?, ?> values = (k, v) -> v;
 
-	public static function<Entry<?, ?>> entriesFunc = $(entries);
+	@SuppressWarnings("unchecked")
+	public static <K, V> R2ArgsInterface<V, K, V> values() {
+		return (R2ArgsInterface<V, K, V>) values;
+	}
 
-	public static R2ArgsInterface<Entry<?, ?>, ?, ?> mapCopy = entries;
+	private static function<?> valuesFunc = $(values);
 
-	public static function<Entry<?, ?>> mapCopyFunc = entriesFunc;
+	@SuppressWarnings("unchecked")
+	public static <V> function<V> valuesFunc() {
+		return (function<V>) valuesFunc;
+	}
+
+	private static R2ArgsInterface<?, ?, ?> keys = (k, v) -> k;
+
+	@SuppressWarnings("unchecked")
+	public static <K, V> R2ArgsInterface<K, K, V> keys() {
+		return (R2ArgsInterface<K, K, V>) keys;
+	}
+
+	private static function<?> keysFunc = $(keys);
+
+	@SuppressWarnings("unchecked")
+	public static <K> function<K> keyFunc() {
+		return (function<K>) keysFunc;
+	}
+
+	private static R2ArgsInterface<Entry<?, ?>, ?, ?> entries = (k, v) -> new Entry<>(k, v);
+
+	@SuppressWarnings("unchecked")
+	public static <K, V, En extends Entry<K, V>> R2ArgsInterface<En, K, V> entries() {
+		return (R2ArgsInterface<En, K, V>) entries;
+	}
+
+	private static function<Entry<?, ?>> entriesFunc = $(entries);
+
+	@SuppressWarnings("unchecked")
+	public static <K, V, En extends Entry<K, V>> function<En> entriesFunc() {
+		return (function<En>) entriesFunc;
+	}
+
+	private static R2ArgsInterface<Entry<?, ?>, ?, ?> mapCopy = entries;
+
+	@SuppressWarnings("unchecked")
+	public static <K, V, En extends Entry<K, V>> R2ArgsInterface<En, K, V> mapCopy() {
+		return (R2ArgsInterface<En, K, V>) mapCopy;
+	}
+
+	private static function<Entry<?, ?>> mapCopyFunc = entriesFunc;
+
+	@SuppressWarnings("unchecked")
+	public static <K, V, En extends Entry<K, V>> function<En> mapCopyFunc() {
+		return (function<En>) mapCopyFunc;
+	}
 
 	static final Break Control_Break = new Break();
 	static final Remove Control_Remove = new Remove();
