@@ -46,6 +46,81 @@ public class style {
 	// ┌─────────────────────────────────┐
 	// │............function.............│
 	// └─────────────────────────────────┘
+
+	// void functions
+	public static function<Object> function(VoidNArgInterface body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void0ArgInterface body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void1ArgInterface<?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void2ArgInterface<?, ?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void3ArgInterface<?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void4ArgInterface<?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void5ArgInterface<?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static function<Object> function(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	// functions with return value
+	public static <R> function<R> function(RNArgsInterface<R> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R0ArgInterface<R> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R1ArgInterface<R, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R2ArgsInterface<R, ?, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R3ArgsInterface<R, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R4ArgsInterface<R, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R5ArgsInterface<R, ?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R6ArgsInterface<R, ?, ?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
+	public static <R> function<R> function(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
+		return $(body);
+	}
+
 	// void functions
 
 	public static function<Object> $(VoidNArgInterface body) {
