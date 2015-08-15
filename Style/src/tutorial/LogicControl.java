@@ -33,7 +33,7 @@ public class LogicControl extends style {
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
 			Break();
-		}).Case(3, () -> System.out.println("case 3:" + tmpS));
+		}).Case(3, () -> System.out.println("case 3:" + tmpS)).Default(() -> System.out.println("default"));
 
 		System.out.println("\nLoop===========");
 		System.out.println("For:");

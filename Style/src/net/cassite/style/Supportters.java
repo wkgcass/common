@@ -837,6 +837,7 @@ public class Supportters extends style {
 	public static class SwitchBlock<T> {
 		private T toSwitch;
 		private boolean doNext = false;
+		private boolean found = false;
 
 		SwitchBlock(T t) {
 			this.toSwitch = t;
@@ -847,6 +848,7 @@ public class Supportters extends style {
 				try {
 					func.apply();
 					doNext = true;
+					found = true;
 				} catch (Throwable t) {
 					if (t instanceof StyleRuntimeException) {
 						if (((StyleRuntimeException) t).origin() instanceof Break) {
@@ -864,6 +866,16 @@ public class Supportters extends style {
 
 		public SwitchBlock<T> Case(T ca, Void0ArgInterface func) {
 			return Case(ca, $(func));
+		}
+
+		public void Default(function<Object> func) {
+			if (!found) {
+				func.apply();
+			}
+		}
+
+		public void Default(Void0ArgInterface func) {
+			Default($(func));
 		}
 	}
 

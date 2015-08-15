@@ -162,7 +162,7 @@ public class Sum extends style {
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
 			Break();
-		}).Case(3, () -> System.out.println("case 3:" + tmpS));
+		}).Case(3, () -> System.out.println("case 3:" + tmpS)).Default(() -> System.out.println("default"));
 
 		System.out.println("\nMap builder and JSONLike===============");
 		Map<String, Integer> testMap = $(new HashMap<>(), $("cass", 1995).$("cassie", 1996).$("unknown", 2001));
