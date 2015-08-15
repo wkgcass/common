@@ -1,5 +1,6 @@
 package net.cassite.style;
 
+import java.util.Date;
 import java.util.function.Predicate;
 
 import net.cassite.style.Supportters.function;
@@ -105,4 +106,16 @@ public class $ extends style {
 	static final Break Control_Break = new Break();
 	static final Remove Control_Remove = new Remove();
 	static final Continue Control_Continue = new Continue();
+
+	public static Date today() {
+		return new Date();
+	}
+
+	public static Date tomorrow() {
+		return $(new Date()).add(d -> d.day(1)).getDate();
+	}
+
+	public static Date yesterday() {
+		return $(new Date()).substract(d -> d.day(1)).getDate();
+	}
 }

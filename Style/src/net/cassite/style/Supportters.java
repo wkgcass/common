@@ -2,7 +2,9 @@ package net.cassite.style;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1102,6 +1104,123 @@ public class Supportters extends style {
 			public void loop(Void1ArgInterface<N> doLoop) {
 				loop($(doLoop));
 			}
+		}
+	}
+
+	public static class DateFuncSup {
+		public static class DateSeperator {
+			private long day;
+			private long hour;
+			private long minute;
+			private long second;
+			private long milli;
+
+			long parse() {
+				return milli + second * 1000 + minute * 60000 + hour * 3600000 + day * 86400000;
+			}
+
+			public DateSeperator day(long days) {
+				day = days;
+				return this;
+			}
+
+			public DateSeperator hour(long hours) {
+				hour = hours;
+				return this;
+			}
+
+			public DateSeperator minute(long minutes) {
+				minute = minutes;
+				return this;
+			}
+
+			public DateSeperator second(long senconds) {
+				second = senconds;
+				return this;
+			}
+
+			public DateSeperator milli(long millis) {
+				milli = millis;
+				return this;
+			}
+		}
+
+		private Date date;
+
+		public Date getDate() {
+			return date;
+		}
+
+		DateFuncSup(Date date) {
+			this.date = date;
+		}
+
+		public DateFuncSup add(DateSeperator d) {
+			date.setTime(date.getTime() + d.parse());
+			return this;
+		}
+
+		public DateFuncSup add(function<DateSeperator> dateFunction) {
+			date.setTime(date.getTime() + dateFunction.apply(new DateSeperator()).parse());
+			return this;
+		}
+
+		public DateFuncSup add(R1ArgInterface<DateSeperator, DateSeperator> dateFunction) {
+			return add($(dateFunction));
+		}
+
+		public DateFuncSup substract(DateSeperator d) {
+			date.setTime(date.getTime() - d.parse());
+			return this;
+		}
+
+		public DateFuncSup substract(function<DateSeperator> dateFunction) {
+			date.setTime(date.getTime() - dateFunction.apply(new DateSeperator()).parse());
+			return this;
+		}
+
+		public DateFuncSup substract(R1ArgInterface<DateSeperator, DateSeperator> dateFunction) {
+			return substract($(dateFunction));
+		}
+
+		public DateFuncSup nextMonth() {
+			return nextMonth(1);
+		}
+
+		public DateFuncSup nextYear() {
+			return nextYear(1);
+		}
+
+		public DateFuncSup previousMonth() {
+			return previousMonth(1);
+		}
+
+		public DateFuncSup previousYear() {
+			return previousYear(1);
+		}
+
+		public DateFuncSup nextMonth(int next) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			cal.add(Calendar.MONTH, next);
+			date.setTime(cal.getTimeInMillis());
+			return this;
+		}
+
+		public DateFuncSup nextYear(int next) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+			cal.add(Calendar.YEAR, next);
+			date.setTime(cal.getTimeInMillis());
+			return this;
+		}
+
+		public DateFuncSup previousMonth(int previous) {
+			return nextMonth(-1);
+		}
+
+		public DateFuncSup previousYear(int previous) {
+			return nextYear(-1);
 		}
 	}
 }

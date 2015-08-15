@@ -1,6 +1,7 @@
 package tutorial;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -179,5 +180,12 @@ public class Sum extends style {
 				Break();
 			System.out.println(i);
 		});
+
+		System.out.println("\nDate===============");
+		Date date = new Date();
+		System.out.println(date);
+		$(date).add(d -> d.day(1).hour(2).minute(3).second(4).milli(5)).nextYear().nextMonth()
+				.substract(d -> d.day(5).hour(4).minute(3).second(2).milli(1));
+		System.out.println(date);
 	}
 }

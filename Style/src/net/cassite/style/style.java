@@ -1,6 +1,7 @@
 package net.cassite.style;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -9,6 +10,7 @@ import java.util.function.UnaryOperator;
 import net.cassite.style.Supportters.ArrayFuncSup;
 import net.cassite.style.Supportters.AsyncGroup;
 import net.cassite.style.Supportters.CollectionFuncSup;
+import net.cassite.style.Supportters.DateFuncSup;
 import net.cassite.style.Supportters.ForSupport;
 import net.cassite.style.Supportters.IterableFuncSup;
 import net.cassite.style.Supportters.JSONLike;
@@ -334,5 +336,10 @@ public class style {
 	// json like
 	public static <K, V> JSONLike<K, V> $(K key, V value) {
 		return new JSONLike<K, V>(key, value);
+	}
+
+	// date
+	public static DateFuncSup $(Date date) {
+		return new DateFuncSup(date);
 	}
 }
