@@ -1,7 +1,7 @@
 package tutorial;
 
 import net.cassite.style.Supportters.StyleRuntimeException;
-import net.cassite.style.style;
+import net.cassite.style.Style;
 
 /**
  * Enhanced Throwable<br/>
@@ -9,7 +9,7 @@ import net.cassite.style.style;
  * @author wkgcass
  *
  */
-public class EnhancedThrowable extends style {
+public class EnhancedThrowable extends Style {
 
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {

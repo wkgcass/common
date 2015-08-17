@@ -37,7 +37,7 @@ import net.cassite.style.interfaces.Void6ArgInterface;
 import net.cassite.style.interfaces.Void7ArgInterface;
 import net.cassite.style.interfaces.VoidNArgInterface;
 
-public class Supportters extends style {
+public class Supportters extends Style {
 	public static class ArrayFuncSup<T> {
 		private final T[] array;
 
@@ -403,7 +403,7 @@ public class Supportters extends style {
 		}
 
 		public void forEach(Void2ArgInterface<K, V> func) {
-			forEach(style.$(func));
+			forEach(Style.$(func));
 		}
 
 		public void forEach(function<Object> func) {
@@ -425,14 +425,14 @@ public class Supportters extends style {
 							throw ((StyleRuntimeException) throwable);
 						}
 					} else {
-						throw style.$(throwable);
+						throw Style.$(throwable);
 					}
 				}
 			}
 		}
 
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, Void2ArgInterface<K, V> func) {
-			forThose(predicate, style.$(func));
+			forThose(predicate, Style.$(func));
 		}
 
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, function<Object> func) {
@@ -456,7 +456,7 @@ public class Supportters extends style {
 							throw ((StyleRuntimeException) throwable);
 						}
 					} else {
-						throw style.$(throwable);
+						throw Style.$(throwable);
 					}
 				}
 			}
@@ -477,7 +477,7 @@ public class Supportters extends style {
 			}
 
 			public Coll via(R2ArgsInterface<R, K, V> method) {
-				return via(style.$(method));
+				return via(Style.$(method));
 			}
 
 			public Coll via(function<R> method) {
@@ -496,7 +496,7 @@ public class Supportters extends style {
 								throw ((StyleRuntimeException) e);
 							}
 						} else {
-							throw style.$(e);
+							throw Style.$(e);
 						}
 					}
 				}
@@ -518,7 +518,7 @@ public class Supportters extends style {
 			}
 
 			public M via(R2ArgsInterface<Entry<K2, V2>, K, V> method) {
-				return via(style.$(method));
+				return via(Style.$(method));
 			}
 
 			public M via(function<Entry<K2, V2>> method) {
@@ -537,7 +537,7 @@ public class Supportters extends style {
 								throw ((StyleRuntimeException) e);
 							}
 						} else {
-							throw style.$(e);
+							throw Style.$(e);
 						}
 					}
 				}
@@ -767,13 +767,31 @@ public class Supportters extends style {
 	public static class AsyncGroup {
 		private Async<?>[] group;
 
-		AsyncGroup(Async<?>... group) {
+		private StyleRuntimeException err;
+		private function<Object> handler;
+		private Object lock = new Object();
+
+		AsyncGroup(function<Object> asyncHandler, Async<?>... group) {
 			if (group.length == 0)
 				throw new IllegalArgumentException("at least one Async object should be passed in");
 			this.group = Arrays.copyOf(group, group.length);
+			if (null != asyncHandler) {
+				for (Async<?> a : group) {
+					if (!a.hasErrHandler()) {
+						a.onError(asyncHandler);
+					}
+				}
+			}
 		}
 
-		public void callback(function<Object> func) {
+		public AsyncGroup callback(function<Object> func) {
+			run(() -> {
+				callbackSync(func);
+			});
+			return this;
+		}
+
+		public AsyncGroup callbackSync(function<Object> func) {
 			try {
 				Object[] awaits = new Object[group.length];
 				int i = 0;
@@ -783,8 +801,31 @@ public class Supportters extends style {
 				}
 				func.apply(awaits);
 			} catch (Throwable e) {
-				throw $(e);
+				synchronized (lock) {
+					err = $(e);
+					if (handler != null) {
+						handler.apply(err);
+					}
+				}
 			}
+			return this;
+		}
+
+		public void onError(Void1ArgInterface<StyleRuntimeException> handler) {
+			onError($(handler));
+		}
+
+		public void onError(function<Object> handler) {
+			synchronized (lock) {
+				this.handler = handler;
+				if (err != null) {
+					handler.apply(err);
+				}
+			}
+		}
+
+		public StyleRuntimeException getErr() {
+			return err;
 		}
 	}
 
@@ -1233,6 +1274,95 @@ public class Supportters extends style {
 
 		public DateFuncSup previousYear(int previous) {
 			return nextYear(-1);
+		}
+
+		public String toString(String format) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(date);
+
+			String s = "" + cal.get(Calendar.SECOND);
+			String ss = s.length() == 1 ? "0" + s : s;
+			String i = "" + cal.get(Calendar.MINUTE);
+			String ii = i.length() == 1 ? "0" + i : i;
+			String h = "" + cal.get(Calendar.HOUR);
+			String hh = h.length() == 1 ? "0" + h : h;
+			String H = "" + cal.get(Calendar.HOUR_OF_DAY);
+			String HH = H.length() == 1 ? "0" + H : H;
+			String d = "" + cal.get(Calendar.DATE);
+			String dd = d.length() == 1 ? "0" + d : d;
+			String m = "" + (cal.get(Calendar.MONTH) + 1);
+			String mm = m.length() == 1 ? "0" + m : m;
+			String yyyy = "" + cal.get(Calendar.YEAR);
+			String yy = yyyy.substring(2);
+			String a = cal.get(Calendar.AM_PM) == Calendar.AM ? "am" : "pm";
+			String A = a.toUpperCase();
+			Map<String, String> replace = $(new LinkedHashMap<String, String>(),
+					$("ss", ss).$("s", s).$("ii", ii).$("i", i).$("hh", hh).$("h", h).$("HH", HH).$("H", H).$("dd", dd)
+							.$("d", d).$("mm", mm).$("m", m).$("yyyy", yyyy).$("yy", yy).$("a", a).$("A", A));
+
+			StringBuilder sb = new StringBuilder(format);
+			$(replace).forEach((k, v) -> {
+				int index;
+				int length = k.length();
+				while ((index = sb.indexOf(k)) != -1) {
+					sb.replace(index, index + length, v);
+				}
+				String upper = k.toUpperCase();
+				if (!replace.containsKey(upper)) {
+					while ((index = sb.indexOf(upper)) != -1) {
+						sb.replace(index, index + length, v);
+					}
+				}
+			});
+			return sb.toString();
+		}
+	}
+
+	public static class ComparableFuncSup<T> {
+		private Comparable<T> comparable;
+
+		ComparableFuncSup(Comparable<T> comparable) {
+			this.comparable = comparable;
+		}
+
+		public boolean gt(T o) {
+			return comparable.compareTo(o) > 0;
+		}
+
+		public boolean lt(T o) {
+			return comparable.compareTo(o) < 0;
+		}
+
+		public boolean ge(T o) {
+			return comparable.compareTo(o) >= 0;
+		}
+
+		public boolean gte(T o) {
+			return ge(o);
+		}
+
+		public boolean le(T o) {
+			return comparable.compareTo(o) <= 0;
+		}
+
+		public boolean lte(T o) {
+			return le(o);
+		}
+
+		public boolean eq(T o) {
+			return comparable.compareTo(o) == 0;
+		}
+
+		public boolean ne(T o) {
+			return !eq(o);
+		}
+
+		public boolean neq(T o) {
+			return ne(o);
+		}
+
+		public int compareTo(T o) {
+			return comparable.compareTo(o);
 		}
 	}
 }

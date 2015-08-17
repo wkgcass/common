@@ -3,14 +3,16 @@ package net.cassite.style;
 import java.util.Date;
 import java.util.function.Predicate;
 
+import net.cassite.style.Supportters.StyleRuntimeException;
 import net.cassite.style.Supportters.function;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
 import net.cassite.style.interfaces.R1ArgInterface;
 import net.cassite.style.interfaces.R2ArgsInterface;
+import net.cassite.style.interfaces.Void1ArgInterface;
 
-public class $ extends style {
+public class $ extends Style {
 	private $() {
 	}
 
@@ -118,4 +120,30 @@ public class $ extends style {
 	public static Date yesterday() {
 		return $(new Date()).substract(d -> d.day(1)).getDate();
 	}
+
+	public static final String fromLowerCases = "abcdefghijklmnopqrstuvwxyz";
+
+	public static final String fromUpperCases = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	public static final String fromNumbers = "0123456789";
+
+	public static final String fromHex = "0123456789ABCDEF";
+
+	public static final String fromAll = fromLowerCases + fromUpperCases + fromNumbers + fromHex;
+
+	public static final String fromRecognizable = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
+
+	public static final String fromKeyboard = "`~1!2@3#4$5%6^7&8*9(0)-_=+qQeErRtTyYuUiIoOpP[{]}\\|aAsSdDfFgGhHjJkKlL;:'\"zZxXcCvVbBnNmM,<.>/?";
+
+	public static final Void1ArgInterface<StyleRuntimeException> throwHandler = (err) -> {
+		throw err;
+	};
+
+	public static final function<Object> throwHandlerFunc = $(throwHandler);
+
+	public static final Void1ArgInterface<StyleRuntimeException> printHandler = (err) -> {
+		err.origin().printStackTrace();
+	};
+
+	public static final function<Object> printHandlerFunc = $(printHandler);
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.cassite.style.Store;
-import net.cassite.style.style;
+import net.cassite.style.Style;
 
 /**
  * A demo showing how to do logic/iteration control<br/>
@@ -17,7 +17,7 @@ import net.cassite.style.style;
  * @author wkgcass
  *
  */
-public class LogicControl extends style {
+public class LogicControl extends Style {
 
 	public static void main(String[] args) {
 		// init

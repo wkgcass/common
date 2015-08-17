@@ -1,7 +1,7 @@
 package tutorial;
 
 import net.cassite.style.Async;
-import net.cassite.style.style;
+import net.cassite.style.Style;
 import net.cassite.style.Supportters.function;
 
 /**
@@ -12,7 +12,7 @@ import net.cassite.style.Supportters.function;
  * @author wkgcass
  *
  */
-public class FunctionAsyncAwaitCallback extends style {
+public class FunctionAsyncAwaitCallback extends Style {
 	public static void main(String[] args) {
 		System.out.println("This demo might not print in order of the code.");
 		System.out.println("function===========");
@@ -72,6 +72,9 @@ public class FunctionAsyncAwaitCallback extends style {
 		System.out.println(async.await());
 
 		System.out.println("\nSimplfied Thread creation===========");
-		run(() -> System.out.println(Thread.currentThread()));
+		run(() -> {
+			sleep(1000);
+			System.out.println(Thread.currentThread());
+		});
 	}
 }

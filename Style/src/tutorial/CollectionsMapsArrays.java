@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.cassite.style.Entry;
-import net.cassite.style.style;
+import net.cassite.style.Style;
 
 /**
  * A demo shows how to create, iterate on, or transform a collection/map<br/>
@@ -16,7 +16,7 @@ import net.cassite.style.style;
  * @author wkgcass
  *
  */
-public class CollectionsMapsArrays extends style {
+public class CollectionsMapsArrays extends Style {
 	public static void main(String[] args) {
 		System.out.println("forEach===================");
 		System.out.println("on array:");

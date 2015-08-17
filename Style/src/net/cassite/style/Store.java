@@ -1,24 +1,24 @@
 package net.cassite.style;
 
 public class Store<T> {
-	T o;
+	public T item;
 
 	Store(T o) {
-		this.o = o;
+		this.item = o;
 	}
 
 	@Override
 	public int hashCode() {
-		return o.hashCode();
+		return item.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return o.toString();
+		return item.toString();
 	}
 
 	@Override
 	public boolean equals(Object another) {
-		return o.equals(another);
+		return item.equals(another);
 	}
 }

@@ -10,6 +10,7 @@ import java.util.function.UnaryOperator;
 import net.cassite.style.Supportters.ArrayFuncSup;
 import net.cassite.style.Supportters.AsyncGroup;
 import net.cassite.style.Supportters.CollectionFuncSup;
+import net.cassite.style.Supportters.ComparableFuncSup;
 import net.cassite.style.Supportters.DateFuncSup;
 import net.cassite.style.Supportters.ForSupport;
 import net.cassite.style.Supportters.IterableFuncSup;
@@ -40,9 +41,9 @@ import net.cassite.style.interfaces.Void6ArgInterface;
 import net.cassite.style.interfaces.Void7ArgInterface;
 import net.cassite.style.interfaces.VoidNArgInterface;
 
-public class style {
+public class Style {
 
-	protected style() {
+	protected Style() {
 	}
 
 	// ┌─────────────────────────────────┐
@@ -205,7 +206,7 @@ public class style {
 	}
 
 	public static <T> T $(Store<T> store) {
-		return store.o;
+		return store.item;
 	}
 
 	// ┌─────────────────────────────────┐
@@ -213,17 +214,39 @@ public class style {
 	// └─────────────────────────────────┘
 
 	public static AsyncGroup $(Async<?>... asyncs) {
-		return new AsyncGroup(asyncs);
+		return new AsyncGroup(null, asyncs);
+	}
+
+	public static AsyncGroup $(function<Object> handler, Async<?>... asyncs) {
+		return new AsyncGroup(handler, asyncs);
+	}
+
+	public static AsyncGroup $(Void1ArgInterface<StyleRuntimeException> handler, Async<?>... asyncs) {
+		return new AsyncGroup($(handler), asyncs);
 	}
 
 	public static <R> R await(Async<R> async) {
 		return async.await();
 	}
 
-	public static Thread run(Runnable runnable) {
-		Thread t = new Thread(runnable);
+	public static Thread run(Void0ArgInterface runnable) {
+		return run($(runnable));
+	}
+
+	public static Thread run(function<Object> toRun) {
+		Thread t = new Thread(() -> {
+			toRun.apply();
+		});
 		t.start();
 		return t;
+	}
+
+	public static void sleep(long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			throw $(e);
+		}
 	}
 
 	// ┌─────────────────────────────────┐
@@ -245,6 +268,70 @@ public class style {
 	// ┌─────────────────────────────────┐
 	// │...collections, maps and arrays..│
 	// └─────────────────────────────────┘
+
+	public static ArrayFuncSup<Integer> $(int[] array) {
+		Integer[] arr = new Integer[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Double> $(double[] array) {
+		Double[] arr = new Double[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Float> $(float[] array) {
+		Float[] arr = new Float[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Boolean> $(boolean[] array) {
+		Boolean[] arr = new Boolean[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Character> $(char[] array) {
+		Character[] arr = new Character[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Byte> $(byte[] array) {
+		Byte[] arr = new Byte[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Long> $(long[] array) {
+		Long[] arr = new Long[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
+
+	public static ArrayFuncSup<Short> $(short[] array) {
+		Short[] arr = new Short[array.length];
+		For(0).to(array.length - 1).loop(i -> {
+			arr[i] = array[i];
+		});
+		return $(arr);
+	}
 
 	public static <T> ArrayFuncSup<T> $(T[] array) {
 		return new ArrayFuncSup<T>(array);
@@ -282,38 +369,64 @@ public class style {
 	// └─────────────────────────────────┘
 	// for
 
-	public static <T> void For(T i, Predicate<T> condition, UnaryOperator<T> increment, Void1ArgInterface<T> loop) {
+	public static <T> void For(T i, Predicate<T> condition, UnaryOperator<T> increment, function<Object> loop) {
 		for (T ii = i; condition.test(ii); ii = increment.apply(ii)) {
 			try {
-				loop.accept(ii);
-			} catch (Throwable t) {
-				if (t instanceof Break) {
-					break;
+				loop.apply(ii);
+			} catch (Throwable e) {
+				if (e instanceof StyleRuntimeException) {
+					Throwable origin = ((StyleRuntimeException) e).origin();
+					if (origin instanceof Break) {
+						break;
+					} else if (origin instanceof Continue) {
+						continue;
+					} else {
+						throw ((StyleRuntimeException) e);
+					}
 				} else {
-					throw $(t);
+					throw $(e);
 				}
 			}
 		}
+	}
+
+	public static <T> void For(T i, Predicate<T> condition, UnaryOperator<T> increment, Void1ArgInterface<T> loop) {
+		For(i, condition, increment, $(loop));
 	}
 
 	public static <N extends Number> ForSupport<N> For(N start) {
 		return new ForSupport<N>(start);
 	}
 
+	public static <N extends Number> ForSupport<N> from(N start) {
+		return new ForSupport<N>(start);
+	}
+
 	// while
 
-	public static void While(BooleanSupplier condition, Void0ArgInterface loop) {
+	public static void While(BooleanSupplier condition, function<Object> loop) {
 		while (condition.getAsBoolean()) {
 			try {
-				loop.invoke();
-			} catch (Throwable t) {
-				if (t instanceof Break) {
-					break;
+				loop.apply();
+			} catch (Throwable e) {
+				if (e instanceof StyleRuntimeException) {
+					Throwable origin = ((StyleRuntimeException) e).origin();
+					if (origin instanceof Break) {
+						break;
+					} else if (origin instanceof Continue) {
+						continue;
+					} else {
+						throw ((StyleRuntimeException) e);
+					}
 				} else {
-					throw $(t);
+					throw $(e);
 				}
 			}
 		}
+	}
+
+	public static void While(BooleanSupplier condition, Void0ArgInterface loop) {
+		While(condition, $(loop));
 	}
 
 	// switch
@@ -327,7 +440,11 @@ public class style {
 	// └─────────────────────────────────┘
 
 	public static StyleRuntimeException $(Throwable t) {
-		return new StyleRuntimeException(t);
+		if (t instanceof StyleRuntimeException) {
+			return (StyleRuntimeException) t;
+		} else {
+			return new StyleRuntimeException(t);
+		}
 	}
 
 	// ┌─────────────────────────────────┐
@@ -341,5 +458,64 @@ public class style {
 	// date
 	public static DateFuncSup $(Date date) {
 		return new DateFuncSup(date);
+	}
+
+	// regex
+	public static RegEx regex(String regex) {
+		return new RegEx(regex);
+	}
+
+	// comparable
+	public static <T> ComparableFuncSup<T> $(Comparable<T> comparable) {
+		return new ComparableFuncSup<>(comparable);
+	}
+
+	// rand
+	public static int rand(int start, int end) {
+		return (int) (Math.random() * (end - start + 1)) + start;
+	}
+
+	public static double rand(double start, double end) {
+		return Math.random() * (end - start) + start;
+	}
+
+	public static int rand(int max) {
+		return (int) (Math.random() * (max + 1));
+	}
+
+	public static double rand(double max) {
+		return Math.random() * max;
+	}
+
+	public static String rand(String chooseFrom, int length, boolean unrepeatable, boolean ignoreCase) {
+		if (length > chooseFrom.length() && unrepeatable) {
+			throw new RuntimeException("unrepeatable but length > chooseFrom.length");
+		}
+		StringBuilder sb = new StringBuilder();
+		Store<String> $chooseFrom = store(chooseFrom);
+		For(1).to(length).loop(i -> {
+			char c = $chooseFrom.item.charAt(rand($chooseFrom.item.length() - 1));
+			while (sb.indexOf("" + c) != -1 && unrepeatable) {
+				c = $chooseFrom.item.charAt(rand(chooseFrom.length() - 1));
+			}
+			sb.append(c);
+			if (unrepeatable) {
+				if (ignoreCase) {
+					$chooseFrom.item = $chooseFrom.item.replace(("" + c).toLowerCase(), "");
+					$chooseFrom.item = $chooseFrom.item.replace(("" + c).toUpperCase(), "");
+				} else {
+					$chooseFrom.item = $chooseFrom.item.replace(("" + c), "");
+				}
+			}
+		});
+		return sb.toString();
+	}
+
+	public static String rand(String chooseFrom, int length, boolean unrepeatable) {
+		return rand(chooseFrom, length, unrepeatable, false);
+	}
+
+	public static String rand(String chooseFrom, int length) {
+		return rand(chooseFrom, length, false, false);
 	}
 }
