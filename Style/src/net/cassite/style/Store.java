@@ -1,24 +1,7 @@
 package net.cassite.style;
 
-public class Store<T> {
-	public T item;
-
+public class Store<T> extends val<T> {
 	Store(T o) {
-		this.item = o;
-	}
-
-	@Override
-	public int hashCode() {
-		return item.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return item.toString();
-	}
-
-	@Override
-	public boolean equals(Object another) {
-		return item.equals(another);
+		super(o);
 	}
 }

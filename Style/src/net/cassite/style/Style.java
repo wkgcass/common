@@ -7,6 +7,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import net.cassite.style.Supportters.function;
+
 import net.cassite.style.Supportters.ArrayFuncSup;
 import net.cassite.style.Supportters.AsyncGroup;
 import net.cassite.style.Supportters.CollectionFuncSup;
@@ -18,7 +20,6 @@ import net.cassite.style.Supportters.JSONLike;
 import net.cassite.style.Supportters.MapFuncSup;
 import net.cassite.style.Supportters.StyleRuntimeException;
 import net.cassite.style.Supportters.SwitchBlock;
-import net.cassite.style.Supportters.function;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
@@ -205,7 +206,7 @@ public class Style {
 		return new Store<T>(o);
 	}
 
-	public static <T> T $(Store<T> store) {
+	public static <T> T $(val<T> store) {
 		return store.item;
 	}
 
@@ -217,7 +218,7 @@ public class Style {
 		return new AsyncGroup(null, asyncs);
 	}
 
-	public static AsyncGroup $(function<Object> handler, Async<?>... asyncs) {
+	public static AsyncGroup $(def<Object> handler, Async<?>... asyncs) {
 		return new AsyncGroup(handler, asyncs);
 	}
 
@@ -233,7 +234,7 @@ public class Style {
 		return run($(runnable));
 	}
 
-	public static Thread run(function<Object> toRun) {
+	public static Thread run(def<Object> toRun) {
 		Thread t = new Thread(() -> {
 			toRun.apply();
 		});
@@ -369,7 +370,7 @@ public class Style {
 	// └─────────────────────────────────┘
 	// for
 
-	public static <T> void For(T i, Predicate<T> condition, UnaryOperator<T> increment, function<Object> loop) {
+	public static <T> void For(T i, Predicate<T> condition, UnaryOperator<T> increment, def<Object> loop) {
 		for (T ii = i; condition.test(ii); ii = increment.apply(ii)) {
 			try {
 				loop.apply(ii);
@@ -404,7 +405,7 @@ public class Style {
 
 	// while
 
-	public static void While(BooleanSupplier condition, function<Object> loop) {
+	public static void While(BooleanSupplier condition, def<Object> loop) {
 		while (condition.getAsBoolean()) {
 			try {
 				loop.apply();

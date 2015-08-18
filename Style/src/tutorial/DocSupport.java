@@ -7,9 +7,10 @@ import java.util.Map;
 
 import net.cassite.style.$;
 import net.cassite.style.Async;
-import net.cassite.style.Store;
 import net.cassite.style.Style;
 import net.cassite.style.Supportters.function;
+import net.cassite.style.def;
+import net.cassite.style.val;
 
 public class DocSupport extends Style {
 
@@ -18,12 +19,12 @@ public class DocSupport extends Style {
 		$(args).forEach(s -> System.out.println(s));
 
 		// 函数式编程 － 创建
-		function<Integer> foo = $((Integer i, function<Integer> func) -> i > 99 ? i : i + func.apply(i + 1, func));
+		def<Integer> foo = function((Integer i, function<Integer> func) -> i > 99 ? i : i + func.apply(i + 1, func));
 		System.out.println(foo.apply(1, foo));
 		// 函数式编程 - 工具
 		int age = 20;
-		Store<Integer> _age = store(age);
-		function<Object> grow = $(() -> $(_age) + 1);
+		val<Integer> _age = store(age);
+		def<Object> grow = function(() -> $(_age) + 1);
 		System.out.println(grow.apply());
 
 		// 异步编程 - Async
@@ -33,7 +34,7 @@ public class DocSupport extends Style {
 		System.out.println(await(aFoo));
 		aFoo.onError($.printHandler);
 		// 异步编程 - Callback1
-		function<Object> funcWithCallback = $(
+		def<Object> funcWithCallback = function(
 				(Integer sum, Integer cursor, function<Object> func, function<Object> callback) -> {
 					if (cursor > 99)
 						callback.apply(sum + cursor);
@@ -42,7 +43,7 @@ public class DocSupport extends Style {
 				});
 		funcWithCallback.async(0, 1, funcWithCallback, function((Integer sum) -> System.out.println(sum)));
 		// 异步编程 - Callback2
-		function<Double> oneToTen = $(() -> {
+		def<Double> oneToTen = function(() -> {
 			System.out.println(Thread.currentThread());
 			double mul = 1;
 			for (double i = 10; i >= 1; --i) {
@@ -50,7 +51,7 @@ public class DocSupport extends Style {
 			}
 			return mul;
 		});
-		function<Double> elevenToTwenty = $(() -> {
+		def<Double> elevenToTwenty = function(() -> {
 			System.out.println(Thread.currentThread());
 			double mul = 1;
 			for (double i = 20; i >= 11; --i) {
@@ -58,7 +59,7 @@ public class DocSupport extends Style {
 			}
 			return mul;
 		});
-		function<Double> twentyOneToThirty = $(() -> {
+		def<Double> twentyOneToThirty = function(() -> {
 			System.out.println(Thread.currentThread());
 			double mul = 1;
 			for (double i = 30; i >= 21; --i) {
@@ -66,7 +67,7 @@ public class DocSupport extends Style {
 			}
 			return mul;
 		});
-		function<Double> ThirtyOneToForty = $(() -> {
+		def<Double> ThirtyOneToForty = function(() -> {
 			System.out.println(Thread.currentThread());
 			double mul = 1;
 			for (double i = 40; i >= 31; --i) {

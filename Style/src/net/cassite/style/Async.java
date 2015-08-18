@@ -1,7 +1,6 @@
 package net.cassite.style;
 
 import net.cassite.style.Supportters.StyleRuntimeException;
-import net.cassite.style.Supportters.function;
 import net.cassite.style.interfaces.Void1ArgInterface;
 
 public class Async<R> {
@@ -9,7 +8,7 @@ public class Async<R> {
 	private Thread t;
 
 	private StyleRuntimeException throwable = null;
-	private function<Object> handler = null;
+	private def<Object> handler = null;
 	private Object lock = new Object();
 
 	private boolean hasHandler = false;
@@ -24,10 +23,10 @@ public class Async<R> {
 
 	private class AsyncRunnable<T> implements Runnable {
 		private final Container<T> container;
-		private final function<T> func;
+		private final def<T> func;
 		private final Object[] args;
 
-		AsyncRunnable(Container<T> container, function<T> func, Object... args) {
+		AsyncRunnable(Container<T> container, def<T> func, Object... args) {
 			this.container = container;
 			this.func = func;
 			this.args = args;
@@ -51,7 +50,7 @@ public class Async<R> {
 		}
 	}
 
-	Async(function<R> func, Object... args) {
+	Async(def<R> func, Object... args) {
 		this.container = new Container<R>();
 		t = new Thread(new AsyncRunnable<R>(container, func, args));
 		t.start();
@@ -74,7 +73,7 @@ public class Async<R> {
 		onError(Style.$(handler));
 	}
 
-	public void onError(function<Object> handler) {
+	public void onError(def<Object> handler) {
 		hasHandler = true;
 		synchronized (lock) {
 			this.handler = handler;

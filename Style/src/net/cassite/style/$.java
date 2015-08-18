@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.function.Predicate;
 
 import net.cassite.style.Supportters.StyleRuntimeException;
-import net.cassite.style.Supportters.function;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
@@ -30,11 +29,11 @@ public class $ extends Style {
 		return (R1ArgInterface<T, T>) copy;
 	}
 
-	private static function<?> copyFunc = $(copy);
+	private static def<?> copyFunc = $(copy);
 
 	@SuppressWarnings("unchecked")
-	public static <T> function<T> copyFunc() {
-		return (function<T>) copyFunc;
+	public static <T> def<T> copyFunc() {
+		return (def<T>) copyFunc;
 	}
 
 	private static R1ArgInterface<String, String> trim = s -> s.trim();
@@ -43,9 +42,9 @@ public class $ extends Style {
 		return trim;
 	}
 
-	private static function<String> trimFunc = $(trim);
+	private static def<String> trimFunc = $(trim);
 
-	public static function<String> trimFunc() {
+	public static def<String> trimFunc() {
 		return trimFunc;
 	}
 
@@ -56,11 +55,11 @@ public class $ extends Style {
 		return (R2ArgsInterface<V, K, V>) values;
 	}
 
-	private static function<?> valuesFunc = $(values);
+	private static def<?> valuesFunc = $(values);
 
 	@SuppressWarnings("unchecked")
-	public static <V> function<V> valuesFunc() {
-		return (function<V>) valuesFunc;
+	public static <V> def<V> valuesFunc() {
+		return (def<V>) valuesFunc;
 	}
 
 	private static R2ArgsInterface<?, ?, ?> keys = (k, v) -> k;
@@ -70,11 +69,11 @@ public class $ extends Style {
 		return (R2ArgsInterface<K, K, V>) keys;
 	}
 
-	private static function<?> keysFunc = $(keys);
+	private static def<?> keysFunc = $(keys);
 
 	@SuppressWarnings("unchecked")
-	public static <K> function<K> keyFunc() {
-		return (function<K>) keysFunc;
+	public static <K> def<K> keyFunc() {
+		return (def<K>) keysFunc;
 	}
 
 	private static R2ArgsInterface<Entry<?, ?>, ?, ?> entries = (k, v) -> new Entry<>(k, v);
@@ -84,11 +83,11 @@ public class $ extends Style {
 		return (R2ArgsInterface<En, K, V>) entries;
 	}
 
-	private static function<Entry<?, ?>> entriesFunc = $(entries);
+	private static def<Entry<?, ?>> entriesFunc = $(entries);
 
 	@SuppressWarnings("unchecked")
-	public static <K, V, En extends Entry<K, V>> function<En> entriesFunc() {
-		return (function<En>) entriesFunc;
+	public static <K, V, En extends Entry<K, V>> def<En> entriesFunc() {
+		return (def<En>) entriesFunc;
 	}
 
 	private static R2ArgsInterface<Entry<?, ?>, ?, ?> mapCopy = entries;
@@ -98,11 +97,11 @@ public class $ extends Style {
 		return (R2ArgsInterface<En, K, V>) mapCopy;
 	}
 
-	private static function<Entry<?, ?>> mapCopyFunc = entriesFunc;
+	private static def<Entry<?, ?>> mapCopyFunc = entriesFunc;
 
 	@SuppressWarnings("unchecked")
-	public static <K, V, En extends Entry<K, V>> function<En> mapCopyFunc() {
-		return (function<En>) mapCopyFunc;
+	public static <K, V, En extends Entry<K, V>> def<En> mapCopyFunc() {
+		return (def<En>) mapCopyFunc;
 	}
 
 	static final Break Control_Break = new Break();
@@ -139,11 +138,11 @@ public class $ extends Style {
 		throw err;
 	};
 
-	public static final function<Object> throwHandlerFunc = $(throwHandler);
+	public static final def<Object> throwHandlerFunc = $(throwHandler);
 
 	public static final Void1ArgInterface<StyleRuntimeException> printHandler = (err) -> {
 		err.origin().printStackTrace();
 	};
 
-	public static final function<Object> printHandlerFunc = $(printHandler);
+	public static final def<Object> printHandlerFunc = $(printHandler);
 }

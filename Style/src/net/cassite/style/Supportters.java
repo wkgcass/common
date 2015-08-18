@@ -38,6 +38,81 @@ import net.cassite.style.interfaces.Void7ArgInterface;
 import net.cassite.style.interfaces.VoidNArgInterface;
 
 public class Supportters extends Style {
+
+	public static class function<R> extends def<R> {
+		function(R0ArgInterface<R> body) {
+			super(body);
+		}
+
+		function(R1ArgInterface<R, ?> body) {
+			super(body);
+		}
+
+		function(R2ArgsInterface<R, ?, ?> body) {
+			super(body);
+		}
+
+		function(R3ArgsInterface<R, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(R4ArgsInterface<R, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(R5ArgsInterface<R, ?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(R6ArgsInterface<R, ?, ?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(RNArgsInterface<R> body) {
+			super(body);
+		}
+
+		function(Void0ArgInterface body) {
+			super(body);
+		}
+
+		function(Void1ArgInterface<?> body) {
+			super(body);
+		}
+
+		function(Void2ArgInterface<?, ?> body) {
+			super(body);
+		}
+
+		function(Void3ArgInterface<?, ?, ?> body) {
+			super(body);
+		}
+
+		function(Void4ArgInterface<?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(Void5ArgInterface<?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
+			super(body);
+		}
+
+		function(VoidNArgInterface body) {
+			super(body);
+		}
+	}
+
 	public static class ArrayFuncSup<T> {
 		private final T[] array;
 
@@ -49,7 +124,7 @@ public class Supportters extends Style {
 			forEach($(func));
 		}
 
-		public void forEach(function<Object> func) {
+		public void forEach(def<Object> func) {
 			for (T t : array) {
 				try {
 					func.apply(t);
@@ -74,7 +149,7 @@ public class Supportters extends Style {
 			toSelf($(func));
 		}
 
-		public void toSelf(function<T> func) {
+		public void toSelf(def<T> func) {
 			for (int i = 0; i < array.length; ++i) {
 				try {
 					array[i] = func.apply(array[i]);
@@ -99,7 +174,7 @@ public class Supportters extends Style {
 			forThose(predicate, $(func));
 		}
 
-		public void forThose(Predicate<T> predicate, function<Object> func) {
+		public void forThose(Predicate<T> predicate, def<Object> func) {
 			for (T t : array) {
 				try {
 					if (predicate.test(t))
@@ -142,7 +217,7 @@ public class Supportters extends Style {
 				return via($(method));
 			}
 
-			public Coll via(function<R> method) {
+			public Coll via(def<R> method) {
 				for (T t : array) {
 					R ret;
 					try {
@@ -179,7 +254,7 @@ public class Supportters extends Style {
 			forEach($(func));
 		}
 
-		public void forEach(function<Object> func) {
+		public void forEach(def<Object> func) {
 			forThose($.alwaysTrue(), func);
 		}
 
@@ -187,7 +262,7 @@ public class Supportters extends Style {
 			forThose(predicate, $(func));
 		}
 
-		public void forThose(Predicate<T> predicate, function<Object> func) {
+		public void forThose(Predicate<T> predicate, def<Object> func) {
 			Iterator<T> it = iterable.iterator();
 			while (it.hasNext()) {
 				try {
@@ -234,7 +309,7 @@ public class Supportters extends Style {
 				return via($(method));
 			}
 
-			public Coll via(function<R> method) {
+			public Coll via(def<R> method) {
 				for (T t : iterable) {
 					R ret;
 					try {
@@ -296,7 +371,7 @@ public class Supportters extends Style {
 			toSelf($(func));
 		}
 
-		public void toSelf(function<T> func) {
+		public void toSelf(def<T> func) {
 			ListIterator<T> it = ((List<T>) iterable).listIterator();
 			while (it.hasNext()) {
 				T t = it.next();
@@ -329,7 +404,7 @@ public class Supportters extends Style {
 			forEach($(func), index);
 		}
 
-		public void forEach(function<Object> func, int index) {
+		public void forEach(def<Object> func, int index) {
 			forThose($.alwaysTrue(), func, index);
 		}
 
@@ -346,11 +421,11 @@ public class Supportters extends Style {
 		}
 
 		@Override
-		public void forThose(Predicate<T> predicate, function<Object> func) {
+		public void forThose(Predicate<T> predicate, def<Object> func) {
 			forThose(predicate, func, 0);
 		}
 
-		public void forThose(Predicate<T> predicate, function<Object> func, int index) {
+		public void forThose(Predicate<T> predicate, def<Object> func, int index) {
 			ListIterator<T> it = ((List<T>) iterable).listIterator(index);
 			T t;
 			if (it.hasNext()) {
@@ -361,7 +436,7 @@ public class Supportters extends Style {
 			while (it.hasNext()) {
 				try {
 					if (predicate.test(t)) {
-						if (func.argCount() == function.ARG_UNDEFINED || func.argCount() == 2) {
+						if (func.argCount() == def.ARG_UNDEFINED || func.argCount() == 2) {
 							ListIteratorInfo info = new ListIteratorInfo(it.previousIndex(), it.nextIndex(),
 									it.hasPrevious(), it.hasNext());
 							func.apply(t, info);
@@ -406,7 +481,7 @@ public class Supportters extends Style {
 			forEach(Style.$(func));
 		}
 
-		public void forEach(function<Object> func) {
+		public void forEach(def<Object> func) {
 			Iterator<K> it = map.keySet().iterator();
 			while (it.hasNext()) {
 				K k = it.next();
@@ -435,7 +510,7 @@ public class Supportters extends Style {
 			forThose(predicate, Style.$(func));
 		}
 
-		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, function<Object> func) {
+		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, def<Object> func) {
 			Iterator<K> it = map.keySet().iterator();
 			while (it.hasNext()) {
 				K k = it.next();
@@ -480,7 +555,7 @@ public class Supportters extends Style {
 				return via(Style.$(method));
 			}
 
-			public Coll via(function<R> method) {
+			public Coll via(def<R> method) {
 				for (K key : map.keySet()) {
 					try {
 						R val = method.apply(key, map.get(key));
@@ -521,7 +596,7 @@ public class Supportters extends Style {
 				return via(Style.$(method));
 			}
 
-			public M via(function<Entry<K2, V2>> method) {
+			public M via(def<Entry<K2, V2>> method) {
 				for (K key : map.keySet()) {
 					try {
 						Entry<K2, V2> val = method.apply(key, map.get(key));
@@ -554,224 +629,14 @@ public class Supportters extends Style {
 		}
 	}
 
-	public static class function<R> {
-		public static final int ARG_UNDEFINED = -1;
-		private final int argCount;
-
-		public int argCount() {
-			return argCount;
-		}
-
-		private VoidNArgInterface voidN;
-		private Void0ArgInterface void0;
-		private Void1ArgInterface<Object> void1;
-		private Void2ArgInterface<Object, Object> void2;
-		private Void3ArgInterface<Object, Object, Object> void3;
-		private Void4ArgInterface<Object, Object, Object, Object> void4;
-		private Void5ArgInterface<Object, Object, Object, Object, Object> void5;
-		private Void6ArgInterface<Object, Object, Object, Object, Object, Object> void6;
-		private Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object> void7;
-
-		private RNArgsInterface<R> body;
-		private R0ArgInterface<R> body0;
-		private R1ArgInterface<R, Object> body1;
-		private R2ArgsInterface<R, Object, Object> body2;
-		private R3ArgsInterface<R, Object, Object, Object> body3;
-		private R4ArgsInterface<R, Object, Object, Object, Object> body4;
-		private R5ArgsInterface<R, Object, Object, Object, Object, Object> body5;
-		private R6ArgsInterface<R, Object, Object, Object, Object, Object, Object> body6;
-		private R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object> body7;
-
-		function(VoidNArgInterface body) {
-			argCount = ARG_UNDEFINED;
-			this.voidN = body;
-		}
-
-		function(Void0ArgInterface body) {
-			argCount = 0;
-			this.void0 = body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void1ArgInterface<?> body) {
-			argCount = 1;
-			this.void1 = (Void1ArgInterface<Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void2ArgInterface<?, ?> body) {
-			argCount = 2;
-			this.void2 = (Void2ArgInterface<Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void3ArgInterface<?, ?, ?> body) {
-			argCount = 3;
-			this.void3 = (Void3ArgInterface<Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void4ArgInterface<?, ?, ?, ?> body) {
-			argCount = 4;
-			this.void4 = (Void4ArgInterface<Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void5ArgInterface<?, ?, ?, ?, ?> body) {
-			argCount = 5;
-			this.void5 = (Void5ArgInterface<Object, Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
-			argCount = 6;
-			this.void6 = (Void6ArgInterface<Object, Object, Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
-			argCount = 7;
-			this.void7 = (Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object>) body;
-		}
-
-		function(RNArgsInterface<R> body) {
-			argCount = ARG_UNDEFINED;
-			this.body = body;
-		}
-
-		function(R0ArgInterface<R> body) {
-			argCount = 0;
-			this.body0 = body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R1ArgInterface<R, ?> body) {
-			argCount = 1;
-			this.body1 = (R1ArgInterface<R, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R2ArgsInterface<R, ?, ?> body) {
-			argCount = 2;
-			this.body2 = (R2ArgsInterface<R, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R3ArgsInterface<R, ?, ?, ?> body) {
-			argCount = 3;
-			this.body3 = (R3ArgsInterface<R, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R4ArgsInterface<R, ?, ?, ?, ?> body) {
-			argCount = 4;
-			this.body4 = (R4ArgsInterface<R, Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R5ArgsInterface<R, ?, ?, ?, ?, ?> body) {
-			argCount = 5;
-			this.body5 = (R5ArgsInterface<R, Object, Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R6ArgsInterface<R, ?, ?, ?, ?, ?, ?> body) {
-			argCount = 6;
-			this.body6 = (R6ArgsInterface<R, Object, Object, Object, Object, Object, Object>) body;
-		}
-
-		@SuppressWarnings("unchecked")
-		function(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
-			argCount = 7;
-			this.body7 = (R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object>) body;
-		}
-
-		public R apply(Object... args) {
-			try {
-				if (body != null) {
-					return body.invoke(args);
-				}
-				if (voidN != null) {
-					voidN.accept(args);
-					return null;
-				}
-				if (args.length == 0) {
-					if (body0 == null) {
-						void0.invoke();
-						return null;
-					} else {
-						return body0.apply();
-					}
-				} else if (args.length == 1) {
-					if (body1 == null) {
-						void1.accept(args[0]);
-						return null;
-					} else {
-						return body1.apply(args[0]);
-					}
-				} else if (args.length == 2) {
-					if (body2 == null) {
-						void2.accept(args[0], args[1]);
-						return null;
-					} else {
-						return body2.apply(args[0], args[1]);
-					}
-				} else if (args.length == 3) {
-					if (body3 == null) {
-						void3.accept(args[0], args[1], args[2]);
-						return null;
-					} else {
-						return body3.apply(args[0], args[1], args[2]);
-					}
-				} else if (args.length == 4) {
-					if (body4 == null) {
-						void4.accept(args[0], args[1], args[2], args[3]);
-						return null;
-					} else {
-						return body4.apply(args[0], args[1], args[2], args[3]);
-					}
-				} else if (args.length == 5) {
-					if (body5 == null) {
-						void5.accept(args[0], args[1], args[2], args[3], args[4]);
-						return null;
-					} else {
-						return body5.apply(args[0], args[1], args[2], args[3], args[4]);
-					}
-				} else if (args.length == 6) {
-					if (body6 == null) {
-						void6.accept(args[0], args[1], args[2], args[3], args[4], args[5]);
-						return null;
-					} else {
-						return body6.apply(args[0], args[1], args[2], args[3], args[4], args[5]);
-					}
-				} else if (args.length == 7) {
-					if (body7 == null) {
-						void7.accept(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-						return null;
-					} else {
-						return body7.apply(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-					}
-				} else {
-					throw new IllegalArgumentException();
-				}
-			} catch (Throwable t) {
-				throw $(t);
-			}
-		}
-
-		public Async<R> async(Object... args) {
-			return new Async<>(this, args);
-		}
-	}
-
 	public static class AsyncGroup {
 		private Async<?>[] group;
 
 		private StyleRuntimeException err;
-		private function<Object> handler;
+		private def<Object> handler;
 		private Object lock = new Object();
 
-		AsyncGroup(function<Object> asyncHandler, Async<?>... group) {
+		AsyncGroup(def<Object> asyncHandler, Async<?>... group) {
 			if (group.length == 0)
 				throw new IllegalArgumentException("at least one Async object should be passed in");
 			this.group = Arrays.copyOf(group, group.length);
@@ -784,14 +649,14 @@ public class Supportters extends Style {
 			}
 		}
 
-		public AsyncGroup callback(function<Object> func) {
+		public AsyncGroup callback(def<Object> func) {
 			run(() -> {
 				callbackSync(func);
 			});
 			return this;
 		}
 
-		public AsyncGroup callbackSync(function<Object> func) {
+		public AsyncGroup callbackSync(def<Object> func) {
 			try {
 				Object[] awaits = new Object[group.length];
 				int i = 0;
@@ -815,7 +680,7 @@ public class Supportters extends Style {
 			onError($(handler));
 		}
 
-		public void onError(function<Object> handler) {
+		public void onError(def<Object> handler) {
 			synchronized (lock) {
 				this.handler = handler;
 				if (err != null) {
@@ -884,7 +749,7 @@ public class Supportters extends Style {
 			this.toSwitch = t;
 		}
 
-		public SwitchBlock<T> Case(T ca, function<?> func) {
+		public SwitchBlock<T> Case(T ca, def<?> func) {
 			if (toSwitch.equals(ca) || doNext) {
 				try {
 					func.apply();
@@ -909,7 +774,7 @@ public class Supportters extends Style {
 			return Case(ca, $(func));
 		}
 
-		public void Default(function<Object> func) {
+		public void Default(def<Object> func) {
 			if (!found) {
 				func.apply();
 			}
@@ -964,7 +829,7 @@ public class Supportters extends Style {
 			}
 
 			@SuppressWarnings("hiding")
-			private <N extends Number> int privateDoLoop(function<Object> func, N num) {
+			private <N extends Number> int privateDoLoop(def<Object> func, N num) {
 				try {
 					func.apply(num);
 				} catch (Throwable t) {
@@ -984,7 +849,7 @@ public class Supportters extends Style {
 			}
 
 			@SuppressWarnings("unchecked")
-			public void loop(function<Object> doLoop) {
+			public void loop(def<Object> doLoop) {
 				if (start.equals(end)) {
 					privateDoLoop(doLoop, start);
 					return;
@@ -1213,7 +1078,7 @@ public class Supportters extends Style {
 			return this;
 		}
 
-		public DateFuncSup add(function<DateSeperator> dateFunction) {
+		public DateFuncSup add(def<DateSeperator> dateFunction) {
 			date.setTime(date.getTime() + dateFunction.apply(new DateSeperator()).parse());
 			return this;
 		}
@@ -1227,7 +1092,7 @@ public class Supportters extends Style {
 			return this;
 		}
 
-		public DateFuncSup substract(function<DateSeperator> dateFunction) {
+		public DateFuncSup substract(def<DateSeperator> dateFunction) {
 			date.setTime(date.getTime() - dateFunction.apply(new DateSeperator()).parse());
 			return this;
 		}
