@@ -20,7 +20,7 @@ import net.cassite.style.Supportters.IteratorInfo;
 import net.cassite.style.Supportters.JSONLike;
 import net.cassite.style.Supportters.MapFuncSup;
 import net.cassite.style.Supportters.StyleRuntimeException;
-import net.cassite.style.Supportters.StyleStringBuilder;
+import net.cassite.style.Supportters.StringFuncSup;
 import net.cassite.style.Supportters.SwitchBlock;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
@@ -44,6 +44,10 @@ import net.cassite.style.interfaces.Void6ArgInterface;
 import net.cassite.style.interfaces.Void7ArgInterface;
 import net.cassite.style.interfaces.VoidNArgInterface;
 
+/**
+ * 
+ * @since 0.1.1
+ */
 public interface var {
 
 	// ┌─────────────────────────────────┐
@@ -426,19 +430,56 @@ public interface var {
 		return Style.$(info);
 	}
 
-	default StyleStringBuilder $(String base) {
+	default StringFuncSup $(String base) {
 		return Style.$(base);
 	}
 
+	/**
+	 * Implicit Type Conversion.<br/>
+	 * To achieve implicit type conversion,<br/>
+	 * the class to be converted to may contain methods like this:<br/>
+	 * <code>static R from(T o)</code><br/>
+	 * <b>OR</b> the class of the object (param 'o') to convert may contain
+	 * methods like this:<br/>
+	 * <code>toT</code><br/>
+	 * e.g.<br/>
+	 * The following definition means you can convert String to User or convert
+	 * User to String with this method.
+	 * 
+	 * <pre>
+	 * static User from(String s)...
+	 * String toString()...
+	 * </pre>
+	 * 
+	 * @param o
+	 *            original object
+	 * @param cls
+	 *            the type to convert to
+	 * @return object of converted type
+	 */
 	default <T> T imp(Object o, Class<T> cls) {
 		return Style.imp(o, cls);
 	}
 
+	/**
+	 * get object in real type<br/>
+	 * if you defined object using <code>var v=...</code>
+	 * 
+	 * @return object in real type
+	 */
 	@SuppressWarnings("unchecked")
 	default <TYPE> TYPE $() {
 		return (TYPE) this;
 	}
 
+	/**
+	 * get object in targeted type<br/>
+	 * if you defined object using <code>var v=...</code>
+	 * 
+	 * @param cls
+	 *            target type
+	 * @return object in targeted type
+	 */
 	@SuppressWarnings("unchecked")
 	default <TYPE> TYPE $(Class<TYPE> cls) {
 		return (TYPE) this;

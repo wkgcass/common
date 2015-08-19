@@ -1250,10 +1250,10 @@ public class Supportters extends Style {
 		}
 	}
 
-	public static class StyleStringBuilder {
+	public static class StringFuncSup {
 		private String str;
 
-		StyleStringBuilder(String str) {
+		StringFuncSup(String str) {
 			this.str = str;
 		}
 
