@@ -1,5 +1,7 @@
 package net.cassite.style;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -20,6 +22,7 @@ import net.cassite.style.Supportters.IteratorInfo;
 import net.cassite.style.Supportters.JSONLike;
 import net.cassite.style.Supportters.MapFuncSup;
 import net.cassite.style.Supportters.StyleRuntimeException;
+import net.cassite.style.Supportters.StyleStringBuilder;
 import net.cassite.style.Supportters.SwitchBlock;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
@@ -434,7 +437,15 @@ public class Style {
 	// switch
 
 	public static <T> SwitchBlock<T> Switch(T t) {
-		return new SwitchBlock<T>(t);
+		return Switch(t, $.eqlFunc);
+	}
+
+	public static <T> SwitchBlock<T> Switch(T t, R2ArgsInterface<Boolean, T, T> method) {
+		return Switch(t, $(method));
+	}
+
+	public static <T> SwitchBlock<T> Switch(T t, function<Boolean> method) {
+		return new SwitchBlock<T>(t, method);
 	}
 
 	// ┌─────────────────────────────────┐
@@ -525,13 +536,38 @@ public class Style {
 		return info.currentIndex;
 	}
 
-	public static String $(String base, Object... fill) {
-		val<String> _base = store(base);
-		$(fill).forEach((s, i) -> {
-			_base.item = $(_base).replace("{" + $(i) + "}", fill[$(i)].toString());
-		});
-		return _base.item;
+	public static StyleStringBuilder $(String base) {
+		return new StyleStringBuilder(base);
 	}
 
-	// TODO
+	@SuppressWarnings("unchecked")
+	public static <T> T imp(Object o, Class<T> cls) {
+		Method m;
+		try {
+			m = o.getClass().getMethod("to" + cls.getSimpleName(), new Class[0]);
+			if (m.getReturnType() != cls) {
+				throw new RuntimeException("Invalid implicit type conversion definition. Return type mismatch");
+			}
+			m.setAccessible(true);
+			return (T) m.invoke(o, new Object[0]);
+		} catch (NoSuchMethodException e) {
+			try {
+				m = cls.getMethod("from", o.getClass());
+				if (m.getReturnType() != cls) {
+					throw new RuntimeException("Invalid implicit type conversion definition. Return type mismatch");
+				} else if (!Modifier.isStatic(m.getModifiers())) {
+					throw new RuntimeException(
+							"Invalid implicit type conversion definition. Method starts with 'from' should be static.");
+				}
+				m.setAccessible(true);
+				return (T) m.invoke(null, o);
+			} catch (NoSuchMethodException e1) {
+				throw new RuntimeException("No implicit type conversion definition.");
+			} catch (Exception e1) {
+				throw $(e1);
+			}
+		} catch (Exception e) {
+			throw $(e);
+		}
+	}
 }

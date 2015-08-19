@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.function.Predicate;
 
 import net.cassite.style.Supportters.StyleRuntimeException;
+import net.cassite.style.Supportters.function;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
@@ -108,8 +109,12 @@ public class $ extends Style {
 	static final Remove Control_Remove = new Remove();
 	static final Continue Control_Continue = new Continue();
 
-	public static Date today() {
+	public static Date current() {
 		return new Date();
+	}
+
+	public static Date today() {
+		return current();
 	}
 
 	public static Date tomorrow() {
@@ -145,4 +150,13 @@ public class $ extends Style {
 	};
 
 	public static final def<Object> printHandlerFunc = $(printHandler);
+
+	public static final R2ArgsInterface<Boolean, ?, ?> eql = (a, b) -> a.equals(b);
+
+	@SuppressWarnings("unchecked")
+	public static <T> R2ArgsInterface<Boolean, T, T> eql() {
+		return (R2ArgsInterface<Boolean, T, T>) eql;
+	}
+
+	public static final function<Boolean> eqlFunc = $(eql);
 }

@@ -10,16 +10,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.cassite.style.Style;
 import net.cassite.style.$;
 import net.cassite.style.Async;
 import net.cassite.style.Entry;
+import net.cassite.style.var;
 import net.cassite.style.Store;
 import net.cassite.style.Supportters.function;
 
-public class Plain extends Style {
-	@SuppressWarnings("unchecked")
+public class Plain implements var {
 	public static void main(String[] args) {
+		new Plain().main2(args);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void main2(String[] args) {
 		Integer[] intArr = new Integer[] { 1, 2, 3, 5, 8, 10 };
 
 		$(intArr).forEach((e) -> System.out.println(e));
@@ -172,5 +176,15 @@ public class Plain extends Style {
 		System.out.println(rand(150, 200));
 		System.out.println(rand(0.875, 1.0));
 		System.out.println(rand($.fromKeyboard, 50, true, true));
+
+		var sample = new Sample("cass", 20, "male");
+		Sample s = sample.$();
+
+		System.out.println($("current time is : {0}, it's time to write code with Style!")
+				.fill($($.current()).toString("HH:ii:ss A")));
+		System.out.println($("My name is ${name}, I'm ${age} years old, and I'm ${sex}.").from(s));
+
+		System.out.println(imp(s, String.class));
+		System.out.println(imp("cassie;19;female", Sample.class).name());
 	}
 }

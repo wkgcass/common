@@ -1,6 +1,8 @@
 package net.cassite.style;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -129,24 +131,7 @@ public class Supportters extends Style {
 		}
 
 		public void forEach(def<Object> func) {
-			for (T t : array) {
-				try {
-					func.apply(t);
-				} catch (Throwable throwable) {
-					if (throwable instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) throwable).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else {
-							throw ((StyleRuntimeException) throwable);
-						}
-					} else {
-						throw $(throwable);
-					}
-				}
-			}
+			forThose($.alwaysTrue(), func);
 		}
 
 		public void toSelf(R1ArgInterface<T, T> func) {
@@ -773,16 +758,18 @@ public class Supportters extends Style {
 	}
 
 	public static class SwitchBlock<T> {
-		private T toSwitch;
+		private final T toSwitch;
+		private final function<Boolean> method;
 		private boolean doNext = false;
 		private boolean found = false;
 
-		SwitchBlock(T t) {
+		SwitchBlock(T t, function<Boolean> method) {
 			this.toSwitch = t;
+			this.method = method;
 		}
 
 		public SwitchBlock<T> Case(T ca, def<?> func) {
-			if (toSwitch.equals(ca) || doNext) {
+			if (method.apply(toSwitch, ca) || doNext) {
 				try {
 					func.apply();
 					doNext = true;
@@ -1260,6 +1247,84 @@ public class Supportters extends Style {
 
 		public int compareTo(T o) {
 			return comparable.compareTo(o);
+		}
+	}
+
+	public static class StyleStringBuilder {
+		private String str;
+
+		StyleStringBuilder(String str) {
+			this.str = str;
+		}
+
+		public String fill(Object... fill) {
+			$(fill).forEach((s, i) -> {
+				str = str.replace("{" + $(i) + "}", fill[$(i)].toString());
+			});
+			return str;
+		}
+
+		public String from(Object obj) {
+			StringBuilder sb = new StringBuilder(str);
+			Method[] methods = obj.getClass().getMethods();
+			Field[] fields = obj.getClass().getDeclaredFields();
+			int lastIndex = -1;
+			out: while (true) {
+				int start = sb.indexOf("${", lastIndex) + 2;
+				if (start == 1) {
+					break;
+				}
+				int end = sb.indexOf("}", start);
+				if (end == -1 || start == end) {
+					break;
+				}
+				String name = sb.substring(start, end);
+				// check functional methods
+				for (Method m : methods) {
+					String mName = m.getName();
+					if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE && mName.equals(name)) {
+						m.setAccessible(true);
+						try {
+							sb.replace(start - 2, end + 1, m.invoke(obj, new Object[0]).toString());
+						} catch (Exception e) {
+							throw $(e);
+						}
+						lastIndex = end;
+						continue out;
+					}
+				}
+				// check getter
+				for (Method m : methods) {
+					String mName = m.getName();
+					if (m.getParameterTypes().length == 0 && m.getReturnType() != Void.TYPE
+							&& mName.equals("get" + name.substring(0, 1).toUpperCase() + name.substring(1))) {
+						m.setAccessible(true);
+						try {
+							sb.replace(start - 2, end + 1, m.invoke(obj, new Object[0]).toString());
+						} catch (Exception e) {
+							throw $(e);
+						}
+						lastIndex = end;
+						continue out;
+					}
+				}
+				// check field
+				for (Field f : fields) {
+					if (f.getName().equals(name)) {
+						f.setAccessible(true);
+						try {
+							sb.replace(start - 2, end + 1, f.get(obj).toString());
+						} catch (Exception e) {
+							throw $(e);
+						}
+						lastIndex = end;
+						continue out;
+					}
+				}
+				lastIndex = end;
+			}
+			str = sb.toString();
+			return str;
 		}
 	}
 }
