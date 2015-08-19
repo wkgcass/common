@@ -11,6 +11,7 @@ import net.cassite.style.Style;
 import net.cassite.style.Supportters.function;
 import net.cassite.style.def;
 import net.cassite.style.val;
+import net.cassite.style.var;
 
 public class DocSupport extends Style {
 
@@ -99,6 +100,13 @@ public class DocSupport extends Style {
 		For(0, (i) -> i < 10, (i) -> i + 1, (i) -> System.out.println(i));
 		For(1).to(11).step(2).loop(i -> System.out.println(i));
 
+		// string
+		var sample = new Sample("cass", 20, "male");
+		System.out.println($("My name is ${name}, I'm ${age} years old, and I'm ${sex}.").from(sample));
+
+		// implicit type conversion
+		System.out.println(imp(sample, String.class));
+		System.out.println(imp("cassie;19;female", Sample.class).name());
 	}
 
 }

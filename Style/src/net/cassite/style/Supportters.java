@@ -769,7 +769,7 @@ public class Supportters extends Style {
 		}
 
 		public SwitchBlock<T> Case(T ca, def<?> func) {
-			if (method.apply(toSwitch, ca) || doNext) {
+			if ((!found && method.apply(toSwitch, ca)) || doNext) {
 				try {
 					func.apply();
 					doNext = true;
