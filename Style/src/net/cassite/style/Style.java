@@ -16,6 +16,7 @@ import net.cassite.style.Supportters.ComparableFuncSup;
 import net.cassite.style.Supportters.DateFuncSup;
 import net.cassite.style.Supportters.ForSupport;
 import net.cassite.style.Supportters.IterableFuncSup;
+import net.cassite.style.Supportters.IteratorInfo;
 import net.cassite.style.Supportters.JSONLike;
 import net.cassite.style.Supportters.MapFuncSup;
 import net.cassite.style.Supportters.StyleRuntimeException;
@@ -519,4 +520,18 @@ public class Style {
 	public static String rand(String chooseFrom, int length) {
 		return rand(chooseFrom, length, false, false);
 	}
+
+	public static int $(IteratorInfo info) {
+		return info.currentIndex;
+	}
+
+	public static String $(String base, Object... fill) {
+		val<String> _base = store(base);
+		$(fill).forEach((s, i) -> {
+			_base.item = $(_base).replace("{" + $(i) + "}", fill[$(i)].toString());
+		});
+		return _base.item;
+	}
+
+	// TODO
 }

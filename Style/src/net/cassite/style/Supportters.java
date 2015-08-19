@@ -124,6 +124,10 @@ public class Supportters extends Style {
 			forEach($(func));
 		}
 
+		public void forEach(Void2ArgInterface<T, IteratorInfo> func) {
+			forEach($(func));
+		}
+
 		public void forEach(def<Object> func) {
 			for (T t : array) {
 				try {
@@ -174,11 +178,20 @@ public class Supportters extends Style {
 			forThose(predicate, $(func));
 		}
 
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, IteratorInfo> func) {
+			forThose(predicate, $(func));
+		}
+
 		public void forThose(Predicate<T> predicate, def<Object> func) {
+			int i = 0;
 			for (T t : array) {
 				try {
 					if (predicate.test(t))
-						func.apply(t);
+						if (func.argCount() == 2 || func.argCount() == def.ARG_UNDEFINED)
+							func.apply(t, new IteratorInfo(i - 1, i + 1, i != 0, i != array.length - 1, i));
+						else
+							func.apply(t);
+					++i;
 				} catch (Throwable throwable) {
 					if (throwable instanceof StyleRuntimeException) {
 						Throwable origin = ((StyleRuntimeException) throwable).origin();
@@ -262,13 +275,22 @@ public class Supportters extends Style {
 			forThose(predicate, $(func));
 		}
 
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, IteratorInfo> func) {
+			forThose(predicate, $(func));
+		}
+
 		public void forThose(Predicate<T> predicate, def<Object> func) {
 			Iterator<T> it = iterable.iterator();
+			int i = 0;
 			while (it.hasNext()) {
 				try {
 					T t = it.next();
 					if (predicate.test(t))
-						func.apply(t);
+						if (func.argCount() == 2 || func.argCount() == def.ARG_UNDEFINED)
+							func.apply(t, new IteratorInfo(i - 1, i + 1, i == 0, it.hasNext(), i));
+						else
+							func.apply(t);
+					++i;
 				} catch (Throwable throwable) {
 					if (throwable instanceof StyleRuntimeException) {
 						Throwable origin = ((StyleRuntimeException) throwable).origin();
@@ -348,23 +370,25 @@ public class Supportters extends Style {
 		}
 	}
 
+	public static class IteratorInfo {
+		public final int previousIndex;
+		public final int nextIndex;
+		public final boolean hasPrevious;
+		public final boolean hasNext;
+		public final int currentIndex;
+
+		IteratorInfo(int previousIndex, int nextIndex, boolean hasPrevious, boolean hasNext, int currentIndex) {
+			this.previousIndex = previousIndex;
+			this.nextIndex = nextIndex;
+			this.hasPrevious = hasPrevious;
+			this.hasNext = hasNext;
+			this.currentIndex = currentIndex;
+		}
+	}
+
 	public static class ListFuncSup<T> extends CollectionFuncSup<T> {
 		ListFuncSup(List<T> collection) {
 			super(collection);
-		}
-
-		public static class ListIteratorInfo {
-			public final int previousIndex;
-			public final int nextIndex;
-			public final boolean hasPrevious;
-			public final boolean hasNext;
-
-			ListIteratorInfo(int previousIndex, int nextIndex, boolean hasPrevious, boolean hasNext) {
-				this.previousIndex = previousIndex;
-				this.nextIndex = nextIndex;
-				this.hasPrevious = hasPrevious;
-				this.hasNext = hasNext;
-			}
 		}
 
 		public void toSelf(R1ArgInterface<T, T> func) {
@@ -412,11 +436,11 @@ public class Supportters extends Style {
 			forThose(predicate, $(func), index);
 		}
 
-		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, ListIteratorInfo> func) {
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, IteratorInfo> func) {
 			forThose(predicate, $(func));
 		}
 
-		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, ListIteratorInfo> func, int index) {
+		public void forThose(Predicate<T> predicate, Void2ArgInterface<T, IteratorInfo> func, int index) {
 			forThose(predicate, $(func), index);
 		}
 
@@ -435,14 +459,13 @@ public class Supportters extends Style {
 			}
 			while (it.hasNext()) {
 				try {
-					if (predicate.test(t)) {
+					if (predicate.test(t))
 						if (func.argCount() == def.ARG_UNDEFINED || func.argCount() == 2) {
-							ListIteratorInfo info = new ListIteratorInfo(it.previousIndex(), it.nextIndex(),
-									it.hasPrevious(), it.hasNext());
+							IteratorInfo info = new IteratorInfo(it.previousIndex(), it.nextIndex(), it.hasPrevious(),
+									it.hasNext(), it.previousIndex() + 1);
 							func.apply(t, info);
 						} else
 							func.apply(t);
-					}
 					t = it.next();
 				} catch (Throwable e) {
 					if (e instanceof StyleRuntimeException) {
@@ -510,14 +533,23 @@ public class Supportters extends Style {
 			forThose(predicate, Style.$(func));
 		}
 
+		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, Void3ArgInterface<K, V, IteratorInfo> func) {
+			forThose(predicate, Style.$(func));
+		}
+
 		public void forThose(R2ArgsInterface<Boolean, K, V> predicate, def<Object> func) {
 			Iterator<K> it = map.keySet().iterator();
+			int i = 0;
 			while (it.hasNext()) {
 				K k = it.next();
 				V v = map.get(k);
 				try {
 					if (predicate.apply(k, v))
-						func.apply(k, v);
+						if (func.argCount() == 3 || func.argCount() == def.ARG_UNDEFINED)
+							func.apply(k, v, new IteratorInfo(i - 1, i + 1, i != 0, it.hasNext(), i));
+						else
+							func.apply(k, v);
+					++i;
 				} catch (Throwable throwable) {
 					if (throwable instanceof StyleRuntimeException) {
 						Throwable origin = ((StyleRuntimeException) throwable).origin();
