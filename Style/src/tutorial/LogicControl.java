@@ -63,6 +63,11 @@ public class LogicControl extends Style {
 				Remove();
 		});
 		System.out.println(map);
+
+		System.out.println("\nif===========");
+		Integer year = If(map.containsKey("john"), () -> map.get("john"))
+				.ElseIf(map.containsKey("cass"), () -> map.get("cass")).End();
+		System.out.println(year);
 	}
 
 }

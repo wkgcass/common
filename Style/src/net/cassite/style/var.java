@@ -15,6 +15,7 @@ import net.cassite.style.Supportters.CollectionFuncSup;
 import net.cassite.style.Supportters.ComparableFuncSup;
 import net.cassite.style.Supportters.DateFuncSup;
 import net.cassite.style.Supportters.ForSupport;
+import net.cassite.style.Supportters.IfBlock;
 import net.cassite.style.Supportters.IterableFuncSup;
 import net.cassite.style.Supportters.IteratorInfo;
 import net.cassite.style.Supportters.JSONLike;
@@ -364,6 +365,15 @@ public interface var {
 
 	default <T> SwitchBlock<T> Switch(T t, function<Boolean> method) {
 		return Style.Switch(t, method);
+	}
+
+	// if
+	default <T> IfBlock<T> If(boolean expression, R0ArgInterface<T> body) {
+		return Style.If(expression, body);
+	}
+
+	default <T> IfBlock<T> If(boolean expression, def<T> body) {
+		return Style.If(expression, body);
 	}
 
 	// ┌─────────────────────────────────┐

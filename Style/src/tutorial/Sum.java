@@ -219,5 +219,10 @@ public class Sum extends Style {
 		System.out.println("\nImplicit type conversion");
 		System.out.println(imp(s, String.class));
 		System.out.println(imp("cassie;19;female", Sample.class).name());
+		
+		System.out.println("\nif===========");
+		Integer year = If(map.containsKey("john"), () -> map.get("john"))
+				.ElseIf(map.containsKey("cass"), () -> map.get("cass")).End();
+		System.out.println(year);
 	}
 }

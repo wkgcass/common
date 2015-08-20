@@ -186,5 +186,9 @@ public class Plain implements var {
 
 		System.out.println(imp(s, String.class));
 		System.out.println(imp("cassie;19;female", Sample.class).name());
+		
+		Integer year = If(map.containsKey("john"), () -> map.get("john"))
+				.ElseIf(map.containsKey("cass"), () -> map.get("cass")).End();
+		System.out.println(year);
 	}
 }

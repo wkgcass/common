@@ -22,9 +22,14 @@ import net.cassite.style.interfaces.VoidNArgInterface;
 public abstract class def<R> {
 	public static final int ARG_UNDEFINED = -1;
 	private final int argCount;
+	private final boolean hasReturnValue;
 
 	public int argCount() {
 		return argCount;
+	}
+
+	public boolean hasReturnValue() {
+		return hasReturnValue;
 	}
 
 	private VoidNArgInterface voidN;
@@ -50,105 +55,123 @@ public abstract class def<R> {
 	def(VoidNArgInterface body) {
 		argCount = ARG_UNDEFINED;
 		this.voidN = body;
+		this.hasReturnValue = false;
 	}
 
 	def(Void0ArgInterface body) {
 		argCount = 0;
 		this.void0 = body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void1ArgInterface<?> body) {
 		argCount = 1;
 		this.void1 = (Void1ArgInterface<Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void2ArgInterface<?, ?> body) {
 		argCount = 2;
 		this.void2 = (Void2ArgInterface<Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void3ArgInterface<?, ?, ?> body) {
 		argCount = 3;
 		this.void3 = (Void3ArgInterface<Object, Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void4ArgInterface<?, ?, ?, ?> body) {
 		argCount = 4;
 		this.void4 = (Void4ArgInterface<Object, Object, Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void5ArgInterface<?, ?, ?, ?, ?> body) {
 		argCount = 5;
 		this.void5 = (Void5ArgInterface<Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void6ArgInterface<?, ?, ?, ?, ?, ?> body) {
 		argCount = 6;
 		this.void6 = (Void6ArgInterface<Object, Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(Void7ArgInterface<?, ?, ?, ?, ?, ?, ?> body) {
 		argCount = 7;
 		this.void7 = (Void7ArgInterface<Object, Object, Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = false;
 	}
 
 	def(RNArgsInterface<R> body) {
 		argCount = ARG_UNDEFINED;
 		this.body = body;
+		this.hasReturnValue = true;
 	}
 
 	def(R0ArgInterface<R> body) {
 		argCount = 0;
 		this.body0 = body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R1ArgInterface<R, ?> body) {
 		argCount = 1;
 		this.body1 = (R1ArgInterface<R, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R2ArgsInterface<R, ?, ?> body) {
 		argCount = 2;
 		this.body2 = (R2ArgsInterface<R, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R3ArgsInterface<R, ?, ?, ?> body) {
 		argCount = 3;
 		this.body3 = (R3ArgsInterface<R, Object, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R4ArgsInterface<R, ?, ?, ?, ?> body) {
 		argCount = 4;
 		this.body4 = (R4ArgsInterface<R, Object, Object, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R5ArgsInterface<R, ?, ?, ?, ?, ?> body) {
 		argCount = 5;
 		this.body5 = (R5ArgsInterface<R, Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R6ArgsInterface<R, ?, ?, ?, ?, ?, ?> body) {
 		argCount = 6;
 		this.body6 = (R6ArgsInterface<R, Object, Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	@SuppressWarnings("unchecked")
 	def(R7ArgsInterface<R, ?, ?, ?, ?, ?, ?, ?> body) {
 		argCount = 7;
 		this.body7 = (R7ArgsInterface<R, Object, Object, Object, Object, Object, Object, Object>) body;
+		this.hasReturnValue = true;
 	}
 
 	public R apply(Object... args) {

@@ -804,6 +804,53 @@ public class Supportters extends Style {
 		}
 	}
 
+	public static class IfBlock<T> {
+		private boolean condition;
+		private def<T> body;
+
+		IfBlock(boolean condition, def<T> body) {
+			this.condition = condition;
+			this.body = body;
+		}
+
+		public T Else(T value) {
+			if (condition) {
+				return body.apply();
+			} else {
+				return value;
+			}
+		}
+
+		public T Else(R0ArgInterface<T> func) {
+			return Else($(func));
+		}
+
+		public T Else(def<T> func) {
+			if (condition) {
+				return body.apply();
+			} else {
+				return func.apply();
+			}
+		}
+
+		public IfBlock<T> ElseIf(boolean condition, R0ArgInterface<T> body) {
+			return ElseIf(condition, $(body));
+		}
+
+		public IfBlock<T> ElseIf(boolean condition, def<T> body) {
+			return If(condition, body);
+		}
+
+		public T End() {
+			if (condition) {
+				return body.apply();
+			} else {
+				return null;
+			}
+		}
+
+	}
+
 	public static class JSONLike<K, V> extends LinkedHashMap<K, V> {
 
 		/**
@@ -1189,6 +1236,8 @@ public class Supportters extends Style {
 				int index;
 				int length = k.length();
 				while ((index = sb.indexOf(k)) != -1) {
+					if ((k.equals("A") && index == sb.indexOf("AM")) || (k.equals("a") && index == sb.indexOf("am")))
+						break;
 					sb.replace(index, index + length, v);
 				}
 				String upper = k.toUpperCase();
