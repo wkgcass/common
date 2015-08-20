@@ -252,6 +252,10 @@ public class Supportters extends Style {
 			forEach($(func));
 		}
 
+		public void forEach(Void2ArgInterface<T, IteratorInfo> func) {
+			forEach($(func));
+		}
+
 		public void forEach(def<Object> func) {
 			forThose($.alwaysTrue(), func);
 		}
@@ -1239,10 +1243,18 @@ public class Supportters extends Style {
 			$(replace).forEach((k, v) -> {
 				int index;
 				int length = k.length();
-				while ((index = sb.indexOf(k)) != -1) {
-					if ((k.equals("A") && index == sb.indexOf("AM")) || (k.equals("a") && index == sb.indexOf("am")))
-						break;
-					sb.replace(index, index + length, v);
+				if (k.equals("A") || k.equals("a")) {
+					int lastAIndex = -1;
+					index = sb.indexOf(k, lastAIndex);
+					while (index != -1) {
+						sb.replace(index, index + length, v);
+						lastAIndex = index + 1;
+						index = sb.indexOf(k, lastAIndex);
+					}
+				} else {
+					while ((index = sb.indexOf(k)) != -1) {
+						sb.replace(index, index + length, v);
+					}
 				}
 				String upper = k.toUpperCase();
 				if (!replace.containsKey(upper)) {

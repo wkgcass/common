@@ -83,6 +83,21 @@ public class Async<R> {
 		}
 	}
 
+	public void awaitError(Void1ArgInterface<StyleRuntimeException> handler) {
+		awaitError(Style.$(handler));
+	}
+
+	public void awaitError(def<Object> handler) {
+		while (!container.inProcess) {
+			// block
+		}
+		synchronized (container) {
+			if (null != throwable) {
+				handler.apply(Style.$(throwable));
+			}
+		}
+	}
+
 	public boolean hasErrHandler() {
 		return hasHandler;
 	}
