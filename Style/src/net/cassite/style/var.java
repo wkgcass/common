@@ -368,6 +368,10 @@ public interface var {
 	}
 
 	// if
+	default <T> IfBlock<T> If(boolean expression, T val) {
+		return Style.If(expression, val);
+	}
+
 	default <T> IfBlock<T> If(boolean expression, R0ArgInterface<T> body) {
 		return Style.If(expression, body);
 	}

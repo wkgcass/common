@@ -456,6 +456,10 @@ public class Style {
 	}
 
 	// if
+	public static <T> IfBlock<T> If(boolean expression, T val) {
+		return If(expression, () -> val);
+	}
+
 	public static <T> IfBlock<T> If(boolean expression, R0ArgInterface<T> body) {
 		return If(expression, $(body));
 	}

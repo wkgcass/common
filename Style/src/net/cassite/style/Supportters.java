@@ -833,6 +833,10 @@ public class Supportters extends Style {
 			}
 		}
 
+		public IfBlock<T> ElseIf(boolean condition, T val) {
+			return ElseIf(condition, () -> val);
+		}
+
 		public IfBlock<T> ElseIf(boolean condition, R0ArgInterface<T> body) {
 			return ElseIf(condition, $(body));
 		}
