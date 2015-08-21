@@ -71,12 +71,17 @@ public class ListFuncSup<T> extends CollectionFuncSup<T> {
 		ListIterator<T> it = ((List<T>) iterable).listIterator(index);
 		IteratorInfo<R> info = new IteratorInfo<R>();
 		return While(() -> it.hasNext(), (res) -> {
+			int previousIndex = it.previousIndex();
+			int nextIndex = it.nextIndex();
+			boolean hasPrevious = it.hasPrevious();
+			boolean hasNext = it.hasNext();
 			T t = it.next();
 			try {
 				if (predicate.test(t))
 					if (func.argCount() == 2)
-						return func.apply(t, info.setValues(it.previousIndex(), it.nextIndex(), it.hasPrevious(),
-								it.hasNext(), it.previousIndex() + 1, res));
+						return func.apply(t,
+								info.setValues(previousIndex, nextIndex, hasPrevious,
+										hasNext, previousIndex + 1, res));
 					else
 						return func.apply(t);
 				else

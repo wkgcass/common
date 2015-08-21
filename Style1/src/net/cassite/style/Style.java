@@ -222,23 +222,11 @@ public class Style {
 		throw $.Control_Break;
 	}
 
-	public static <T> T Break(Class<T> cls) throws Break {
-		throw $.Control_Break;
-	}
-
 	public static <T> T Remove() throws Remove {
 		throw $.Control_Remove;
 	}
 
-	public static <T> T Remove(Class<T> cls) throws Remove {
-		throw $.Control_Remove;
-	}
-
 	public static <T> T Continue() throws Continue {
-		throw $.Control_Continue;
-	}
-
-	public static <T> T Continue(Class<T> cls) throws Continue {
 		throw $.Control_Continue;
 	}
 
@@ -609,7 +597,7 @@ public class Style {
 		return rand(chooseFrom, length, false, false);
 	}
 
-	static int $(IteratorInfo<?> info) {
+	public static int $(IteratorInfo<?> info) {
 		return info.currentIndex;
 	}
 
