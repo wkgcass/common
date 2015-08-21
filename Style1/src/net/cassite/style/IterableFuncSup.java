@@ -4,13 +4,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
-import net.cassite.style.interfaces.RFunc1;
-import net.cassite.style.interfaces.VFunc1;
-import net.cassite.style.interfaces.VFunc2;
+import net.cassite.style.interfaces.*;
 import net.cassite.style.control.*;
 
 public class IterableFuncSup<T> extends Style {
-	public final Iterable<T> iterable;
+	protected final Iterable<T> iterable;
 
 	IterableFuncSup(Iterable<T> iterable) {
 		this.iterable = iterable;
@@ -22,59 +20,86 @@ public class IterableFuncSup<T> extends Style {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forEach(VFunc2<T, IteratorInfo> func) {
+	public <R> R forEach(VFunc2<T, IteratorInfo<R>> func) {
 		return (R) forEach($(func));
 	}
 
-	@SuppressWarnings("unchecked")
-	public <R> R forEach(def<Object> func) {
+	public <R> R forEach(RFunc1<R, T> func) {
+		return forEach($(func));
+	}
+
+	public <R> R forEach(RFunc2<R, T, IteratorInfo<R>> func) {
+		return forEach($(func));
+	}
+
+	public <R> R forEach(def<R> func) {
 		return (R) forThose($.alwaysTrue(), func);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <R> R forThose(Predicate<T> predicate, VFunc1<T> func) {
-		return forThose(predicate, $(func));
-	}
-
-	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo> func) {
-		return forThose(predicate, $(func));
+		return (R) forThose(predicate, $(func));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(Predicate<T> predicate, def<Object> func) {
+	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo<R>> func) {
+		return (R) forThose(predicate, $(func));
+	}
+
+	public <R> R forThose(Predicate<T> predicate, RFunc1<R, T> func) {
+		return forThose(predicate, $(func));
+	}
+
+	public <R> R forThose(Predicate<T> predicate, RFunc2<R, T, IteratorInfo<R>> func) {
+		return forThose(predicate, $(func));
+	}
+
+	public <R> R forThose(Predicate<T> predicate, def<R> func) {
 		Iterator<T> it = iterable.iterator();
-		int i = 0;
-		R res = null;
-		while (it.hasNext()) {
-			try {
+		if (func.argCount() == 2) {
+			ptr<Integer> i = ptr(0);
+			IteratorInfo<R> info = new IteratorInfo<R>();
+			return While(() -> it.hasNext(), (res) -> {
 				T t = it.next();
-				if (predicate.test(t))
-					if (func.argCount() == 2)
-						func.apply(t, new IteratorInfo(i - 1, i + 1, i == 0, it.hasNext(), i));
+				try {
+					if (predicate.test(t))
+						return func.apply(t,
+								info.setValues(i.item - 1, i.item + 1, i.item == 0, it.hasNext(), i.item, res));
 					else
-						func.apply(t);
-			} catch (Throwable throwable) {
-				if (throwable instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) throwable).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						continue;
-					} else if (origin instanceof Remove) {
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = $(err);
+					Throwable throwable = sErr.origin();
+					if (throwable instanceof Remove) {
 						it.remove();
-					} else if (origin instanceof BreakWithResult) {
-						res = (R) ((BreakWithResult) origin).getRes();
-						break;
 					} else {
-						throw ((StyleRuntimeException) throwable);
+						throw sErr;
 					}
-				} else {
-					throw $(throwable);
+				} finally {
+					i.item += 1;
 				}
-			} finally {
-				++i;
-			}
+				return null;
+			});
+		} else {
+			return While(() -> it.hasNext(), () -> {
+				T t = it.next();
+				try {
+					if (predicate.test(t))
+						return func.apply(t);
+					else
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = $(err);
+					Throwable throwable = sErr.origin();
+					if (throwable instanceof Remove) {
+						it.remove();
+					} else {
+						throw sErr;
+					}
+				}
+				return null;
+			});
 		}
-		return res;
 	}
 
 	public T first() {
@@ -99,26 +124,9 @@ public class IterableFuncSup<T> extends Style {
 		}
 
 		public Coll via(def<R> method) {
-			for (T t : iterable) {
-				R ret;
-				try {
-					ret = method.apply(t);
-				} catch (Throwable e) {
-					if (e instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) e).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else {
-							throw ((StyleRuntimeException) e);
-						}
-					} else {
-						throw $(e);
-					}
-				}
-				collection.add(ret);
-			}
+			$(iterable).forEach(e -> {
+				collection.add(method.apply(e));
+			});
 			return collection;
 		}
 	}

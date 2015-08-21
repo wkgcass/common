@@ -4,12 +4,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import net.cassite.style.control.*;
+import net.cassite.style.control.$Set;
 import net.cassite.style.interfaces.*;
 
 public class Style {
@@ -159,12 +161,17 @@ public class Style {
 
 	// function support
 
-	public static <T> val<T> store(T o) {
-		return new val<T>(o);
+	public static <T> ptr<T> ptr(T o) {
+		return new ptr<T>(o);
 	}
 
-	public static <T> T $(val<T> store) {
+	public static <T> T $(ptr<T> store) {
 		return store.item;
+	}
+
+	public static <T> ptr<T> $(ptr<T> ptr, T newItem) {
+		ptr.item = newItem;
+		return ptr;
 	}
 
 	// ┌─────────────────────────────────┐
@@ -233,6 +240,10 @@ public class Style {
 
 	public static <T> T Continue(Class<T> cls) throws Continue {
 		throw $.Control_Continue;
+	}
+
+	public static <T> T Set(T toSet) {
+		throw new $Set(toSet);
 	}
 
 	public static <T> T BreakWithResult(T res) {
@@ -319,6 +330,10 @@ public class Style {
 		return new CollectionFuncSup<>(coll);
 	}
 
+	public static <T> ListFuncSup<T> $(List<T> coll) {
+		return new ListFuncSup<T>(coll);
+	}
+
 	@SafeVarargs
 	public static <E, Coll extends Collection<E>> Coll $(Coll collection, E... elements) {
 		for (E e : elements) {
@@ -347,7 +362,12 @@ public class Style {
 		R res = null;
 		for (T ii = i; condition.test(ii); ii = increment.apply(ii)) {
 			try {
-				R tmpRes = loop.apply(ii);
+				R tmpRes;
+				if (loop.argCount() == 2) {
+					tmpRes = loop.apply(ii, res);
+				} else {
+					tmpRes = loop.apply(ii);
+				}
 				if (tmpRes != null) {
 					res = tmpRes;
 				}
@@ -381,6 +401,15 @@ public class Style {
 		return (R) For(i, condition, increment, $(loop));
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, R> loop) {
+		return (R) For(i, condition, increment, $(loop));
+	}
+
+	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, R> loop) {
+		return (R) For(i, condition, increment, $(loop));
+	}
+
 	public static <N extends Number> ForSupport<N> For(N start) {
 		return new ForSupport<N>(start);
 	}
@@ -395,7 +424,11 @@ public class Style {
 		R res = null;
 		while (condition.getAsBoolean()) {
 			try {
-				R tmpRes = loop.apply();
+				R tmpRes;
+				if (loop.argCount() == 1)
+					tmpRes = loop.apply(res);
+				else
+					tmpRes = loop.apply();
 				if (tmpRes != null) {
 					res = tmpRes;
 				}
@@ -426,6 +459,15 @@ public class Style {
 	}
 
 	public static <R> R While(BooleanSupplier condition, RFunc0<R> loop) {
+		return While(condition, $(loop));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <R> R While(BooleanSupplier condition, VFunc1<R> loop) {
+		return While(condition, (def<R>) $(loop));
+	}
+
+	public static <R> R While(BooleanSupplier condition, RFunc1<R, R> loop) {
 		return While(condition, $(loop));
 	}
 
@@ -540,7 +582,7 @@ public class Style {
 			throw new RuntimeException("unrepeatable but length > chooseFrom.length");
 		}
 		StringBuilder sb = new StringBuilder();
-		val<String> $chooseFrom = store(chooseFrom);
+		ptr<String> $chooseFrom = ptr(chooseFrom);
 		For(1).to(length).loop(i -> {
 			char c = $chooseFrom.item.charAt(rand($chooseFrom.item.length() - 1));
 			while (sb.indexOf("" + c) != -1 && unrepeatable) {
@@ -570,7 +612,7 @@ public class Style {
 	/**
 	 * @since 0.1.1
 	 */
-	public static int $(IteratorInfo info) {
+	public static int $(IteratorInfo<?> info) {
 		return info.currentIndex;
 	}
 

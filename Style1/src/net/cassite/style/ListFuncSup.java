@@ -19,40 +19,22 @@ public class ListFuncSup<T> extends CollectionFuncSup<T> {
 	}
 
 	public void toSelf(def<T> func) {
-		ListIterator<T> it = ((List<T>) iterable).listIterator();
-		while (it.hasNext()) {
-			T t = it.next();
-			try {
-				it.set(func.apply(t));
-			} catch (Throwable throwable) {
-				if (throwable instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) throwable).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						continue;
-					} else if (origin instanceof Remove) {
-						it.remove();
-					} else {
-						throw ((StyleRuntimeException) throwable);
-					}
-				} else {
-					throw $(throwable);
-				}
-			}
-		}
-	}
-
-	public <R> R forEach(VFunc1<T> func) {
-		return forEach($(func));
-	}
-
-	public <R> R forEach(VFunc1<T> func, int index) {
-		return forEach($(func), index);
+		$((List<T>) iterable).forEach(e -> {
+			return Set(func.apply(e));
+		});
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forEach(def<Object> func, int index) {
+	public <R> R forEach(VFunc1<T> func) {
+		return (R) forEach($(func));
+	}
+
+	@SuppressWarnings("unchecked")
+	public <R> R forEach(VFunc1<T> func, int index) {
+		return (R) forEach($(func), index);
+	}
+
+	public <R> R forEach(def<R> func, int index) {
 		return (R) forThose($.alwaysTrue(), func, index);
 	}
 
@@ -61,67 +43,70 @@ public class ListFuncSup<T> extends CollectionFuncSup<T> {
 		return (R) forThose(predicate, $(func), index);
 	}
 
-	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo> func) {
-		return forThose(predicate, $(func));
+	@SuppressWarnings("unchecked")
+	@Override
+	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo<R>> func) {
+		return (R) forThose(predicate, $(func));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo> func, int index) {
+	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo<R>> func, int index) {
 		return (R) forThose(predicate, $(func), index);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public <R> R forThose(Predicate<T> predicate, def<Object> func) {
+	public <R> R forThose(Predicate<T> predicate, def<R> func) {
 		return (R) forThose(predicate, func, 0);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <R> R forThose(Predicate<T> predicate, def<R> func, int index) {
 		ListIterator<T> it = ((List<T>) iterable).listIterator(index);
-		T t;
-		if (it.hasNext()) {
-			t = it.next();
-		} else {
-			t = null;
-		}
-		R res = null;
-		while (it.hasNext()) {
-			try {
-				if (predicate.test(t))
-					if (func.argCount() == 2) {
-						IteratorInfo info = new IteratorInfo(it.previousIndex(), it.nextIndex(), it.hasPrevious(),
-								it.hasNext(), it.previousIndex() + 1);
-						func.apply(t, info);
-					} else
-						func.apply(t);
-				t = it.next();
-			} catch (Throwable e) {
-				if (e instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) e).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						t = it.next();
-						continue;
-					} else if (origin instanceof Add) {
-						it.add(((Add) origin).getAdd());
-					} else if (origin instanceof Previous) {
-						t = it.previous();
-					} else if (origin instanceof $Set) {
-						it.set((($Set) origin).getSet());
-						t = it.next();
-					} else if (origin instanceof BreakWithResult) {
-						res = (R) ((BreakWithResult) origin).getRes();
-						break;
+		if (func.argCount() == 2) {
+			IteratorInfo<R> info = new IteratorInfo<R>();
+			return While(() -> it.hasNext(), (res) -> {
+				T t = it.next();
+				try {
+					if (predicate.test(t))
+						return func.apply(t, info.setValues(it.previousIndex(), it.nextIndex(), it.hasPrevious(),
+								it.hasNext(), it.previousIndex() + 1, res));
+					else
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = $(err);
+					Throwable throwable = sErr.origin();
+					if (throwable instanceof Add) {
+						it.add(((Add) throwable).getAdd());
+					} else if (throwable instanceof $Set) {
+						it.set((($Set) throwable).getSet());
+					} else if (throwable instanceof Remove) {
+						it.remove();
 					} else {
-						throw ((StyleRuntimeException) e);
+						throw sErr;
 					}
-				} else {
-					throw $(e);
 				}
-			}
+				return null;
+			});
+		} else {
+			return While(() -> it.hasNext(), () -> {
+				T t = it.next();
+				try {
+					if (predicate.test(t))
+						return func.apply(t);
+					else
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = $(err);
+					Throwable throwable = sErr.origin();
+					if (throwable instanceof Add) {
+						it.add(((Add) throwable).getAdd());
+					} else if (throwable instanceof $Set) {
+						it.set((($Set) throwable).getSet());
+					} else {
+						throw sErr;
+					}
+				}
+				return null;
+			});
 		}
-		return res;
 	}
 }

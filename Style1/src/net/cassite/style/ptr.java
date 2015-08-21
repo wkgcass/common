@@ -1,9 +1,9 @@
 package net.cassite.style;
 
-public class val<T> {
+public class ptr<T> {
 	public T item;
 
-	val(T o) {
+	ptr(T o) {
 		this.item = o;
 	}
 

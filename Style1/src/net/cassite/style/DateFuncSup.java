@@ -7,7 +7,7 @@ import java.util.Map;
 
 import net.cassite.style.interfaces.RFunc1;
 
-public class DateFuncSup implements var {
+public class DateFuncSup extends Style {
 	public static class DateSeperator {
 		private long day;
 		private long hour;
@@ -171,6 +171,7 @@ public class DateFuncSup implements var {
 					sb.replace(index, index + length, v);
 				}
 			}
+			return null;
 		});
 
 		return sb.toString();

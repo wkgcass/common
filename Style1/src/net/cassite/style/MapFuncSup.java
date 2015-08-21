@@ -4,10 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.cassite.style.interfaces.RFunc2;
-import net.cassite.style.interfaces.VFunc2;
-import net.cassite.style.interfaces.VFunc3;
-import net.cassite.style.control.*;
+import net.cassite.style.control.Remove;
+import net.cassite.style.interfaces.*;
 
 public class MapFuncSup<K, V> {
 	private Map<K, V> map;
@@ -16,13 +14,26 @@ public class MapFuncSup<K, V> {
 		this.map = map;
 	}
 
-	public Object forEach(VFunc2<K, V> func) {
-		return forEach(Style.$(func));
+	@SuppressWarnings("unchecked")
+	public <R> R forEach(VFunc2<K, V> func) {
+		return (R) forEach(Style.$(func));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forEach(def<Object> func) {
-		return (R) forThose((k, v) -> true, func);
+	public <R> R forEach(VFunc3<K, V, IteratorInfo<R>> func) {
+		return (R) forEach(Style.$(func));
+	}
+
+	public <R> R forEach(RFunc2<R, K, V> func) {
+		return forEach(Style.$(func));
+	}
+
+	public <R> R forEach(RFunc3<R, K, V, IteratorInfo<R>> func) {
+		return forEach(Style.$(func));
+	}
+
+	public <R> R forEach(def<R> func) {
+		return forThose((k, v) -> true, func);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -31,47 +42,66 @@ public class MapFuncSup<K, V> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(RFunc2<Boolean, K, V> predicate, VFunc3<K, V, IteratorInfo> func) {
+	public <R> R forThose(RFunc2<Boolean, K, V> predicate, VFunc3<K, V, IteratorInfo<R>> func) {
 		return (R) forThose(predicate, Style.$(func));
 	}
 
-	@SuppressWarnings("unchecked")
+	public <R> R forThose(RFunc2<Boolean, K, V> predicate, RFunc2<R, K, V> func) {
+		return forThose(predicate, Style.$(func));
+	}
+
+	public <R> R forThose(RFunc2<Boolean, K, V> predicate, RFunc3<R, K, V, IteratorInfo<R>> func) {
+		return forThose(predicate, Style.$(func));
+	}
+
 	public <R> R forThose(RFunc2<Boolean, K, V> predicate, def<R> func) {
 		Iterator<K> it = map.keySet().iterator();
-		int i = 0;
-		R res = null;
-		while (it.hasNext()) {
-			K k = it.next();
-			V v = map.get(k);
-			try {
-				if (predicate.apply(k, v))
-					if (func.argCount() == 3)
-						func.apply(k, v, new IteratorInfo(i - 1, i + 1, i != 0, it.hasNext(), i));
+		if (func.argCount() == 3) {
+			IteratorInfo<R> info = new IteratorInfo<R>();
+			ptr<Integer> i = Style.ptr(0);
+			return Style.While(() -> it.hasNext(), (res) -> {
+				K k = it.next();
+				V v = map.get(k);
+				try {
+					if (predicate.apply(k, v))
+						return func.apply(k, v,
+								info.setValues(i.item - 1, i.item + 1, i.item != 0, it.hasNext(), i.item, res));
 					else
-						func.apply(k, v);
-			} catch (Throwable throwable) {
-				if (throwable instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) throwable).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						continue;
-					} else if (origin instanceof Remove) {
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = Style.$(err);
+					Throwable t = sErr.origin();
+					if (t instanceof Remove) {
 						it.remove();
-					} else if (origin instanceof BreakWithResult) {
-						res = (R) ((BreakWithResult) origin).getRes();
-						break;
 					} else {
-						throw ((StyleRuntimeException) throwable);
+						throw sErr;
 					}
-				} else {
-					throw Style.$(throwable);
+				} finally {
+					i.item += 1;
 				}
-			} finally {
-				++i;
-			}
-		}
-		return res;
+				return null;
+			});
+		} else
+			return Style.While(() -> it.hasNext(), () -> {
+				try {
+					K k = it.next();
+					V v = map.get(k);
+					if (predicate.apply(k, v))
+						return func.apply(k, v);
+					else
+						return null;
+				} catch (Throwable err) {
+					StyleRuntimeException sErr = Style.$(err);
+					Throwable t = sErr.origin();
+					if (t instanceof Remove) {
+						it.remove();
+					} else {
+						throw sErr;
+					}
+				}
+				return null;
+			});
+
 	}
 
 	public MapFuncSup<K, V> append(K key, V value) {
@@ -93,25 +123,9 @@ public class MapFuncSup<K, V> {
 		}
 
 		public Coll via(def<R> method) {
-			for (K key : map.keySet()) {
-				try {
-					R val = method.apply(key, map.get(key));
-					collection.add(val);
-				} catch (Throwable e) {
-					if (e instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) e).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else {
-							throw ((StyleRuntimeException) e);
-						}
-					} else {
-						throw Style.$(e);
-					}
-				}
-			}
+			Style.$(map).forEach((k, v) -> {
+				collection.add(method.apply(k, v));
+			});
 			return collection;
 		}
 	}
@@ -134,25 +148,10 @@ public class MapFuncSup<K, V> {
 		}
 
 		public M via(def<Entry<K2, V2>> method) {
-			for (K key : map.keySet()) {
-				try {
-					Entry<K2, V2> val = method.apply(key, map.get(key));
-					toMap.put(val.key, val.value);
-				} catch (Throwable e) {
-					if (e instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) e).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else {
-							throw ((StyleRuntimeException) e);
-						}
-					} else {
-						throw Style.$(e);
-					}
-				}
-			}
+			Style.$(map).forEach((k, v) -> {
+				Entry<K2, V2> entry = method.apply(k, v);
+				toMap.put(entry.key, entry.value);
+			});
 			return toMap;
 		}
 	}

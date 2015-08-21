@@ -12,7 +12,7 @@ import java.util.Set;
 
 import net.cassite.style.Style;
 import net.cassite.style.def;
-import net.cassite.style.val;
+import net.cassite.style.ptr;
 import net.cassite.style.var;
 import net.cassite.style.$;
 import net.cassite.style.Async;
@@ -161,7 +161,7 @@ public class Sum extends Style {
 
 		System.out.println("\nSwitch-Case============");
 		int tmp = 1;
-		val<Integer> tmpS = store(tmp);
+		ptr<Integer> tmpS = ptr(tmp);
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
 			Break();

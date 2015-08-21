@@ -14,7 +14,7 @@ import net.cassite.style.$;
 import net.cassite.style.Async;
 import net.cassite.style.Entry;
 import net.cassite.style.def;
-import net.cassite.style.val;
+import net.cassite.style.ptr;
 import net.cassite.style.var;
 
 public class Plain implements var {
@@ -139,7 +139,7 @@ public class Plain implements var {
 		$(list).forEach((e) -> System.out.println(e));
 
 		int tmp = 1;
-		val<Integer> tmpS = store(tmp);
+		ptr<Integer> tmpS = ptr(tmp);
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
 		}).Case(3, () -> System.out.println("case 3:" + tmpS)).Default(() -> System.out.println("default"));

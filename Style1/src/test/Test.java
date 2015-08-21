@@ -1,5 +1,12 @@
 package test;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import net.cassite.style.Async;
 import net.cassite.style.Style;
 import net.cassite.style.def;
@@ -7,14 +14,14 @@ import net.cassite.style.var;
 
 public class Test implements var {
 
-	def<Object> arg0;
-	def<Object> arg1;
-	def<Object> arg2;
-	def<Object> arg3;
-	def<Object> arg4;
-	def<Object> arg5;
-	def<Object> arg6;
-	def<Object> arg7;
+	def<?> arg0;
+	def<?> arg1;
+	def<?> arg2;
+	def<?> arg3;
+	def<?> arg4;
+	def<?> arg5;
+	def<?> arg6;
+	def<?> arg7;
 
 	def<Integer> rarg0;
 	def<Integer> rarg1;
@@ -25,6 +32,11 @@ public class Test implements var {
 	def<Integer> rarg6;
 	def<Integer> rarg7;
 
+	String[] strArr;
+	Collection<Integer> coll;
+	List<Integer> list;
+	Map<String, Integer> map;
+
 	public static void main(String[] args) {
 		Test t = new Test();
 		t.testFuncCreation();
@@ -32,6 +44,10 @@ public class Test implements var {
 		testAsyncAwait(t);
 		testCallback(t);
 		t.testIfSwitchForWhile();
+		t.testArray();
+		t.testCollection();
+		t.testList();
+		t.testMap();
 	}
 
 	public void testFuncCreation() {
@@ -110,7 +126,7 @@ public class Test implements var {
 
 	public static void testAsyncAwait(Test t) {
 		System.out.println("Test AsyncAwait");
-		Async<Object> a = t.arg1.async(1);
+		Async<?> a = t.arg1.async(1);
 		System.out.println(a.await());
 		Async<Integer> b = t.rarg1.async(1);
 		System.out.println(b.await());
@@ -155,7 +171,8 @@ public class Test implements var {
 				Break();
 			System.out.println(i);
 		});
-		System.out.println(For(1).to(21).step(2).loop(i -> {
+		System.out.println(For(1).to(21).step(2).loop((Integer i, Integer res) -> {
+			System.out.println(res);
 			if (i < 4)
 				return Continue();
 			if (i > 15)
@@ -186,9 +203,113 @@ public class Test implements var {
 						i -> i)
 								.ElseIf(
 										While(() -> true,
-												() -> BreakWithResult(4)),
+												(Integer res) -> {
+													System.out.println(res);
+													BreakWithResult(4);
+												}),
 										i -> i)
 								.End());
 
+	}
+
+	void testArray() {
+		System.out.println("Array Enhance");
+		strArr = new String[] {
+				"a", "b", "c", "d"
+		};
+		System.out.println($(strArr).first());
+		System.out.println($(strArr).forEach(e -> {
+			if (e.equals("b"))
+				Continue();
+			if (e.equals("d"))
+				Break();
+			return e;
+		}));
+		System.out.println((String) $(strArr).forEach((e, i) -> {
+			if (e.equals("b"))
+				Continue();
+			if (e.equals("d"))
+				Break();
+			System.out.println("RES:" + i.lastRes);
+			return e + i;
+		}));
+		$(strArr).forEach((e, i) -> {
+			if (e.equals("b"))
+				Continue();
+			if (e.equals("d"))
+				Break();
+			System.out.println(e);
+		});
+		System.out.println($(strArr).to(new ArrayList<String>()).via((e) -> e));
+	}
+
+	void testCollection() {
+		System.out.println("Collection Enhance");
+		coll = $(new HashSet<>(), 1, 3, 5, 9);
+		System.out.println($(coll).first());
+		System.out.println($(coll).forEach(e -> {
+			if (e.equals(3))
+				Continue();
+			if (e.equals(9))
+				Break();
+			return e;
+		}));
+		System.out.println((Integer) $(coll).forEach((e, i) -> {
+			if (e.equals(3))
+				Continue();
+			if (e.equals(9))
+				Break();
+			return e + $(i) * 100;
+		}));
+		$(coll).forEach((e, i) -> {
+			if (e.equals(1))
+				Remove();
+			if (e.equals(3))
+				Continue();
+			if (e.equals(9))
+				Break();
+			System.out.println(e + $(i) * 100);
+		});
+		list = $(coll).to(new ArrayList<Integer>()).via(e -> e);
+		System.out.println(list);
+	}
+
+	void testList() {
+		System.out.println("List Enhance");
+		System.out.println($(list).first());
+		System.out.println($(list).forEach(e -> {
+			if (e.equals(3))
+				Continue();
+			if (e.equals(9))
+				Break();
+			return e;
+		}));
+		System.out.println((Integer) $(list).forEach((e, i) -> {
+			if (e.equals(3))
+				Continue();
+			return e + $(i) * 100;
+		}));
+		$(list).forEach((e, i) -> {
+			if (e.equals(3))
+				Remove();
+			if (e.equals(9))
+				Set(10);
+			System.out.println(e + $(i) * 100);
+		});
+		System.out.println($(list).to(new ArrayList<Integer>()).via(e -> e));
+	}
+
+	void testMap() {
+		System.out.println("Map Enhance");
+		map = $(new HashMap<String, Integer>(), map("cass", 1995).$("john", 1996).$("alpha", 1994));
+		$(map).forEach((k, v, i) -> {
+			if (k.equals("alpha"))
+				Remove();
+			System.out.println(k + v + $(i));
+		});
+		System.out.println($(map).forEach((k, v) -> {
+			return k + v;
+		}));
+		System.out.println($(map).to(new ArrayList<Integer>()).via((k, v) -> v));
 	}
 }

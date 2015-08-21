@@ -9,7 +9,7 @@ import net.cassite.style.$;
 import net.cassite.style.Async;
 import net.cassite.style.Style;
 import net.cassite.style.def;
-import net.cassite.style.val;
+import net.cassite.style.ptr;
 import net.cassite.style.var;
 
 public class DocSupport extends Style {
@@ -23,7 +23,7 @@ public class DocSupport extends Style {
 		System.out.println(foo.apply(1, foo));
 		// 函数式编程 - 工具
 		int age = 20;
-		val<Integer> _age = store(age);
+		ptr<Integer> _age = ptr(age);
 		def<Object> grow = function(() -> $(_age) + 1);
 		System.out.println(grow.apply());
 

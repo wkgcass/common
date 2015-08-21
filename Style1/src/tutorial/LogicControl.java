@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.cassite.style.Style;
-import net.cassite.style.val;
+import net.cassite.style.ptr;
 
 /**
  * A demo showing how to do logic/iteration control<br/>
@@ -29,7 +29,7 @@ public class LogicControl extends Style {
 
 		System.out.println("\nSwitch-Case============");
 		int tmp = 1;
-		val<Integer> tmpS = store(tmp);
+		ptr<Integer> tmpS = ptr(tmp);
 		Switch(tmp).Case(1, () -> System.out.println("switch(tmp) case 1:" + tmpS)).Case(2, () -> {
 			System.out.println("case 2:" + tmpS);
 			Break();

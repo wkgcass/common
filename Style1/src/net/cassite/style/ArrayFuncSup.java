@@ -1,15 +1,9 @@
 package net.cassite.style;
 
-import net.cassite.style.interfaces.RFunc1;
-import net.cassite.style.interfaces.VFunc1;
-import net.cassite.style.interfaces.VFunc2;
+import net.cassite.style.interfaces.*;
 
 import java.util.Collection;
 import java.util.function.Predicate;
-
-import net.cassite.style.control.Break;
-import net.cassite.style.control.BreakWithResult;
-import net.cassite.style.control.Continue;
 
 public class ArrayFuncSup<T> extends Style {
 	private final T[] array;
@@ -18,17 +12,26 @@ public class ArrayFuncSup<T> extends Style {
 		this.array = array;
 	}
 
-	public <R> R forEach(VFunc1<T> func) {
+	public <R> R forEach(RFunc1<R, T> func) {
 		return forEach($(func));
 	}
 
-	public <R> R forEach(VFunc2<T, IteratorInfo> func) {
+	public <R> R forEach(RFunc2<R, T, IteratorInfo<R>> func) {
 		return forEach($(func));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forEach(def<Object> func) {
-		return (R) forThose($.alwaysTrue(), func);
+	public <R> R forEach(VFunc1<T> func) {
+		return forEach((def<R>) $(func));
+	}
+
+	@SuppressWarnings("unchecked")
+	public <R> R forEach(VFunc2<T, IteratorInfo<R>> func) {
+		return forEach((def<R>) $(func));
+	}
+
+	public <R> R forEach(def<R> func) {
+		return forThose($.alwaysTrue(), func);
 	}
 
 	public void toSelf(RFunc1<T, T> func) {
@@ -36,24 +39,17 @@ public class ArrayFuncSup<T> extends Style {
 	}
 
 	public void toSelf(def<T> func) {
-		for (int i = 0; i < array.length; ++i) {
-			try {
-				array[i] = func.apply(array[i]);
-			} catch (Throwable throwable) {
-				if (throwable instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) throwable).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						continue;
-					} else {
-						throw ((StyleRuntimeException) throwable);
-					}
-				} else {
-					throw $(throwable);
-				}
-			}
-		}
+		$(array).forEach((e, i) -> {
+			array[$(i)] = func.apply(e);
+		});
+	}
+
+	public <R> R forThose(Predicate<T> predicate, RFunc1<R, T> func) {
+		return forThose(predicate, $(func));
+	}
+
+	public <R> R forThose(Predicate<T> predicate, RFunc2<R, T, IteratorInfo<R>> func) {
+		return forThose(predicate, $(func));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,47 +58,29 @@ public class ArrayFuncSup<T> extends Style {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo> func) {
+	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo<R>> func) {
 		return (R) forThose(predicate, $(func));
 	}
 
-	@SuppressWarnings("unchecked")
 	public <R> R forThose(Predicate<T> predicate, def<R> func) {
-		int i = 0;
-		R res = null;
-		for (T t : array) {
-			try {
-				if (predicate.test(t)) {
-					R tmpRes;
-					if (func.argCount() == 2)
-						tmpRes = func.apply(t, new IteratorInfo(i - 1, i + 1, i != 0, i != array.length - 1, i));
-					else
-						tmpRes = func.apply(t);
-					if (tmpRes != null) {
-						res = tmpRes;
-					}
-				}
-			} catch (Throwable throwable) {
-				if (throwable instanceof StyleRuntimeException) {
-					Throwable origin = ((StyleRuntimeException) throwable).origin();
-					if (origin instanceof Break) {
-						break;
-					} else if (origin instanceof Continue) {
-						continue;
-					} else if (origin instanceof BreakWithResult) {
-						res = (R) ((BreakWithResult) origin).getRes();
-						break;
-					} else {
-						throw ((StyleRuntimeException) throwable);
-					}
-				} else {
-					throw $(throwable);
-				}
-			} finally {
-				++i;
-			}
+		if (array.length == 0)
+			return null;
+		if (func.argCount() == 2) {
+			IteratorInfo<R> info = new IteratorInfo<R>();
+			return For(0).to(array.length - 1).loop((i, res) -> {
+				if (predicate.test(array[i]))
+					return func.apply(array[i], info.setValues(i - 1, i + 1, i != 0, i != array.length - 1, i, res));
+				else
+					return null;
+			});
+		} else {
+			return For(0).to(array.length - 1).loop(i -> {
+				if (predicate.test(array[i]))
+					return func.apply(array[i]);
+				else
+					return null;
+			});
 		}
-		return res;
 	}
 
 	public T first() {
@@ -127,26 +105,9 @@ public class ArrayFuncSup<T> extends Style {
 		}
 
 		public Coll via(def<R> method) {
-			for (T t : array) {
-				R ret;
-				try {
-					ret = method.apply(t);
-				} catch (Throwable e) {
-					if (e instanceof StyleRuntimeException) {
-						Throwable origin = ((StyleRuntimeException) e).origin();
-						if (origin instanceof Break) {
-							break;
-						} else if (origin instanceof Continue) {
-							continue;
-						} else {
-							throw ((StyleRuntimeException) e);
-						}
-					} else {
-						throw $(e);
-					}
-				}
-				collection.add(ret);
-			}
+			$(array).forEach(e -> {
+				collection.add(method.apply(e));
+			});
 			return collection;
 		}
 	}

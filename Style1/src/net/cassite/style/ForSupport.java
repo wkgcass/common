@@ -1,7 +1,6 @@
 package net.cassite.style;
 
-import net.cassite.style.interfaces.RFunc1;
-import net.cassite.style.interfaces.VFunc1;
+import net.cassite.style.interfaces.*;
 
 public class ForSupport<N extends Number> extends Style {
 	private N start;
@@ -35,6 +34,15 @@ public class ForSupport<N extends Number> extends Style {
 		}
 
 		public <R, T extends N> R loop(RFunc1<R, T> doLoop) {
+			return loop($(doLoop));
+		}
+
+		@SuppressWarnings("unchecked")
+		public <R, T extends N> R loop(VFunc2<T, R> doLoop) {
+			return (R) loop($(doLoop));
+		}
+
+		public <R, T extends N> R loop(RFunc2<R, T, R> doLoop) {
 			return loop($(doLoop));
 		}
 

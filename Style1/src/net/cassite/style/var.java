@@ -2,6 +2,7 @@ package net.cassite.style;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -156,12 +157,16 @@ public interface var {
 
 	// function support
 
-	default <T> val<T> store(T o) {
-		return Style.store(o);
+	default <T> ptr<T> ptr(T o) {
+		return Style.ptr(o);
 	}
 
-	default <T> T $(val<T> store) {
+	default <T> T $(ptr<T> store) {
 		return Style.$(store);
+	}
+
+	default <T> ptr<T> $(ptr<T> ptr, T newItem) {
+		return Style.$(ptr, newItem);
 	}
 
 	// ┌─────────────────────────────────┐
@@ -216,6 +221,10 @@ public interface var {
 		return Style.BreakWithResult(res);
 	}
 
+	default <T> T Set(T toSet) {
+		return Style.Set(toSet);
+	}
+
 	// ┌─────────────────────────────────┐
 	// │...collections, maps and arrays..│
 	// └─────────────────────────────────┘
@@ -264,6 +273,10 @@ public interface var {
 		return Style.$(coll);
 	}
 
+	default <T> ListFuncSup<T> $(List<T> list) {
+		return Style.$(list);
+	}
+
 	default <E, Coll extends Collection<E>> Coll $(Coll collection, @SuppressWarnings("unchecked") E... elements) {
 		return Style.$(collection, elements);
 	}
@@ -293,6 +306,14 @@ public interface var {
 		return Style.For(i, condition, increment, loop);
 	}
 
+	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, R> loop) {
+		return Style.For(i, condition, increment, loop);
+	}
+
+	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, R> loop) {
+		return Style.For(i, condition, increment, loop);
+	}
+
 	default <N extends Number> ForSupport<N> For(N start) {
 		return Style.For(start);
 	}
@@ -312,6 +333,14 @@ public interface var {
 	}
 
 	default <R> R While(BooleanSupplier condition, RFunc0<R> loop) {
+		return Style.While(condition, loop);
+	}
+
+	default <R> R While(BooleanSupplier condition, VFunc1<R> loop) {
+		return Style.While(condition, loop);
+	}
+
+	default <R> R While(BooleanSupplier condition, RFunc1<R, R> loop) {
 		return Style.While(condition, loop);
 	}
 
@@ -427,7 +456,7 @@ public interface var {
 		return Style.rand(chooseFrom, length);
 	}
 
-	default int $(IteratorInfo info) {
+	default int $(IteratorInfo<?> info) {
 		return Style.$(info);
 	}
 
