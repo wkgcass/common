@@ -5,7 +5,7 @@ import net.cassite.style.interfaces.*;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-public class ArrayFuncSup<T> extends Style {
+public class ArrayFuncSup<T> implements A1FuncSup<T> {
 	private final T[] array;
 
 	ArrayFuncSup(T[] array) {
@@ -65,22 +65,16 @@ public class ArrayFuncSup<T> extends Style {
 	public <R> R forThose(Predicate<T> predicate, def<R> func) {
 		if (array.length == 0)
 			return null;
-		if (func.argCount() == 2) {
-			IteratorInfo<R> info = new IteratorInfo<R>();
-			return For(0).to(array.length - 1).loop((i, res) -> {
-				if (predicate.test(array[i]))
+		IteratorInfo<R> info = new IteratorInfo<R>();
+		return For(0).to(array.length - 1).loop((i, res) -> {
+			if (predicate.test(array[i]))
+				if (func.argCount() == 2)
 					return func.apply(array[i], info.setValues(i - 1, i + 1, i != 0, i != array.length - 1, i, res));
 				else
-					return null;
-			});
-		} else {
-			return For(0).to(array.length - 1).loop(i -> {
-				if (predicate.test(array[i]))
 					return func.apply(array[i]);
-				else
-					return null;
-			});
-		}
+			else
+				return null;
+		});
 	}
 
 	public T first() {
@@ -91,7 +85,7 @@ public class ArrayFuncSup<T> extends Style {
 		return new Tramsformer<>(array, collection);
 	}
 
-	public static class Tramsformer<R, T, Coll extends Collection<R>> {
+	public static class Tramsformer<R, T, Coll extends Collection<R>> implements A1Transformer<R, T, Coll> {
 		private final Coll collection;
 		private final T[] array;
 
@@ -100,15 +94,22 @@ public class ArrayFuncSup<T> extends Style {
 			this.collection = collection;
 		}
 
-		public Coll via(RFunc1<R, T> method) {
-			return via($(method));
-		}
-
 		public Coll via(def<R> method) {
 			$(array).forEach(e -> {
 				collection.add(method.apply(e));
 			});
 			return collection;
 		}
+	}
+
+	public <Coll extends Collection<T>> Coll findAll(def<Boolean> filter, Coll toColl, int limit) {
+		return $(array).to(toColl).via(e -> {
+			if (!filter.apply(e))
+				Continue();
+			if (limit > 0 && limit <= toColl.size()) {
+				Break();
+			}
+			return e;
+		});
 	}
 }

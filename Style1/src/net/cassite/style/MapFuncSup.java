@@ -1,6 +1,7 @@
 package net.cassite.style;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -56,51 +57,33 @@ public class MapFuncSup<K, V> {
 
 	public <R> R forThose(RFunc2<Boolean, K, V> predicate, def<R> func) {
 		Iterator<K> it = map.keySet().iterator();
-		if (func.argCount() == 3) {
-			IteratorInfo<R> info = new IteratorInfo<R>();
-			ptr<Integer> i = Style.ptr(0);
-			return Style.While(() -> it.hasNext(), (res) -> {
-				K k = it.next();
-				V v = map.get(k);
-				try {
-					if (predicate.apply(k, v))
+		IteratorInfo<R> info = new IteratorInfo<R>();
+		ptr<Integer> i = Style.ptr(0);
+		return Style.While(() -> it.hasNext(), (res) -> {
+			K k = it.next();
+			V v = map.get(k);
+			try {
+				if (predicate.apply(k, v))
+					if (func.argCount() == 3)
 						return func.apply(k, v,
 								info.setValues(i.item - 1, i.item + 1, i.item != 0, it.hasNext(), i.item, res));
 					else
-						return null;
-				} catch (Throwable err) {
-					StyleRuntimeException sErr = Style.$(err);
-					Throwable t = sErr.origin();
-					if (t instanceof Remove) {
-						it.remove();
-					} else {
-						throw sErr;
-					}
-				} finally {
-					i.item += 1;
-				}
-				return null;
-			});
-		} else
-			return Style.While(() -> it.hasNext(), () -> {
-				try {
-					K k = it.next();
-					V v = map.get(k);
-					if (predicate.apply(k, v))
 						return func.apply(k, v);
-					else
-						return null;
-				} catch (Throwable err) {
-					StyleRuntimeException sErr = Style.$(err);
-					Throwable t = sErr.origin();
-					if (t instanceof Remove) {
-						it.remove();
-					} else {
-						throw sErr;
-					}
+				else
+					return null;
+			} catch (Throwable err) {
+				StyleRuntimeException sErr = Style.$(err);
+				Throwable t = sErr.origin();
+				if (t instanceof Remove) {
+					it.remove();
+				} else {
+					throw sErr;
 				}
-				return null;
-			});
+			} finally {
+				i.item += 1;
+			}
+			return null;
+		});
 
 	}
 
@@ -160,7 +143,56 @@ public class MapFuncSup<K, V> {
 		return new TransformerMap<K, V, K2, V2, M>(map, m);
 	}
 
+	public Entry<K, V> first() {
+		Iterator<K> it = map.keySet().iterator();
+		if (it.hasNext()) {
+			K k = it.next();
+			V v = map.get(k);
+			return new Entry<>(k, v);
+		} else {
+			return null;
+		}
+	}
+
 	public V $(K key) {
 		return map.get(key);
+	}
+
+	public Entry<K, V> findOne(RFunc2<Boolean, K, V> filter) {
+		return findOne(Style.$(filter));
+	}
+
+	public Entry<K, V> findOne(def<Boolean> filter) {
+		return Style.$(findAll(filter, new HashMap<>(), 1)).first();
+	}
+
+	public Map<K, V> findAll(RFunc2<Boolean, K, V> filter) {
+		return findAll(Style.$(filter));
+	}
+
+	public Map<K, V> findAll(def<Boolean> filter) {
+		return findAll(filter, new HashMap<K, V>());
+	}
+
+	public Map<K, V> findAll(RFunc2<Boolean, K, V> filter, Map<K, V> map) {
+		return findAll(Style.$(filter), map);
+	}
+
+	public Map<K, V> findAll(def<Boolean> filter, Map<K, V> map) {
+		return findAll(filter, map, 0);
+	}
+
+	public Map<K, V> findAll(RFunc2<Boolean, K, V> filter, Map<K, V> map, int limit) {
+		return findAll(Style.$(filter), map, limit);
+	}
+
+	public Map<K, V> findAll(def<Boolean> filter, Map<K, V> map, int limit) {
+		return Style.$(this.map).to(map).via((k, v) -> {
+			if (!filter.apply(k, v))
+				Style.Continue();
+			if (limit > 0 && limit <= map.size())
+				Style.Break();
+			return new Entry<K, V>(k, v);
+		});
 	}
 }

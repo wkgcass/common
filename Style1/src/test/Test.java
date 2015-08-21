@@ -172,13 +172,13 @@ public class Test implements var {
 			System.out.println(i);
 		});
 		System.out.println(For(1).to(21).step(2).loop((Integer i, Integer res) -> {
-			System.out.println(res);
+			System.out.println("RES:" + res);
 			if (i < 4)
 				return Continue();
 			if (i > 15)
 				return BreakWithResult(i + 100);
 			else
-				return i + 100;
+				return res == null ? i : i + res;
 		}));
 		System.out.println(For(1).to(21).step(2).loop(i -> {
 			if (i < 4)
@@ -204,7 +204,7 @@ public class Test implements var {
 								.ElseIf(
 										While(() -> true,
 												(Integer res) -> {
-													System.out.println(res);
+													System.out.println("RES:" + res);
 													BreakWithResult(4);
 												}),
 										i -> i)
@@ -241,6 +241,8 @@ public class Test implements var {
 			System.out.println(e);
 		});
 		System.out.println($(strArr).to(new ArrayList<String>()).via((e) -> e));
+		System.out.println($(strArr).findOne((e) -> e.equals("a")));
+		System.out.println($(strArr).findAll((e) -> true, new ArrayList<>(), 2));
 	}
 
 	void testCollection() {
@@ -297,6 +299,8 @@ public class Test implements var {
 			System.out.println(e + $(i) * 100);
 		});
 		System.out.println($(list).to(new ArrayList<Integer>()).via(e -> e));
+		System.out.println($(list).findOne((e) -> e.equals(5)));
+		System.out.println($(list).findAll((e) -> true, new ArrayList<>(), 2));
 	}
 
 	void testMap() {
@@ -311,5 +315,8 @@ public class Test implements var {
 			return k + v;
 		}));
 		System.out.println($(map).to(new ArrayList<Integer>()).via((k, v) -> v));
+		System.out.println($(map).findOne((k, v) -> {
+			return k.equals("cass");
+		}));
 	}
 }

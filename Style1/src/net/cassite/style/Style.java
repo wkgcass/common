@@ -609,35 +609,31 @@ public class Style {
 		return rand(chooseFrom, length, false, false);
 	}
 
-	/**
-	 * @since 0.1.1
-	 */
-	public static int $(IteratorInfo<?> info) {
+	static int $(IteratorInfo<?> info) {
 		return info.currentIndex;
 	}
 
-	/**
-	 * @since 0.1.1
-	 */
 	public static StringFuncSup $(String base) {
 		return new StringFuncSup(base);
 	}
 
 	/**
 	 * Implicit Type Conversion.<br/>
-	 * To achieve implicit type conversion,<br/>
-	 * the class to be converted to may contain methods like this:<br/>
+	 * In order to use implicit type conversion,<br/>
+	 * the class <b>to be converted to</b> may contain methods like this:<br/>
 	 * <code>static R from(T o)</code><br/>
-	 * <b>OR</b> the class of the object (param 'o') to convert may contain
-	 * methods like this:<br/>
+	 * <b>OR</b> the class of the object (param 'o') <b>to convert</b> may
+	 * contain methods like this:<br/>
 	 * <code>toT</code><br/>
 	 * e.g.<br/>
 	 * The following definition means you can convert String to User or convert
-	 * User to String with this method.
+	 * User to String.
 	 * 
 	 * <pre>
+	 * class User{
 	 * static User from(String s)...
 	 * String toString()...
+	 * }
 	 * </pre>
 	 * 
 	 * @param o
@@ -645,7 +641,6 @@ public class Style {
 	 * @param cls
 	 *            the type to convert to
 	 * @return object of converted type
-	 * @since 0.1.1
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T imp(Object o, Class<T> cls) {
