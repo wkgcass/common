@@ -13,4 +13,9 @@ public class CollectionFuncSup<T> extends IterableFuncSup<T> {
 		coll.add(t);
 		return (Coll) this;
 	}
+
+	@Override
+	public int size() {
+		return ((Collection<T>) iterable).size();
+	}
 }

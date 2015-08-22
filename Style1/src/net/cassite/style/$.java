@@ -1,7 +1,6 @@
 package net.cassite.style;
 
 import java.util.Date;
-import java.util.function.Predicate;
 
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
@@ -14,18 +13,18 @@ public class $ extends Style {
 	private $() {
 	}
 
-	private static Predicate<?> alwaysTrue = t -> true;
+	private static RFunc1<Boolean, ?> alwaysTrue = t -> true;
 
 	@SuppressWarnings("unchecked")
-	public static <T> Predicate<T> alwaysTrue() {
-		return (Predicate<T>) alwaysTrue;
+	public static <T> RFunc1<Boolean, T> alwaysTrue() {
+		return (RFunc1<Boolean, T>) alwaysTrue;
 	}
 
 	private static RFunc1<?, ?> copy = e -> e;
 
 	@SuppressWarnings("unchecked")
-	public static <T> RFunc1<T, T> copy() {
-		return (RFunc1<T, T>) copy;
+	public static <R, T> RFunc1<R, T> copy() {
+		return (RFunc1<R, T>) copy;
 	}
 
 	private static def<?> copyFunc = $(copy);

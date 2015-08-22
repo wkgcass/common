@@ -12,6 +12,7 @@ import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
 import net.cassite.style.interfaces.*;
+import net.cassite.style.reflect.ClassSup;
 
 public interface var {
 
@@ -306,11 +307,11 @@ public interface var {
 		return Style.For(i, condition, increment, loop);
 	}
 
-	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, R> loop) {
+	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, LoopInfo<R>> loop) {
 		return Style.For(i, condition, increment, loop);
 	}
 
-	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, R> loop) {
+	default <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, LoopInfo<R>> loop) {
 		return Style.For(i, condition, increment, loop);
 	}
 
@@ -336,11 +337,11 @@ public interface var {
 		return Style.While(condition, loop);
 	}
 
-	default <R> R While(BooleanSupplier condition, VFunc1<R> loop) {
+	default <R> R While(BooleanSupplier condition, VFunc1<LoopInfo<R>> loop) {
 		return Style.While(condition, loop);
 	}
 
-	default <R> R While(BooleanSupplier condition, RFunc1<R, R> loop) {
+	default <R> R While(BooleanSupplier condition, RFunc1<R, LoopInfo<R>> loop) {
 		return Style.While(condition, loop);
 	}
 
@@ -513,6 +514,26 @@ public interface var {
 	@SuppressWarnings("unchecked")
 	default <TYPE> TYPE $(Class<TYPE> cls) {
 		return (TYPE) this;
+	}
+
+	default <T> T avoidNull(T t, RFunc0<T> Default) {
+		return Style.avoidNull(t, Default);
+	}
+
+	// ┌─────────────────────────────────┐
+	// │...........reflection............│
+	// └─────────────────────────────────┘
+
+	default <T> ClassSup<T> cls(Class<T> cls) {
+		return Style.cls(cls);
+	}
+
+	default ClassSup<?> cls(String clsName) {
+		return Style.cls(clsName);
+	}
+
+	default ClassSup<?> cls(Object obj) {
+		return Style.cls(obj);
 	}
 
 }

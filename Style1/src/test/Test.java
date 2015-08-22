@@ -11,6 +11,7 @@ import net.cassite.style.Async;
 import net.cassite.style.Style;
 import net.cassite.style.def;
 import net.cassite.style.var;
+import net.cassite.style.reflect.ClassSup;
 
 public class Test implements var {
 
@@ -48,6 +49,7 @@ public class Test implements var {
 		t.testCollection();
 		t.testList();
 		t.testMap();
+		t.reflectionTest();
 	}
 
 	public void testFuncCreation() {
@@ -171,14 +173,14 @@ public class Test implements var {
 				Break();
 			System.out.println(i);
 		});
-		System.out.println(For(1).to(21).step(2).loop((Integer i, Integer res) -> {
+		System.out.println((Integer) For(1).to(21).step(2).loop((i, res) -> {
 			System.out.println("RES:" + res);
 			if (i < 4)
 				return Continue();
 			if (i > 15)
 				return BreakWithResult(i + 100);
 			else
-				return res == null ? i : i + res;
+				return res.lastRes == null ? i : i + (Integer) res.lastRes;
 		}));
 		System.out.println(For(1).to(21).step(2).loop(i -> {
 			if (i < 4)
@@ -203,8 +205,8 @@ public class Test implements var {
 						i -> i)
 								.ElseIf(
 										While(() -> true,
-												(Integer res) -> {
-													System.out.println("RES:" + res);
+												(res) -> {
+													System.out.println("RES:" + res.lastRes);
 													BreakWithResult(4);
 												}),
 										i -> i)
@@ -318,5 +320,20 @@ public class Test implements var {
 		System.out.println($(map).findOne((k, v) -> {
 			return k.equals("cass");
 		}));
+	}
+
+	void reflectionTest() {
+		System.out.println("Reflection Simplify");
+		@SuppressWarnings("rawtypes")
+		ClassSup<ArrayList> cls = cls(ArrayList.class);
+
+		System.out.println(cls.field("serialVersionUID", Long.class).get(null));
+		@SuppressWarnings("unchecked")
+		ArrayList<String> list = cls.constructor(int.class).newInstance(16);
+		list.add("test");
+		System.out.println(cls.method("get", Object.class, int.class).invoke(list, 0));
+
+		System.out.println(cls.allFields());
+		System.out.println(cls.allMethods());
 	}
 }

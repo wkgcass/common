@@ -2,7 +2,6 @@ package net.cassite.style;
 
 import java.util.List;
 import java.util.ListIterator;
-import java.util.function.Predicate;
 
 import net.cassite.style.interfaces.*;
 import net.cassite.style.control.*;
@@ -45,47 +44,46 @@ public class ListFuncSup<T> extends CollectionFuncSup<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(Predicate<T> predicate, VFunc1<T> func, int index) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, VFunc1<T> func, int index) {
 		return (R) forThose(predicate, $(func), index);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <R> R forThose(Predicate<T> predicate, VFunc2<T, IteratorInfo<R>> func, int index) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, VFunc2<T, IteratorInfo<R>> func, int index) {
 		return (R) forThose(predicate, $(func), index);
 	}
 
-	public <R> R forThose(Predicate<T> predicate, RFunc1<R, T> func, int index) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, RFunc1<R, T> func, int index) {
 		return (R) forThose(predicate, $(func), index);
 	}
 
-	public <R> R forThose(Predicate<T> predicate, RFunc2<R, T, IteratorInfo<R>> func, int index) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, RFunc2<R, T, IteratorInfo<R>> func, int index) {
 		return (R) forThose(predicate, $(func), index);
 	}
 
 	@Override
-	public <R> R forThose(Predicate<T> predicate, def<R> func) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, def<R> func) {
 		return (R) forThose(predicate, func, 0);
 	}
 
-	public <R> R forThose(Predicate<T> predicate, def<R> func, int index) {
+	public <R> R forThose(RFunc1<Boolean, T> predicate, def<R> func, int index) {
 		ListIterator<T> it = ((List<T>) iterable).listIterator(index);
 		IteratorInfo<R> info = new IteratorInfo<R>();
-		return While(() -> it.hasNext(), (res) -> {
+		return While(() -> it.hasNext(), (loopInfo) -> {
 			int previousIndex = it.previousIndex();
 			int nextIndex = it.nextIndex();
 			boolean hasPrevious = it.hasPrevious();
 			boolean hasNext = it.hasNext();
 			T t = it.next();
 			try {
-				if (predicate.test(t))
+				return If(predicate.apply(t), () -> {
 					if (func.argCount() == 2)
 						return func.apply(t,
 								info.setValues(previousIndex, nextIndex, hasPrevious,
-										hasNext, previousIndex + 1, res));
+										hasNext, loopInfo.currentIndex, loopInfo.effectiveIndex, loopInfo.lastRes));
 					else
 						return func.apply(t);
-				else
-					return null;
+				}).Else(() -> null);
 			} catch (Throwable err) {
 				StyleRuntimeException sErr = $(err);
 				Throwable throwable = sErr.origin();

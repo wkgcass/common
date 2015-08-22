@@ -38,11 +38,11 @@ public class ForSupport<N extends Number> extends Style {
 		}
 
 		@SuppressWarnings("unchecked")
-		public <R, T extends N> R loop(VFunc2<T, R> doLoop) {
+		public <R, T extends N> R loop(VFunc2<T, LoopInfo<R>> doLoop) {
 			return (R) loop($(doLoop));
 		}
 
-		public <R, T extends N> R loop(RFunc2<R, T, R> doLoop) {
+		public <R, T extends N> R loop(RFunc2<R, T, LoopInfo<R>> doLoop) {
 			return loop($(doLoop));
 		}
 

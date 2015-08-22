@@ -59,18 +59,18 @@ public class MapFuncSup<K, V> {
 		Iterator<K> it = map.keySet().iterator();
 		IteratorInfo<R> info = new IteratorInfo<R>();
 		ptr<Integer> i = Style.ptr(0);
-		return Style.While(() -> it.hasNext(), (res) -> {
+		return Style.While(() -> it.hasNext(), (loopInfo) -> {
 			K k = it.next();
 			V v = map.get(k);
 			try {
-				if (predicate.apply(k, v))
+				return Style.If(predicate.apply(k, v), () -> {
 					if (func.argCount() == 3)
 						return func.apply(k, v,
-								info.setValues(i.item - 1, i.item + 1, i.item != 0, it.hasNext(), i.item, res));
+								info.setValues(i.item - 1, i.item + 1, i.item != 0, it.hasNext(), loopInfo.currentIndex,
+										loopInfo.effectiveIndex, loopInfo.lastRes));
 					else
 						return func.apply(k, v);
-				else
-					return null;
+				}).Else(() -> null);
 			} catch (Throwable err) {
 				StyleRuntimeException sErr = Style.$(err);
 				Throwable t = sErr.origin();
@@ -115,6 +115,31 @@ public class MapFuncSup<K, V> {
 
 	public <R, Coll extends Collection<R>> TransformerColl<K, V, R, Coll> to(Coll collection) {
 		return new TransformerColl<K, V, R, Coll>(map, collection);
+	}
+
+	public static class TransformerArr<K, V, R> {
+		private Map<K, V> map;
+		private R[] retArr;
+
+		TransformerArr(Map<K, V> map, R[] retArr) {
+			this.map = map;
+			this.retArr = retArr;
+		}
+
+		public R[] via(RFunc2<R, K, V> method) {
+			return via(Style.$(method));
+		}
+
+		public R[] via(def<R> method) {
+			Style.$(map).forEach((k, v, i) -> {
+				if (i.effectiveIndex == retArr.length) {
+					Style.Break();
+				} else {
+					retArr[i.effectiveIndex] = method.apply(k, v);
+				}
+			});
+			return retArr;
+		}
 	}
 
 	public static class TransformerMap<K, V, K2, V2, M extends Map<K2, V2>> {
@@ -194,5 +219,9 @@ public class MapFuncSup<K, V> {
 				Style.Break();
 			return new Entry<K, V>(k, v);
 		});
+	}
+
+	public int size() {
+		return map.size();
 	}
 }

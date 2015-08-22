@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
 import net.cassite.style.control.*;
 import net.cassite.style.control.$Set;
 import net.cassite.style.interfaces.*;
+import net.cassite.style.reflect.ClassSup;
 
 public class Style {
 
@@ -348,16 +349,20 @@ public class Style {
 
 	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, def<R> loop) {
 		R res = null;
+		LoopInfo<R> info = new LoopInfo<R>();
+		int cursor = 0;
+		int effctiveCursor = 0;
 		for (T ii = i; condition.test(ii); ii = increment.apply(ii)) {
 			try {
 				R tmpRes;
 				if (loop.argCount() == 2) {
-					tmpRes = loop.apply(ii, res);
+					tmpRes = loop.apply(ii, info.setValues(cursor, effctiveCursor, res));
 				} else {
 					tmpRes = loop.apply(ii);
 				}
 				if (tmpRes != null) {
 					res = tmpRes;
+					++effctiveCursor;
 				}
 			} catch (Throwable e) {
 				if (e instanceof StyleRuntimeException) {
@@ -375,6 +380,8 @@ public class Style {
 				} else {
 					throw $(e);
 				}
+			} finally {
+				++cursor;
 			}
 		}
 		return res;
@@ -390,11 +397,13 @@ public class Style {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, R> loop) {
+	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment,
+			VFunc2<T, LoopInfo<R>> loop) {
 		return (R) For(i, condition, increment, $(loop));
 	}
 
-	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, R> loop) {
+	public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment,
+			RFunc2<R, T, LoopInfo<R>> loop) {
 		return (R) For(i, condition, increment, $(loop));
 	}
 
@@ -410,15 +419,19 @@ public class Style {
 
 	public static <R> R While(BooleanSupplier condition, def<R> loop) {
 		R res = null;
+		LoopInfo<R> info = new LoopInfo<>();
+		int currentIndex = 0;
+		int effectiveIndex = 0;
 		while (condition.getAsBoolean()) {
 			try {
 				R tmpRes;
 				if (loop.argCount() == 1)
-					tmpRes = loop.apply(res);
+					tmpRes = loop.apply(info.setValues(currentIndex, effectiveIndex, res));
 				else
 					tmpRes = loop.apply();
 				if (tmpRes != null) {
 					res = tmpRes;
+					++effectiveIndex;
 				}
 			} catch (Throwable e) {
 				if (e instanceof StyleRuntimeException) {
@@ -436,6 +449,8 @@ public class Style {
 				} else {
 					throw $(e);
 				}
+			} finally {
+				++currentIndex;
 			}
 		}
 		return res;
@@ -451,11 +466,11 @@ public class Style {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <R> R While(BooleanSupplier condition, VFunc1<R> loop) {
+	public static <R> R While(BooleanSupplier condition, VFunc1<LoopInfo<R>> loop) {
 		return While(condition, (def<R>) $(loop));
 	}
 
-	public static <R> R While(BooleanSupplier condition, RFunc1<R, R> loop) {
+	public static <R> R While(BooleanSupplier condition, RFunc1<R, LoopInfo<R>> loop) {
 		return While(condition, $(loop));
 	}
 
@@ -659,5 +674,36 @@ public class Style {
 		} catch (Exception e) {
 			throw $(e);
 		}
+	}
+
+	public static <T> T avoidNull(T t, RFunc0<T> Default) {
+		if (t == null)
+			try {
+				return Default.apply();
+			} catch (Throwable throwable) {
+				throw $(throwable);
+			}
+		else
+			return t;
+	}
+
+	// ┌─────────────────────────────────┐
+	// │...........reflection............│
+	// └─────────────────────────────────┘
+
+	public static <T> ClassSup<T> cls(Class<T> cls) {
+		return new ClassSup<>(cls);
+	}
+
+	public static ClassSup<?> cls(String clsName) {
+		try {
+			return cls(Class.forName(clsName));
+		} catch (Exception e) {
+			throw $(e);
+		}
+	}
+
+	public static ClassSup<?> cls(Object obj) {
+		return cls(obj.getClass());
 	}
 }

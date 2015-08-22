@@ -84,8 +84,9 @@ public class Tutorial extends Style {
 				map("cass", 1995).$("john", 1996).$("alpha", 1994));
 		$(map).forEach((k, v, i) -> {
 			if (k.equals("alpha"))
-				Remove();
-			System.out.println("key is:" + k + " value is:" + v + " current index is:" + $(i));
+				Continue();
+			System.out.println("key is:" + k + " value is:" + v + " current index is:" + $(i) + " effective index is:"
+					+ i.effectiveIndex);
 		});
 		// the result is null (because there are no return values in the loop)
 
