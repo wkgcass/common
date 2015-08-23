@@ -12,8 +12,12 @@ public class IfBlock<T, INIT> extends Style {
 
 	private INIT initVal;
 
-	IfBlock(INIT initVal, def<T> body) {
-		this.initVal = initVal;
+	IfBlock(RFunc0<INIT> initVal, def<T> body) {
+		try {
+			this.initVal = initVal.apply();
+		} catch (Throwable e) {
+			throw $(e);
+		}
 		this.body = body;
 		procceed = true;
 	}
@@ -39,10 +43,7 @@ public class IfBlock<T, INIT> extends Style {
 	public T Else(def<T> func) {
 		if (procceed)
 			if (initVal != null && !initVal.equals(false)) {
-				if (body.argCount() == 1)
-					return body.apply(initVal);
-				else
-					return body.apply();
+				return body.apply(initVal);
 			} else {
 				return func.apply();
 			}
@@ -51,34 +52,53 @@ public class IfBlock<T, INIT> extends Style {
 	}
 
 	public IfBlock<T, INIT> ElseIf(INIT init, T val) {
-		return ElseIf(init, () -> val);
+		return ElseIf(() -> init, () -> val);
 	}
 
 	@SuppressWarnings("unchecked")
 	public IfBlock<T, INIT> ElseIf(INIT init, VFunc1<INIT> body) {
-		return ElseIf(init, (def<T>) $(body));
+		return ElseIf(() -> init, (def<T>) $(body));
 	}
 
 	public IfBlock<T, INIT> ElseIf(INIT init, RFunc1<T, INIT> body) {
-		return ElseIf(init, $(body));
+		return ElseIf(() -> init, $(body));
 	}
 
 	@SuppressWarnings("unchecked")
 	public IfBlock<T, INIT> ElseIf(INIT init, VFunc0 body) {
-		return ElseIf(init, (def<T>) $(body));
+		return ElseIf(() -> init, (def<T>) $(body));
 	}
 
 	public IfBlock<T, INIT> ElseIf(INIT init, RFunc0<T> body) {
+		return ElseIf(() -> init, $(body));
+	}
+
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, T val) {
+		return ElseIf(init, () -> val);
+	}
+
+	@SuppressWarnings("unchecked")
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, VFunc1<INIT> body) {
+		return ElseIf(init, (def<T>) $(body));
+	}
+
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, RFunc1<T, INIT> body) {
 		return ElseIf(init, $(body));
 	}
 
-	public IfBlock<T, INIT> ElseIf(INIT init, def<T> body) {
+	@SuppressWarnings("unchecked")
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, VFunc0 body) {
+		return ElseIf(init, (def<T>) $(body));
+	}
+
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, RFunc0<T> body) {
+		return ElseIf(init, $(body));
+	}
+
+	public IfBlock<T, INIT> ElseIf(RFunc0<INIT> init, def<T> body) {
 		if (procceed)
 			if (initVal != null && !initVal.equals(false)) {
-				if (body.argCount() == 1)
-					return new IfBlock<T, INIT>(this.body.apply(initVal));
-				else
-					return new IfBlock<T, INIT>(this.body.apply());
+				return new IfBlock<T, INIT>(this.body.apply(initVal));
 			} else {
 				return new IfBlock<T, INIT>(init, body);
 			}
@@ -89,10 +109,7 @@ public class IfBlock<T, INIT> extends Style {
 	public T End() {
 		if (procceed)
 			if (initVal != null && !initVal.equals(false)) {
-				if (body.argCount() == 1)
-					return body.apply(initVal);
-				else
-					return body.apply();
+				return body.apply(initVal);
 			} else {
 				return null;
 			}

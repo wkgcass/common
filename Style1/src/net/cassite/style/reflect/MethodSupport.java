@@ -44,6 +44,10 @@ public class MethodSupport<R, ObjectType> extends Style implements MemberSup<Met
 		return method.getParameterTypes();
 	}
 
+	public int argCount() {
+		return method.getParameterCount();
+	}
+
 	public String toString() {
 		return method.toString();
 	}
