@@ -1454,6 +1454,26 @@ public interface var {
                 return Style.map(key, value);
         }
 
+        /**
+         * Create a JSONLike object from an array similar to JSON
+         * 
+         * @param json
+         *                an array look like JSON.<br/>
+         *                e.g.
+         * 
+         *                <pre>
+         * new Object["name" ,"cass",
+         *           "age", 20,
+         *           "sex", "male"]
+         *                </pre>
+         * 
+         * @return a new JSONLike object
+         * @see JSONLike
+         */
+        default JSONLike<String, Object> map(Object[] json) {
+                return Style.map(json);
+        }
+
         // date
 
         /**
@@ -1687,6 +1707,19 @@ public interface var {
                 return Style.avoidNull(t, Default);
         }
 
+        /**
+         * Swap two values in an un-traditional way<br/>
+         * The two values should be the same type
+         * (a.getClass().equals(b.getClass())) and are not primitives <br/>
+         * or they are same kind of array and length are the same.
+         * 
+         * @param a
+         * @param b
+         */
+        default void swap(Object a, Object b) {
+                Style.swap(a, b);
+        }
+
         // ┌─────────────────────────────────┐
         // │...........reflection............│
         // └─────────────────────────────────┘
@@ -1723,7 +1756,7 @@ public interface var {
          * @return Class supporter
          * @see ClassSup
          */
-        default ClassSup<?> cls(Object obj) {
+        default ClassSup<Object> cls(Object obj) {
                 return Style.cls(obj);
         }
 

@@ -1,5 +1,6 @@
 package net.cassite.style;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -19,6 +20,7 @@ import net.cassite.style.readonly.ModifyReadOnlyException;
 import net.cassite.style.readonly.ReadOnly;
 import net.cassite.style.readonly.Writable;
 import net.cassite.style.reflect.ClassSup;
+import net.cassite.style.reflect.FieldSupport;
 import net.cassite.style.reflect.MethodSupport;
 import net.cassite.style.reflect.ProxyHandler;
 
@@ -1575,6 +1577,35 @@ public abstract class Style {
                 return new JSONLike<K, V>(key, value);
         }
 
+        /**
+         * Create a JSONLike object from an array similar to JSON
+         * 
+         * @param json
+         *                an array look like JSON.<br/>
+         *                e.g.
+         * 
+         *                <pre>
+         * new Object["name" ,"cass",
+         *           "age", 20,
+         *           "sex", "male"]
+         *                </pre>
+         * 
+         * @return a new JSONLike object
+         * @see JSONLike
+         */
+        public static JSONLike<String, Object> map(Object[] json) {
+                if (json.length % 2 != 0 || json.length == 0) {
+                        throw new RuntimeException("Wrong json format");
+                }
+                JSONLike<String, Object> map = new JSONLike<String, Object>(json[0].toString(), json[1]);
+                for (int i = 2; i < json.length; i += 2) {
+                        String key = json[i].toString();
+                        Object value = json[i + 1];
+                        map.$(key, value);
+                }
+                return map;
+        }
+
         // date
 
         /**
@@ -1839,6 +1870,37 @@ public abstract class Style {
                         }
                 else
                         return t;
+        }
+
+        /**
+         * Swap two values in an un-traditional way<br/>
+         * The two values should be the same type
+         * (a.getClass().equals(b.getClass())) and are not primitives <br/>
+         * or they are same kind of array and length are the same.
+         * 
+         * @param a
+         * @param b
+         */
+        public static void swap(Object a, Object b) {
+                if (!a.getClass().equals(b.getClass())) {
+                        throw new RuntimeException();
+                }
+                if (a.getClass().isArray() && Array.getLength(a) == Array.getLength(b)) {
+                        for (int i = 0; i < Array.getLength(a); ++i) {
+                                Object tmp = Array.get(a, i);
+                                Array.set(a, i, Array.get(b, i));
+                                Array.set(b, i, tmp);
+                        }
+                } else {
+                        List<FieldSupport<?, Object>> fields = cls(a).allFields();
+                        $(fields).forEach(f -> {
+                                if (!f.isStatic()) {
+                                        Object tmp = f.get(a);
+                                        f.set(a, f.get(b));
+                                        f.set(b, tmp);
+                                }
+                        });
+                }
         }
 
         // ┌─────────────────────────────────┐

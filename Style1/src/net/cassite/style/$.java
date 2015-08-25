@@ -340,7 +340,7 @@ public class $ extends Style {
         public static final def<Object> printHandlerFunc = $(printHandler);
 
         /**
-         * Used as 3nd argument in {@link Style#Switch(Object, Class, RFunc2)}
+         * Used as 3rd argument in {@link Style#Switch(Object, Class, RFunc2)}
          * <br/>
          * When the switch is a normal switch when two objects' value are equal,
          * do case.
@@ -348,7 +348,7 @@ public class $ extends Style {
         public static final RFunc2<Boolean, ?, ?> eql = (a, b) -> a.equals(b);
 
         /**
-         * Used as 3nd argument in {@link Style#Switch(Object, Class, RFunc2)}
+         * Used as 3rd argument in {@link Style#Switch(Object, Class, RFunc2)}
          * <br/>
          * When the switch is a normal switch when two objects' value are equal,
          * do case.
@@ -361,7 +361,7 @@ public class $ extends Style {
         }
 
         /**
-         * Used as 3nd argument in {@link Style#Switch(Object, Class, def)}
+         * Used as 3rd argument in {@link Style#Switch(Object, Class, def)}
          * <br/>
          * When the switch is a normal switch when two objects' value are equal,
          * do case.
