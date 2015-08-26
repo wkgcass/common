@@ -10,8 +10,8 @@ import net.cassite.style.Store;
 import net.cassite.style.Style;
 
 /**
- * A demo showing how to do logic/iteration control<br/>
- * Including for/while loop, enhanced switch,<br/>
+ * A demo showing how to do logic/iteration control<br>
+ * Including for/while loop, enhanced switch,<br>
  * and how to use break/continue/remove
  * 
  * @author wkgcass

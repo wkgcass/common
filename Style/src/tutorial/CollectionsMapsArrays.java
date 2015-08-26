@@ -11,7 +11,7 @@ import net.cassite.style.Entry;
 import net.cassite.style.Style;
 
 /**
- * A demo shows how to create, iterate on, or transform a collection/map<br/>
+ * A demo shows how to create, iterate on, or transform a collection/map<br>
  * 
  * @author wkgcass
  *

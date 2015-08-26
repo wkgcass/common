@@ -5,8 +5,8 @@ import net.cassite.style.Style;
 import net.cassite.style.Supportters.function;
 
 /**
- * This demo shows function grammar <br/>
- * Including creating functions through lambda expressions <br/>
+ * This demo shows function grammar <br>
+ * Including creating functions through lambda expressions <br>
  * and using async/await and callback to simplify async programming
  * 
  * @author wkgcass

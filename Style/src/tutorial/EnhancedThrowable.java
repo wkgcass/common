@@ -4,7 +4,7 @@ import net.cassite.style.Supportters.StyleRuntimeException;
 import net.cassite.style.Style;
 
 /**
- * Enhanced Throwable<br/>
+ * Enhanced Throwable<br>
  * 
  * @author wkgcass
  *

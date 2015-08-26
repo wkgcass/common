@@ -449,14 +449,14 @@ public interface var {
 	}
 
 	/**
-	 * Implicit Type Conversion.<br/>
-	 * To achieve implicit type conversion,<br/>
-	 * the class to be converted to may contain methods like this:<br/>
-	 * <code>static R from(T o)</code><br/>
+	 * Implicit Type Conversion.<br>
+	 * To achieve implicit type conversion,<br>
+	 * the class to be converted to may contain methods like this:<br>
+	 * <code>static R from(T o)</code><br>
 	 * <b>OR</b> the class of the object (param 'o') to convert may contain
-	 * methods like this:<br/>
-	 * <code>toT</code><br/>
-	 * e.g.<br/>
+	 * methods like this:<br>
+	 * <code>toT</code><br>
+	 * e.g.<br>
 	 * The following definition means you can convert String to User or convert
 	 * User to String with this method.
 	 * 
@@ -476,7 +476,7 @@ public interface var {
 	}
 
 	/**
-	 * get object in real type<br/>
+	 * get object in real type<br>
 	 * if you defined object using <code>var v=...</code>
 	 * 
 	 * @return object in real type
@@ -487,7 +487,7 @@ public interface var {
 	}
 
 	/**
-	 * get object in targeted type<br/>
+	 * get object in targeted type<br>
 	 * if you defined object using <code>var v=...</code>
 	 * 
 	 * @param cls
