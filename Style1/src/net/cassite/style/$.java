@@ -242,7 +242,7 @@ public class $ extends Style {
          * @return date represents yesterday
          */
         public static Date yesterday() {
-                return $(new Date()).substract(d -> d.day(1)).getDate();
+                return $(new Date()).subtract(d -> d.day(1)).getDate();
         }
 
         /**

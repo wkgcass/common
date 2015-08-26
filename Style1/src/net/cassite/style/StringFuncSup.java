@@ -4,6 +4,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
+/**
+ * Supporter for strings
+ * 
+ * @author wkgcass
+ *
+ */
 public class StringFuncSup extends Style {
         private String str;
 
@@ -11,10 +17,26 @@ public class StringFuncSup extends Style {
                 this.str = str;
         }
 
+        /**
+         * fill the string like <code>My name is {0}, I'm {1} years old</code>
+         * with given objects.<br/>
+         * simply invoke {@link MessageFormat#format(String, Object...)}
+         * 
+         * @param fill
+         * @return formated string
+         */
         public String fill(Object... fill) {
                 return MessageFormat.format(str, fill);
         }
 
+        /**
+         * fill the string like
+         * <code>My name is ${name}, I'm ${age} years old</code> with fields in
+         * the given object.
+         * 
+         * @param obj
+         * @return formated string
+         */
         public String from(Object obj) {
                 StringBuilder sb = new StringBuilder(str);
                 Method[] methods = obj.getClass().getMethods();

@@ -145,7 +145,7 @@ public class ArrayFuncSup<T> implements A1FuncSup<T> {
         }
 
         /**
-         * Interface of classes to tramsform the array into another array
+         * Interface of classes to transform the array into another array
          * 
          * @author wkgcass
          *

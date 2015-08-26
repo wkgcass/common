@@ -93,7 +93,7 @@ public class Tutorial extends Style {
 		Date date = new Date();
 		$(date).add(d -> d.day(1).hour(2).minute(3).second(4).milli(5))
 				.nextYear().nextMonth()
-				.substract(d -> d.day(5).hour(4).minute(3).second(2).milli(1));
+				.subtract(d -> d.day(5).hour(4).minute(3).second(2).milli(1));
 		System.out.println($(date).toString("YYYY-mm-dd hh:ii:ss A"));
 
 		System.out.println(regex("/<[^>]*>/g").replace("<html>abc</html>", ""));

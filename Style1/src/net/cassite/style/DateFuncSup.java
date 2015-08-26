@@ -133,7 +133,7 @@ public class DateFuncSup extends Style {
          *                date to add
          * @return <code>this</code>
          */
-        public DateFuncSup substract(RFunc1<DateSeperator, DateSeperator> dateFunction) {
+        public DateFuncSup subtract(RFunc1<DateSeperator, DateSeperator> dateFunction) {
                 return subtract($(dateFunction));
         }
 

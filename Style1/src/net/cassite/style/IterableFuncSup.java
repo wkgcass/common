@@ -100,7 +100,7 @@ public class IterableFuncSup<T> implements A1FuncSup<T> {
         }
 
         /**
-         * Interface of classes to tramsform an iterable object into another
+         * Interface of classes to transform an iterable object into another
          * array
          * 
          * @author wkgcass
