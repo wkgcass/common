@@ -56,6 +56,18 @@ public class IterableFuncSup<T> implements A1FuncSup<T> {
                 return new Transformer<>(iterable, collection);
         }
 
+        /**
+         * Transformer which transforms an iterable into a collection
+         * 
+         * @author wkgcass
+         *
+         * @param <R>
+         *                element type of collection to transform to
+         * @param <T>
+         *                element type of the iterable
+         * @param <Coll>
+         *                collection
+         */
         public static class Transformer<R, T, Coll extends Collection<R>> implements A1Transformer<R, T, Coll> {
                 protected final Coll collection;
                 protected final Iterable<T> iterable;
@@ -87,6 +99,17 @@ public class IterableFuncSup<T> implements A1FuncSup<T> {
                 });
         }
 
+        /**
+         * Interface of classes to tramsform an iterable object into another
+         * array
+         * 
+         * @author wkgcass
+         *
+         * @param <R>
+         *                returned array type
+         * @param <T>
+         *                input iterable type
+         */
         public static class ArrTransformer<R, T> implements A1ArrTransformer<R, T> {
                 protected final R[] retArr;
                 protected final Iterable<T> iterable;

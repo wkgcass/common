@@ -3,7 +3,7 @@ package net.cassite.style;
 import net.cassite.style.interfaces.RFunc1;
 
 /**
- * Interface of classes to tramsform an array or an iterable object into another
+ * Interface of classes to transform an array or an iterable object into another
  * array
  * 
  * @author wkgcass

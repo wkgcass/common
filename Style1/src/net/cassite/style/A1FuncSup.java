@@ -190,7 +190,7 @@ public interface A1FuncSup<T> extends var {
         <R> R forThose(RFunc1<Boolean, T> predicate, def<R> func);
 
         /**
-         * Return first element in the array/iterable
+         * Return first element in the array/iterable or null if not found
          * 
          * @return
          */

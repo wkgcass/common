@@ -1,6 +1,5 @@
 package net.cassite.style;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -20,7 +19,6 @@ import net.cassite.style.readonly.ModifyReadOnlyException;
 import net.cassite.style.readonly.ReadOnly;
 import net.cassite.style.readonly.Writable;
 import net.cassite.style.reflect.ClassSup;
-import net.cassite.style.reflect.FieldSupport;
 import net.cassite.style.reflect.MethodSupport;
 import net.cassite.style.reflect.ProxyHandler;
 
@@ -1500,8 +1498,7 @@ public abstract class Style {
          *                <b>false</b> in traditional if expression. in other
          *                cases, considered true
          * @param body
-         *                takes in INIT value, and return null if init is
-         *                considered true
+         *                return null if init is considered true
          * @return values or function results defined in the 2nd param of
          *         {@link #If(RFunc0, def)} or the 2nd param of
          *         {@link IfBlock#ElseIf(RFunc0, def)} or the 1st param of
@@ -1870,37 +1867,6 @@ public abstract class Style {
                         }
                 else
                         return t;
-        }
-
-        /**
-         * Swap two values in an un-traditional way<br/>
-         * The two values should be the same type
-         * (a.getClass().equals(b.getClass())) and are not primitives <br/>
-         * or they are same kind of array and length are the same.
-         * 
-         * @param a
-         * @param b
-         */
-        public static void swap(Object a, Object b) {
-                if (!a.getClass().equals(b.getClass())) {
-                        throw new RuntimeException();
-                }
-                if (a.getClass().isArray() && Array.getLength(a) == Array.getLength(b)) {
-                        for (int i = 0; i < Array.getLength(a); ++i) {
-                                Object tmp = Array.get(a, i);
-                                Array.set(a, i, Array.get(b, i));
-                                Array.set(b, i, tmp);
-                        }
-                } else {
-                        List<FieldSupport<?, Object>> fields = cls(a).allFields();
-                        $(fields).forEach(f -> {
-                                if (!f.isStatic()) {
-                                        Object tmp = f.get(a);
-                                        f.set(a, f.get(b));
-                                        f.set(b, tmp);
-                                }
-                        });
-                }
         }
 
         // ┌─────────────────────────────────┐

@@ -4,6 +4,12 @@ import java.util.Arrays;
 
 import net.cassite.style.interfaces.*;
 
+/**
+ * Joins results of a group of Async process.
+ * 
+ * @author wkgcass
+ *
+ */
 public class AsyncGroup {
         private Async<?>[] group;
 
