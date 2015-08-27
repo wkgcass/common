@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 import net.cassite.style.control.*;
@@ -892,12 +891,12 @@ public abstract class Style {
          *                the loop to run
          * @return last not null loop value
          */
-        public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, def<R> loop) {
+        public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, def<R> loop) {
                 R res = null;
                 LoopInfo<R> info = new LoopInfo<R>();
                 int cursor = 0;
                 int effctiveCursor = 0;
-                for (T ii = i; condition.test(ii); ii = increment.apply(ii)) {
+                for (T ii = i; $(condition).applyCheckPrimitive(boolean.class, ii); ii = increment.apply(ii)) {
                         try {
                                 R tmpRes;
                                 tmpRes = loop.apply(ii, info.setValues(cursor, effctiveCursor, res));
@@ -934,7 +933,7 @@ public abstract class Style {
          * Check <a href="https://github.com/wkgcass/Style">tutorial</a> for
          * more info about 'last loop value'<br>
          * This method simply invokes
-         * {@link #For(Object, Predicate, UnaryOperator, def)}
+         * {@link #For(Object, RFunc1, UnaryOperator, def)}
          * 
          * @param i
          *                init value
@@ -945,10 +944,10 @@ public abstract class Style {
          * @param loop
          *                the loop takes in i and run without results
          * @return last not null loop value
-         * @see #For(Object, Predicate, UnaryOperator, def)
+         * @see #For(Object, RFunc1, UnaryOperator, def)
          */
         @SuppressWarnings("unchecked")
-        public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc1<T> loop) {
+        public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, VFunc1<T> loop) {
                 return (R) For(i, condition, increment, $(loop));
         }
 
@@ -958,7 +957,7 @@ public abstract class Style {
          * Check <a href="https://github.com/wkgcass/Style">tutorial</a> for
          * more info about 'last loop value'<br>
          * This method simply invokes
-         * {@link #For(Object, Predicate, UnaryOperator, def)}
+         * {@link #For(Object, RFunc1, UnaryOperator, def)}
          * 
          * @param i
          *                init value
@@ -969,9 +968,9 @@ public abstract class Style {
          * @param loop
          *                the loop takes in i and run and return a result
          * @return last not null loop value
-         * @see #For(Object, Predicate, UnaryOperator, def)
+         * @see #For(Object, RFunc1, UnaryOperator, def)
          */
-        public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc1<R, T> loop) {
+        public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, RFunc1<R, T> loop) {
                 return (R) For(i, condition, increment, $(loop));
         }
 
@@ -981,7 +980,7 @@ public abstract class Style {
          * Check <a href="https://github.com/wkgcass/Style">tutorial</a> for
          * more info about 'last loop value'<br>
          * This method simply invokes
-         * {@link #For(Object, Predicate, UnaryOperator, def)}
+         * {@link #For(Object, RFunc1, UnaryOperator, def)}
          * 
          * @param i
          *                init value
@@ -993,10 +992,10 @@ public abstract class Style {
          *                the loop takes in i and loop info and run without
          *                results
          * @return last not null loop value
-         * @see #For(Object, Predicate, UnaryOperator, def)
+         * @see #For(Object, RFunc1, UnaryOperator, def)
          */
         @SuppressWarnings("unchecked")
-        public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, VFunc2<T, LoopInfo<R>> loop) {
+        public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, VFunc2<T, LoopInfo<R>> loop) {
                 return (R) For(i, condition, increment, $(loop));
         }
 
@@ -1006,7 +1005,7 @@ public abstract class Style {
          * Check <a href="https://github.com/wkgcass/Style">tutorial</a> for
          * more info about 'last loop value'<br>
          * This method simply invokes
-         * {@link #For(Object, Predicate, UnaryOperator, def)}
+         * {@link #For(Object, RFunc1, UnaryOperator, def)}
          * 
          * @param i
          *                init value
@@ -1018,9 +1017,9 @@ public abstract class Style {
          *                the loop takes in i and loop info and run and return a
          *                result
          * @return last not null loop value
-         * @see #For(Object, Predicate, UnaryOperator, def)
+         * @see #For(Object, RFunc, UnaryOperator, def)
          */
-        public static <T, R> R For(T i, Predicate<T> condition, UnaryOperator<T> increment, RFunc2<R, T, LoopInfo<R>> loop) {
+        public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, RFunc2<R, T, LoopInfo<R>> loop) {
                 return (R) For(i, condition, increment, $(loop));
         }
 
@@ -1063,12 +1062,12 @@ public abstract class Style {
          *                the loop to run
          * @return loop result
          */
-        public static <R> R While(BooleanSupplier condition, def<R> loop) {
+        public static <R> R While(RFunc0<Boolean> condition, def<R> loop) {
                 R res = null;
                 LoopInfo<R> info = new LoopInfo<>();
                 int currentIndex = 0;
                 int effectiveIndex = 0;
-                while (condition.getAsBoolean()) {
+                while ($(condition).applyCheckPrimitive(boolean.class)) {
                         try {
                                 R tmpRes;
                                 tmpRes = loop.apply(info.setValues(currentIndex, effectiveIndex, res));
@@ -1108,10 +1107,10 @@ public abstract class Style {
          * @param loop
          *                the loop to run without results
          * @return loop result
-         * @see #While(BooleanSupplier, def)
+         * @see #While(RFunc0, def)
          */
         @SuppressWarnings("unchecked")
-        public static <R> R While(BooleanSupplier condition, VFunc0 loop) {
+        public static <R> R While(RFunc0<Boolean> condition, VFunc0 loop) {
                 return While(condition, (def<R>) $(loop));
         }
 
@@ -1124,9 +1123,9 @@ public abstract class Style {
          * @param loop
          *                the loop to run and return a result
          * @return loop result
-         * @see #While(BooleanSupplier, def)
+         * @see #While(RFun0, def)
          */
-        public static <R> R While(BooleanSupplier condition, RFunc0<R> loop) {
+        public static <R> R While(RFunc0<Boolean> condition, RFunc0<R> loop) {
                 return While(condition, $(loop));
         }
 
@@ -1139,10 +1138,10 @@ public abstract class Style {
          * @param loop
          *                the loop takes in loop info and run without results
          * @return loop result
-         * @see #While(BooleanSupplier, def)
+         * @see #While(RFunc0, def)
          */
         @SuppressWarnings("unchecked")
-        public static <R> R While(BooleanSupplier condition, VFunc1<LoopInfo<R>> loop) {
+        public static <R> R While(RFunc0<Boolean> condition, VFunc1<LoopInfo<R>> loop) {
                 return While(condition, (def<R>) $(loop));
         }
 
@@ -1156,9 +1155,9 @@ public abstract class Style {
          *                the loop takes in loop info and run and return a
          *                result
          * @return loop result
-         * @see #While(BooleanSupplier, def)
+         * @see #While(RFunc0, def)
          */
-        public static <R> R While(BooleanSupplier condition, RFunc1<R, LoopInfo<R>> loop) {
+        public static <R> R While(RFunc0<Boolean> condition, RFunc1<R, LoopInfo<R>> loop) {
                 return While(condition, $(loop));
         }
 
