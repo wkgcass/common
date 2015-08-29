@@ -1,5 +1,7 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
+import net.cassite.style.def;
+import net.cassite.style.var;
 import net.cassite.style.interfaces.RFunc1;
 
 /**

@@ -1,4 +1,4 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
 import java.util.Collection;
 

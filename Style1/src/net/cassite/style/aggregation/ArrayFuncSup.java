@@ -1,5 +1,7 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
+import net.cassite.style.$;
+import net.cassite.style.def;
 import net.cassite.style.interfaces.*;
 
 import java.util.Collection;

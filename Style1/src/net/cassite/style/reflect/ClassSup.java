@@ -5,8 +5,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.cassite.style.A1FuncSup;
 import net.cassite.style.Style;
+import net.cassite.style.aggregation.A1FuncSup;
 
 /**
  * Supporter for Class objects

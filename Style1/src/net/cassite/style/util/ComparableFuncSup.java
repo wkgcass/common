@@ -1,4 +1,4 @@
-package net.cassite.style;
+package net.cassite.style.util;
 
 /**
  * Supporter of Comparable objects.<br>

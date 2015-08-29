@@ -1,4 +1,6 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
+
+import net.cassite.style.LoopInfo;
 
 /**
  * Info about current Iterator.<br>

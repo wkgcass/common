@@ -1,4 +1,4 @@
-package net.cassite.style.readonly;
+package net.cassite.style.reflect.readonly;
 
 import java.lang.reflect.Method;
 

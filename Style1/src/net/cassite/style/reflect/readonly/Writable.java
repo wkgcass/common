@@ -1,4 +1,4 @@
-package net.cassite.style.readonly;
+package net.cassite.style.reflect.readonly;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface ReadOnly {
+public @interface Writable {
+
 }

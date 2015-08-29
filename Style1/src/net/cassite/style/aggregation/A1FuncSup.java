@@ -1,8 +1,11 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.cassite.style.$;
+import net.cassite.style.def;
+import net.cassite.style.var;
 import net.cassite.style.interfaces.RFunc1;
 import net.cassite.style.interfaces.RFunc2;
 import net.cassite.style.interfaces.VFunc1;

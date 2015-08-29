@@ -4,8 +4,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
 import net.cassite.style.$;
-import net.cassite.style.A1FuncSup;
 import net.cassite.style.Style;
+import net.cassite.style.aggregation.A1FuncSup;
 
 /**
  * Supporter for Constructors

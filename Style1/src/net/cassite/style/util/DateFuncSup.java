@@ -1,10 +1,12 @@
-package net.cassite.style;
+package net.cassite.style.util;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.cassite.style.Style;
+import net.cassite.style.def;
 import net.cassite.style.interfaces.RFunc1;
 
 /**

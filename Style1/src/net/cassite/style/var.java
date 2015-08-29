@@ -9,12 +9,22 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
 
+import net.cassite.style.aggregation.ArrayFuncSup;
+import net.cassite.style.aggregation.CollectionFuncSup;
+import net.cassite.style.aggregation.IterableFuncSup;
+import net.cassite.style.aggregation.IteratorInfo;
+import net.cassite.style.aggregation.ListFuncSup;
+import net.cassite.style.aggregation.MapFuncSup;
 import net.cassite.style.control.Break;
 import net.cassite.style.control.Continue;
 import net.cassite.style.control.Remove;
 import net.cassite.style.interfaces.*;
 import net.cassite.style.reflect.ClassSup;
 import net.cassite.style.reflect.ProxyHandler;
+import net.cassite.style.util.ComparableFuncSup;
+import net.cassite.style.util.DateFuncSup;
+import net.cassite.style.util.RegEx;
+import net.cassite.style.util.StringFuncSup;
 
 /**
  * All functions in <b>Style tool box</b> are provided both in <b>Style</b> and
@@ -1804,6 +1814,22 @@ public interface var {
          */
         default <R> R readOnly(R toReadOnly) {
                 return Style.readOnly(toReadOnly);
+        }
+
+        /**
+         * Join lists into one, the joined list's elements are in order of
+         * argument order and original lists' element order<br/>
+         * you cannot modify the returned joined list's size.<br/>
+         * in other words, the joined list doesn't support methods like add,
+         * remove, addAll, retainAll, removeAll...
+         * 
+         * @param toJoin
+         *                the lists to join
+         * @return a joined list
+         */
+        @SuppressWarnings("unchecked")
+        default <T> List<T> join(List<T>... toJoin) {
+                return Style.join(toJoin);
         }
 
 }

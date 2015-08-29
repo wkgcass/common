@@ -1,8 +1,10 @@
-package net.cassite.style;
+package net.cassite.style.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
+
+import net.cassite.style.Style;
 
 /**
  * Supporter for strings

@@ -1,10 +1,15 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.cassite.style.Entry;
+import net.cassite.style.Style;
+import net.cassite.style.StyleRuntimeException;
+import net.cassite.style.def;
+import net.cassite.style.ptr;
 import net.cassite.style.control.Remove;
 import net.cassite.style.interfaces.*;
 

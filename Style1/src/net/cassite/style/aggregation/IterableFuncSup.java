@@ -1,8 +1,11 @@
-package net.cassite.style;
+package net.cassite.style.aggregation;
 
 import java.util.Collection;
 import java.util.Iterator;
 
+import net.cassite.style.StyleRuntimeException;
+import net.cassite.style.def;
+import net.cassite.style.ptr;
 import net.cassite.style.control.*;
 import net.cassite.style.interfaces.RFunc1;
 
