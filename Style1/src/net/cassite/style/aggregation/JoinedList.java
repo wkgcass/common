@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import net.cassite.style.Entry;
+import net.cassite.style.ptr;
 
 public class JoinedList<E> extends Aggregation implements List<E> {
         private List<List<E>> lists;
@@ -46,20 +47,14 @@ public class JoinedList<E> extends Aggregation implements List<E> {
 
         @Override
         public Iterator<E> iterator() {
-                // TODO Auto-generated method stub
-                return null;
+                return listIterator(0);
         }
 
         @Override
         public Object[] toArray() {
-                Object[] arr = new Object[lists.isEmpty() ? 0 : (int) $(lists).forEach((e, i) -> {
-                        return (Integer) avoidNull(i.lastRes, 0) + e.size();
-                })];
-                $(lists).forEach((list, i) -> {
-                        return $(list).forEach((e, j) -> {
-                                arr[(int) avoidNull(i.lastRes, 0) + (int) avoidNull(j.lastRes, 0)] = e;
-                                return (int) avoidNull(i.lastRes, 0) + 1;
-                        });
+                Object[] arr = new Object[size()];
+                $(this).forEach((e, i) -> {
+                        arr[$(i)] = e;
                 });
                 return arr;
         }
@@ -76,6 +71,11 @@ public class JoinedList<E> extends Aggregation implements List<E> {
                                 return (int) avoidNull(i.lastRes, 0) + 1;
                         });
                         return res == -1 ? Break() : res;
+                });
+                $(this).forEach((e, i) -> {
+                        if ($(i) >= arr.length)
+                                Break();
+                        arr[$(i)] = (T) e;
                 });
                 return arr;
         }
@@ -125,13 +125,13 @@ public class JoinedList<E> extends Aggregation implements List<E> {
         }
 
         private Entry<List<E>, Integer> getListAndPos(int index) {
-                int sumIndex = 0;
-                int listIndex = -1;
-                while (sumIndex < index) {
-                        ++listIndex;
-                        sumIndex += lists.get(listIndex).size();
+                int baseIndex = 0;
+                int current = 0;
+                while (index - baseIndex >= lists.get(current).size()) {
+                        baseIndex += lists.get(current).size();
+                        ++current;
                 }
-                return new Entry<List<E>, Integer>(lists.get(listIndex), index - sumIndex + lists.get(listIndex).size());
+                return new Entry<List<E>, Integer>(lists.get(current), index - baseIndex);
         }
 
         @Override
@@ -158,36 +158,109 @@ public class JoinedList<E> extends Aggregation implements List<E> {
 
         @Override
         public int indexOf(Object o) {
+                ptr<Integer> count = ptr(0);
                 return lists.size() == 0 ? -1 : $(lists).forEach((list, i) -> {
-                        int indexJ = $(list).forEach((e, j) -> {
+                        int indexJ = list.size() == 0 ? -1 : $(list).forEach((e, j) -> {
                                 return e.equals(o) ? BreakWithResult($(j)) : -1;
                         });
-                        return indexJ != -1 ? BreakWithResult(indexJ + i.lastRes) : -1;
+                        try {
+                                return indexJ == -1 ? -1 : BreakWithResult(indexJ + $(count));
+                        } finally {
+                                $(count, $(count) + list.size());
+                        }
                 });
         }
 
         @Override
         public int lastIndexOf(Object o) {
-                // TODO Auto-generated method stub
-                return 0;
+                return For(lists.size() - 1).to(0).step(-1).loop(i -> {
+                        int index = avoidNull(For(lists.get(i).size() - 1).to(0).step(-1).loop(j -> {
+                                return lists.get(i).get(j).equals(o) ? BreakWithResult(j) : -1;
+                        }), -1);
+                        return index == -1 ? -1
+                                        : BreakWithResult(index + avoidNull(
+                                                        For(0).to(i - 1).step(1).loop((k, info) -> avoidNull(info.lastRes, 0) + lists.get(k).size()),
+                                                        0));
+                });
         }
 
         @Override
         public ListIterator<E> listIterator() {
-                // TODO Auto-generated method stub
-                return null;
+                return listIterator(0);
         }
 
         @Override
         public ListIterator<E> listIterator(int index) {
-                // TODO Auto-generated method stub
-                return null;
+                return new JoinedListIterator(index);
         }
 
         @Override
         public List<E> subList(int fromIndex, int toIndex) {
-                // TODO Auto-generated method stub
-                return null;
+                if (fromIndex > toIndex)
+                        throw new IllegalArgumentException();
+                List<E> toReturn = new ArrayList<>();
+                For(fromIndex).to(toIndex).step(1).loop(i -> {
+                        Entry<List<E>, Integer> listAndPos = getListAndPos(i);
+                        toReturn.add(listAndPos.key.get(listAndPos.value));
+                });
+                return toReturn;
+        }
+
+        private class JoinedListIterator implements ListIterator<E> {
+                private int cursor;
+                private int size = size();
+
+                public JoinedListIterator(int cursor) {
+                        this.cursor = cursor;
+                }
+
+                @Override
+                public boolean hasNext() {
+                        return cursor < size;
+                }
+
+                @Override
+                public E next() {
+                        return get(cursor++);
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                        return cursor >= 0;
+                }
+
+                @Override
+                public E previous() {
+                        return cursor == 0 ? null : get(--cursor);
+                }
+
+                @Override
+                public int nextIndex() {
+                        return cursor + 1;
+                }
+
+                @Override
+                public int previousIndex() {
+                        return cursor - 1;
+                }
+
+                @Override
+                public void remove() {
+                        if (cursor != 0)
+                                JoinedList.this.remove(--cursor);
+                }
+
+                @Override
+                public void set(E e) {
+                        if (cursor >= 0 && cursor < size)
+                                JoinedList.this.set(cursor, e);
+                }
+
+                @Override
+                public void add(E e) {
+                        JoinedList.this.add(e);
+                }
+
         }
 
 }

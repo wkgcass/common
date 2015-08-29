@@ -1,9 +1,11 @@
 package test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +53,8 @@ public class Test implements var {
                 t.testList();
                 t.testMap();
                 t.reflectionTest();
+
+                t.other();
         }
 
         public void testFuncCreation() {
@@ -164,6 +168,8 @@ public class Test implements var {
 
                 String str = Switch(6, String.class).Case(7, () -> "abc").Case(6, "666").Default(() -> "null");
                 System.out.println(str);
+
+                For(1).to(10).loop(System.out::println);
 
                 For(1).to(21).step(2).loop(i -> {
                         if (i < 4)
@@ -344,5 +350,28 @@ public class Test implements var {
                 } catch (Exception e) {
                         System.out.println(e);
                 }
+        }
+
+        @SuppressWarnings("unchecked")
+        void other() {
+                List<Integer> list0 = $(new ArrayList<Integer>(), 5, 70, 28);
+                List<Integer> list1 = new ArrayList<Integer>();
+                List<Integer> list2 = $(new ArrayList<Integer>(), 43, 6, 32, 69);
+                List<Integer> list3 = new LinkedList<Integer>();
+                List<Integer> list4 = $(new ArrayList<Integer>(), 5, 70, 28);
+                List<Integer> list5 = $(new ArrayList<Integer>(), 1);
+
+                List<Integer> joined = join(list0, list1, list2, list3, list4, list5);
+                joined.forEach(System.out::println);
+                System.out.println("======");
+                joined.stream().sorted().forEach(System.out::println);
+                System.out.println("======");
+                System.out.println(Arrays.toString(joined.toArray()));
+                System.out.println(joined.indexOf(70));
+                System.out.println(joined.indexOf(222));
+                System.out.println(joined.lastIndexOf(70));
+                System.out.println(joined.lastIndexOf(222));
+                System.out.println(joined.indexOf(1));
+                System.out.println(joined.lastIndexOf(1));
         }
 }
