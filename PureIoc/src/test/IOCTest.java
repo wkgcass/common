@@ -15,14 +15,15 @@ public class IOCTest {
                 IOCController.autoRegister();
                 IOCController.closeRegistering();
 
-                /*
-                 * A a = new A(); System.out.println(a);
-                 * System.out.println(a.getB());
-                 * System.out.println(a.getB().getC());
-                 * System.out.println(a.getB().getC().getC());
-                 * System.out.println(a.getB().getC().getD());
-                 * System.out.println(a.getE()); System.out.println(a.getDbl());
-                 */
+                A a = new A();
+                System.out.println(a);
+                System.out.println(a.getB());
+                System.out.println(a.getB().getC());
+                System.out.println(a.getB().getC().getC());
+                System.out.println(a.getB().getC().getD());
+                System.out.println(a.getE());
+                System.out.println(a.getDbl());
+
                 F f = AutoWire.get(F.class);
                 System.out.println(f.getF());
                 System.out.println(f.getD());
