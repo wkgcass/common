@@ -2,7 +2,6 @@ package net.cassite.style;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
 
 import net.cassite.style.control.$Set;
@@ -752,7 +751,7 @@ public abstract class Core {
          *                the loop takes in i and loop info and run and return a
          *                result
          * @return last not null loop value
-         * @see #For(Object, RFunc, UnaryOperator, def)
+         * @see #For(Object, RFunc1, UnaryOperator, def)
          */
         public static <T, R> R For(T i, RFunc1<Boolean, T> condition, UnaryOperator<T> increment, RFunc2<R, T, LoopInfo<R>> loop) {
                 return (R) For(i, condition, increment, $(loop));
@@ -835,7 +834,7 @@ public abstract class Core {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
@@ -851,14 +850,14 @@ public abstract class Core {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
          * @param loop
          *                the loop to run and return a result
          * @return loop result
-         * @see #While(RFun0, def)
+         * @see #While(RFunc0, def)
          */
         public static <R> R While(RFunc0<Boolean> condition, RFunc0<R> loop) {
                 return While(condition, $(loop));
@@ -866,7 +865,7 @@ public abstract class Core {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
@@ -882,7 +881,7 @@ public abstract class Core {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on

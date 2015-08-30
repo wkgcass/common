@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
 
 import net.cassite.style.aggregation.ArrayFuncSup;
@@ -999,14 +998,14 @@ public interface var {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
          * @param loop
          *                the loop to run without results
          * @return loop result
-         * @see #While(RFun0, def)
+         * @see #While(RFunc0, def)
          */
         default <R> R While(RFunc0<Boolean> condition, VFunc0 loop) {
                 return Style.While(condition, loop);
@@ -1014,7 +1013,7 @@ public interface var {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
@@ -1029,7 +1028,7 @@ public interface var {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
@@ -1044,7 +1043,7 @@ public interface var {
 
         /**
          * Enhanced While expression with return value<br>
-         * It simply invokes {@link #While(BooleanSupplier, def)}
+         * It simply invokes {@link #While(RFunc0, def)}
          * 
          * @param condition
          *                only when conditon return true, the loop goes on
@@ -1818,8 +1817,8 @@ public interface var {
 
         /**
          * Join lists into one, the joined list's elements are in order of
-         * argument order and original lists' element order<br/>
-         * you cannot modify the returned joined list's size.<br/>
+         * argument order and original lists' element order<br>
+         * you cannot modify the returned joined list's size.<br>
          * in other words, the joined list doesn't support methods like add,
          * remove, addAll, retainAll, removeAll...
          * 

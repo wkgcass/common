@@ -304,8 +304,8 @@ public abstract class Aggregation extends Core {
 
         /**
          * Join lists into one, the joined list's elements are in order of
-         * argument order and original lists' element order<br/>
-         * you cannot modify the returned joined list's size.<br/>
+         * argument order and original lists' element order<br>
+         * you cannot modify the returned joined list's size.<br>
          * in other words, the joined list doesn't support methods like add,
          * remove, addAll, retainAll, removeAll...
          * 
