@@ -3,6 +3,7 @@ package test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -361,17 +362,30 @@ public class Test implements var {
                 List<Integer> list4 = $(new ArrayList<Integer>(), 5, 70, 28);
                 List<Integer> list5 = $(new ArrayList<Integer>(), 1);
 
+                System.out.println("初始值：");
+                System.out.println("list0:" + list0);
+                System.out.println("list1:" + list1);
+                System.out.println("list2:" + list2);
+                System.out.println("list3:" + list3);
+                System.out.println("list4:" + list4);
+                System.out.println("list5:" + list5);
+
                 List<Integer> joined = join(list0, list1, list2, list3, list4, list5);
-                joined.forEach(System.out::println);
-                System.out.println("======");
+                System.out.println("joined list:" + joined);
+                System.out.println();
+                System.out.println("使用Stream输出排序后结果");
                 joined.stream().sorted().forEach(System.out::println);
-                System.out.println("======");
+                System.out.println("转为数组");
                 System.out.println(Arrays.toString(joined.toArray()));
+                System.out.println("获取index信息");
                 System.out.println(joined.indexOf(70));
                 System.out.println(joined.indexOf(222));
                 System.out.println(joined.lastIndexOf(70));
                 System.out.println(joined.lastIndexOf(222));
                 System.out.println(joined.indexOf(1));
                 System.out.println(joined.lastIndexOf(1));
+                System.out.println("排序");
+                Collections.sort(joined);
+                System.out.println(list0.toString() + list1 + list2 + list3 + list4 + list5);
         }
 }

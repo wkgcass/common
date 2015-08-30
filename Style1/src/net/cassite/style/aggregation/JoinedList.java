@@ -173,7 +173,7 @@ public class JoinedList<E> extends Aggregation implements List<E> {
 
         @Override
         public int lastIndexOf(Object o) {
-                return For(lists.size() - 1).to(0).step(-1).loop(i -> {
+                return lists.size() == 0 ? -1 : For(lists.size() - 1).to(0).step(-1).loop(i -> {
                         int index = avoidNull(For(lists.get(i).size() - 1).to(0).step(-1).loop(j -> {
                                 return lists.get(i).get(j).equals(o) ? BreakWithResult(j) : -1;
                         }), -1);
@@ -206,22 +206,39 @@ public class JoinedList<E> extends Aggregation implements List<E> {
                 return toReturn;
         }
 
+        public String toString() {
+                StringBuilder sb = new StringBuilder();
+                sb.append("[");
+                boolean isFirst = true;
+                for (E e : this) {
+                        if (isFirst) {
+                                sb.append(e);
+                                isFirst = false;
+                        } else {
+                                sb.append(", ").append(e);
+                        }
+                }
+
+                sb.append("]");
+                return sb.toString();
+        }
+
         private class JoinedListIterator implements ListIterator<E> {
                 private int cursor;
                 private int size = size();
 
-                public JoinedListIterator(int cursor) {
-                        this.cursor = cursor;
+                public JoinedListIterator(int index) {
+                        this.cursor = index - 1;
                 }
 
                 @Override
                 public boolean hasNext() {
-                        return cursor < size;
+                        return cursor < size - 1;
                 }
 
                 @Override
                 public E next() {
-                        return get(cursor++);
+                        return get(++cursor);
                 }
 
                 @Override
@@ -246,8 +263,7 @@ public class JoinedList<E> extends Aggregation implements List<E> {
 
                 @Override
                 public void remove() {
-                        if (cursor != 0)
-                                JoinedList.this.remove(--cursor);
+                        throw new UnsupportedOperationException();
                 }
 
                 @Override
@@ -258,7 +274,7 @@ public class JoinedList<E> extends Aggregation implements List<E> {
 
                 @Override
                 public void add(E e) {
-                        JoinedList.this.add(e);
+                        throw new UnsupportedOperationException();
                 }
 
         }

@@ -1,5 +1,6 @@
 package net.cassite.style;
 
+import net.cassite.style.control.BreakWithResult;
 import net.cassite.style.control.IterationControl;
 import net.cassite.style.interfaces.*;
 
@@ -156,6 +157,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }
@@ -180,6 +183,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }
@@ -204,6 +209,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }
@@ -228,6 +235,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }
@@ -254,6 +263,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }
@@ -278,6 +289,8 @@ public class ForSupport<N extends Number> extends Style {
                                                 return doLoop.apply(start, new LoopInfo<>().setValues(0, 0, null));
                                         } catch (StyleRuntimeException ctrl) {
                                                 ctrl.throwNotIn(IterationControl.class);
+                                                if (ctrl.origin() instanceof BreakWithResult)
+                                                        return ((BreakWithResult) ctrl.origin()).getRes();
                                                 return null;
                                         }
                                 }

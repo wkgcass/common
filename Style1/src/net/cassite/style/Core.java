@@ -1367,11 +1367,7 @@ public abstract class Core {
          */
         public static <T> T avoidNull(T t, T Default) {
                 if (t == null)
-                        try {
-                                return Default;
-                        } catch (Throwable throwable) {
-                                throw $(throwable);
-                        }
+                        return Default;
                 else
                         return t;
         }
