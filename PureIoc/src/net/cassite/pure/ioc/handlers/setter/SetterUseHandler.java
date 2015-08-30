@@ -1,8 +1,9 @@
 package net.cassite.pure.ioc.handlers.setter;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
+
+import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.IOCController;
@@ -23,6 +24,8 @@ import net.cassite.style.reflect.MethodSupport;
  */
 public class SetterUseHandler extends IOCController implements SetterAnnotationHandler {
 
+        private static final Logger logger = Logger.getLogger(SetterUseHandler.class);
+
         @Override
         public boolean canHandle(Set<Annotation> annotations) {
                 for (Annotation ann : annotations) {
@@ -36,9 +39,14 @@ public class SetterUseHandler extends IOCController implements SetterAnnotationH
         @Override
         public boolean handle(Object target, MethodSupport<Object, Object> setter, Set<Annotation> toHandle, SetterHandlerChain chain)
                         throws AnnotationHandlingException {
+                logger.debug("Entered SetterUseHandler with args: \n\ttarget:\t" + target + "\n\tsetter:\t" + setter + "\n\ttoHandle:\t" + toHandle
+                                + "\n\tchain:\t" + chain);
+
                 if (chain.next().handle(target, setter, toHandle, chain)) {
                         return true;
                 }
+
+                logger.debug("Start handling with SetterUseHandler");
 
                 Use use = null;
                 for (Annotation ann : toHandle) {
@@ -61,19 +69,11 @@ public class SetterUseHandler extends IOCController implements SetterAnnotationH
                 if (!variable.equals(""))
                         obj = retrieveVariable(variable);
 
+                logger.debug("--Inferred parameter value is " + obj);
+
                 Object[] pv = new Object[] { obj };
-                try {
-                        setter.invoke(target, pv);
-                } catch (Exception e) {
-                        if (e instanceof InvocationTargetException) {
-                                Throwable t = ((InvocationTargetException) e).getTargetException();
-                                if (t instanceof RuntimeException)
-                                        throw (RuntimeException) t;
-                                if (t instanceof Error)
-                                        throw (Error) t;
-                        }
-                        return false;
-                }
+                setter.invoke(target, pv);
+
                 return true;
         }
 

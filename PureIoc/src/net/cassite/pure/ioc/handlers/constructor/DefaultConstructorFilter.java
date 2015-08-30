@@ -43,7 +43,8 @@ public class DefaultConstructorFilter extends Aggregation implements Constructor
                 } catch (IrrelevantAnnotationHandlingException e) {
                 }
 
-                logger.debug("start handling with DefaultConstructorFilter");
+                if (null == nextCon)
+                        logger.debug("start handling with DefaultConstructorFilter");
 
                 if (nextCon != null)
                         return nextCon;

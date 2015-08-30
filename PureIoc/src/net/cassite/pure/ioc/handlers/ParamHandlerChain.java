@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import net.cassite.pure.ioc.handlers.EmptyHandler;
 
 public class ParamHandlerChain {
+
+        private static final Logger logger = Logger.getLogger(ParamHandlerChain.class);
 
         private final Iterator<ParamAnnotationHandler> it;
 
@@ -18,6 +22,9 @@ public class ParamHandlerChain {
                                 list.add(h);
                 });
                 list.add(EmptyHandler.getInstance());
+
+                logger.debug("Generate Param Chain with Handlers: " + list);
+
                 it = list.iterator();
         }
 

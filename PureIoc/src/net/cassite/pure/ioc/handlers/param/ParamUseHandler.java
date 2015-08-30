@@ -1,6 +1,9 @@
 package net.cassite.pure.ioc.handlers.param;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
+import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.IOCController;
@@ -21,6 +24,8 @@ import net.cassite.style.reflect.MemberSup;
  */
 public class ParamUseHandler extends IOCController implements ParamAnnotationHandler {
 
+        private static final Logger logger = Logger.getLogger(ParamUseHandler.class);
+
         @Override
         public boolean canHandle(Annotation[] annotations) {
                 for (Annotation ann : annotations) {
@@ -33,10 +38,16 @@ public class ParamUseHandler extends IOCController implements ParamAnnotationHan
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
+                logger.debug("Entered ParamUseHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                                + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
+
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
                 } catch (AnnotationHandlingException e) {
                 }
+
+                logger.debug("Start handling with ParamUseHandler");
+
                 return If((Use) $(toHandle).findOne(a -> a.annotationType() == Use.class), use -> {
                         Class<?> clazz = use.clazz();
                         if (clazz != Use.class)

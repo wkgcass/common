@@ -158,11 +158,16 @@ public abstract class IOCController extends Style {
                 If($(fields).findOne(f -> f.name().equalsIgnoreCase(fieldName)), (found) -> {
                         for (Annotation ann : found.getMember().getAnnotations())
                                 annset.add(ann);
-                });
+                }).End();
 
                 // try to get method annotations
                 for (Annotation ann : m.getMember().getAnnotations())
                         annset.add(ann);
+                // parameter value annotations
+                for (Annotation ann : m.getMember().getParameterAnnotations()[0]) {
+                        annset.add(ann);
+                }
+
                 logger.debug("With Annotations: " + annset);
 
                 // handle
@@ -206,10 +211,14 @@ public abstract class IOCController extends Style {
                 ConstructorFilterChain chain = new ConstructorFilterChain(constructorFilters, set);
                 @SuppressWarnings("unchecked")
                 ConstructorSup<?> con = chain.next().handle(cls(cls).constructors(), chain);
+
+                logger.debug("--retrieved constructor is " + con);
+
                 Object[] pv = new Object[con.argCount()];
                 for (int i = 0; i < pv.length; ++i) {
                         ParamHandlerChain chain2 = new ParamHandlerChain(paramAnnotationHandlers, con.getMember().getParameterAnnotations()[i]);
                         pv[i] = chain2.next().handle(con, con.argTypes()[i], con.getMember().getParameterAnnotations()[i], chain2);
+                        logger.debug("--parameter at index " + i + " is " + pv[i]);
                 }
                 return construct(con, pv);
         }

@@ -2,6 +2,9 @@ package net.cassite.pure.ioc.handlers.param;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.util.Arrays;
+
+import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.handlers.IrrelevantAnnotationHandlingException;
@@ -17,6 +20,8 @@ import net.cassite.style.reflect.MemberSup;
  */
 public class PrimitiveParameterHandler implements ParamAnnotationHandler {
 
+        private static final Logger logger = Logger.getLogger(PrimitiveParameterHandler.class);
+
         @Override
         public boolean canHandle(Annotation[] annotations) {
                 return true;
@@ -24,10 +29,15 @@ public class PrimitiveParameterHandler implements ParamAnnotationHandler {
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
+                logger.debug("Entered PrimitiveParameterHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                                + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
+
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
                 } catch (AnnotationHandlingException e) {
                 }
+
+                logger.debug("Start handling with PrimitiveParameterHandler");
 
                 if (cls.isPrimitive()) {
                         // primitive

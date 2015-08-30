@@ -1,6 +1,9 @@
 package net.cassite.pure.ioc.handlers.param;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
+import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.IOCController;
@@ -17,6 +20,8 @@ import net.cassite.style.reflect.MemberSup;
  */
 public class DefaultParamHandler extends IOCController implements ParamAnnotationHandler {
 
+        private static final Logger logger = Logger.getLogger(DefaultParamHandler.class);
+
         @Override
         public boolean canHandle(Annotation[] annotations) {
                 return true;
@@ -24,10 +29,15 @@ public class DefaultParamHandler extends IOCController implements ParamAnnotatio
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
+                logger.debug("Entered DefaultParamHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                                + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
                 } catch (AnnotationHandlingException e) {
                 }
+
+                logger.debug("Start handling with DefaultParamHandler");
+
                 return get(cls);
         }
 

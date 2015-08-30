@@ -1,6 +1,9 @@
 package net.cassite.pure.ioc.handlers.param;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+
+import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.annotations.Force;
@@ -23,6 +26,8 @@ import net.cassite.style.reflect.MemberSup;
  */
 public class ParamForceHandler extends Aggregation implements ParamAnnotationHandler {
 
+        private static final Logger logger = Logger.getLogger(ParamForceHandler.class);
+
         @Override
         public boolean canHandle(Annotation[] annotations) {
                 for (Annotation ann : annotations) {
@@ -35,10 +40,15 @@ public class ParamForceHandler extends Aggregation implements ParamAnnotationHan
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
+                logger.debug("Entered ParamForceHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                                + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
                 } catch (AnnotationHandlingException e) {
                 }
+
+                logger.debug("Start handling with ParamForceHandler");
+
                 return If((Force) $(toHandle).findOne(a -> a.annotationType() == Force.class), f -> {
                         try {
                                 if (cls.isPrimitive()) {
