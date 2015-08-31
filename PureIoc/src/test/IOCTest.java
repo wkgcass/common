@@ -10,6 +10,8 @@ import net.cassite.pure.ioc.annotations.Use;
 import net.cassite.pure.ioc.annotations.Wire;
 
 public class IOCTest {
+        private IOCTest() {
+        }
 
         public static void main(String[] args) {
                 IOCController.autoRegister();
@@ -101,11 +103,11 @@ class C extends AutoWire {
 }
 
 class D implements TestInterface1 {
+        private B b;
+
         public D() {
                 AutoWire.wire(this);
         }
-
-        private B b;
 
         public B getB() {
                 return b;

@@ -14,7 +14,7 @@ import net.cassite.style.aggregation.Aggregation;
 import net.cassite.style.reflect.ConstructorSup;
 
 /**
- * Constructor Filter handling Default annotation <br/>
+ * Constructor Filter handling Default annotation <br>
  * return the constructor with Default annotation attached.
  * 
  * @author wkgcass
@@ -24,7 +24,7 @@ import net.cassite.style.reflect.ConstructorSup;
  */
 public class ConstructorDefaultFilter extends Aggregation implements ConstructorFilter {
 
-        private static final Logger logger = Logger.getLogger(ConstructorDefaultFilter.class);
+        private static final Logger LOGGER = Logger.getLogger(ConstructorDefaultFilter.class);
 
         @Override
         public boolean canHandle(Set<Annotation> annotations) {
@@ -38,13 +38,12 @@ public class ConstructorDefaultFilter extends Aggregation implements Constructor
 
         @Override
         public ConstructorSup<Object> handle(List<ConstructorSup<Object>> cons, ConstructorFilterChain chain) throws AnnotationHandlingException {
-                logger.debug("Entered ConstructorDefaultFilter with args:\n\tcons:\t" + cons + "\n\tchain:\t" + chain);
+                LOGGER.debug("Entered ConstructorDefaultFilter with args:\n\tcons:\t" + cons + "\n\tchain:\t" + chain);
                 ConstructorSup<Object> nextRes = chain.next().handle(cons, chain);
-                if (null == nextRes)
-                        logger.debug("start handling with ConstructorDefaultFilter");
-                return nextRes == null ? If($(cons).findOne(c -> c.isAnnotationPresent(Default.class)), c -> {
-                        return c;
-                }).Else(() -> null) : nextRes;
+                if (null == nextRes) {
+                        LOGGER.debug("start handling with ConstructorDefaultFilter");
+                }
+                return nextRes == null ? If($(cons).findOne(c -> c.isAnnotationPresent(Default.class)), c -> c).Else(() -> null) : nextRes;
         }
 
 }

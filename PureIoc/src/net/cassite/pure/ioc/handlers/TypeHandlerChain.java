@@ -11,7 +11,7 @@ import net.cassite.pure.ioc.handlers.EmptyHandler;
 
 public class TypeHandlerChain {
 
-        private static final Logger logger = Logger.getLogger(TypeHandlerChain.class);
+        private static final Logger LOGGER = Logger.getLogger(TypeHandlerChain.class);
 
         private final Iterator<TypeAnnotationHandler> it;
 
@@ -19,12 +19,13 @@ public class TypeHandlerChain {
 
                 List<TypeAnnotationHandler> list = new ArrayList<TypeAnnotationHandler>();
                 handlers.forEach(h -> {
-                        if (h.canHandle(anns))
+                        if (h.canHandle(anns)) {
                                 list.add(h);
+                        }
                 });
                 list.add(EmptyHandler.getInstance());
 
-                logger.debug("Generate Type Chain with handlers " + list);
+                LOGGER.debug("Generate Type Chain with handlers " + list);
 
                 it = list.iterator();
         }

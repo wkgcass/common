@@ -14,17 +14,17 @@ import net.cassite.pure.ioc.handlers.ParamHandlerChain;
 import net.cassite.style.reflect.MemberSup;
 
 /**
- * Handler for Use annotation. <br/>
+ * Handler for Use annotation. <br>
  * returns the instance of the class "use" annotation represents.
  * 
  * @author wkgcass
  * 
- * @see cass.toolbox.ioc.annotations.Use
+ * @see Use
  *
  */
 public class ParamUseHandler extends IOCController implements ParamAnnotationHandler {
 
-        private static final Logger logger = Logger.getLogger(ParamUseHandler.class);
+        private static final Logger LOGGER = Logger.getLogger(ParamUseHandler.class);
 
         @Override
         public boolean canHandle(Annotation[] annotations) {
@@ -38,30 +38,32 @@ public class ParamUseHandler extends IOCController implements ParamAnnotationHan
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
-                logger.debug("Entered ParamUseHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                LOGGER.debug("Entered ParamUseHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
                                 + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
 
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
-                } catch (AnnotationHandlingException e) {
+                } catch (IrrelevantAnnotationHandlingException e) {
+                        LOGGER.debug("Start handling with ParamUseHandler");
+
+                        return If((Use) $(toHandle).findOne(a -> a.annotationType() == Use.class), use -> {
+                                Class<?> clazz = use.clazz();
+                                if (clazz != Use.class) {
+                                        return get(clazz);
+                                }
+                                String constant = use.constant();
+                                if (!"".equals(constant)) {
+                                        return retrieveConstant(constant);
+                                }
+                                String variable = use.variable();
+                                if (!"".equals(variable)) {
+                                        return retrieveVariable(variable);
+                                }
+                                throw new AnnotationHandlingException("empty Use annotation");
+                        }).Else(() -> {
+                                throw new IrrelevantAnnotationHandlingException();
+                        });
                 }
-
-                logger.debug("Start handling with ParamUseHandler");
-
-                return If((Use) $(toHandle).findOne(a -> a.annotationType() == Use.class), use -> {
-                        Class<?> clazz = use.clazz();
-                        if (clazz != Use.class)
-                                return get(clazz);
-                        String constant = use.constant();
-                        if (!constant.equals(""))
-                                return retrieveConstant(constant);
-                        String variable = use.variable();
-                        if (!variable.equals(""))
-                                return retrieveVariable(variable);
-                        throw new AnnotationHandlingException("empty Use annotation");
-                }).Else(() -> {
-                        throw new IrrelevantAnnotationHandlingException();
-                });
         }
 
 }

@@ -10,9 +10,9 @@ import net.cassite.style.reflect.MemberSup;
 import net.cassite.style.reflect.MethodSupport;
 
 /**
- * Handles every kind of annotations. <br/>
+ * Handles every kind of annotations. <br>
  * false/null/exception would be returned/thrown in order to end the
- * HandlingChain. <br/>
+ * HandlingChain. <br>
  * priority Double.MAX_VALUE
  * 
  * @author wkgcass

@@ -10,19 +10,20 @@ import org.apache.log4j.Logger;
 
 public class ConstructorFilterChain {
 
-        private static final Logger logger = Logger.getLogger(ConstructorFilterChain.class);
+        private static final Logger LOGGER = Logger.getLogger(ConstructorFilterChain.class);
 
         private final Iterator<ConstructorFilter> it;
 
         public ConstructorFilterChain(List<ConstructorFilter> handlers, Set<Annotation> anns) {
                 List<ConstructorFilter> list = new ArrayList<ConstructorFilter>();
                 handlers.forEach(e -> {
-                        if (e.canHandle(anns))
+                        if (e.canHandle(anns)) {
                                 list.add(e);
+                        }
                 });
                 list.add(EmptyHandler.getInstance());
 
-                logger.debug("Generate Constructor Chain with Filters: " + list);
+                LOGGER.debug("Generate Constructor Chain with Filters: " + list);
 
                 it = list.iterator();
         }

@@ -13,19 +13,17 @@ import net.cassite.pure.ioc.handlers.SetterHandlerChain;
 import net.cassite.style.reflect.MethodSupport;
 
 /**
- * Priority 8.0 <br/>
- * Handler for Force annotation <br/>
+ * Handler for Force annotation <br>
  * invoke the setter with what force.value represents.
  * 
  * @author wkgcass
  * 
- * @see cass.toolbox.ioc.annotations.Force
- * @see cass.toolbox.util.Utility_#stringToObject(Object)
+ * @see Force
  *
  */
 public class SetterForceHandler extends IOCController implements SetterAnnotationHandler {
 
-        private static final Logger logger = Logger.getLogger(SetterForceHandler.class);
+        private static final Logger LOGGER = Logger.getLogger(SetterForceHandler.class);
 
         @Override
         public boolean canHandle(Set<Annotation> annotations) {
@@ -40,14 +38,14 @@ public class SetterForceHandler extends IOCController implements SetterAnnotatio
         @Override
         public boolean handle(Object target, MethodSupport<Object, Object> setter, Set<Annotation> toHandle, SetterHandlerChain chain)
                         throws AnnotationHandlingException {
-                logger.debug("Entered SetterForceHandler with args: \n\ttarget:\t" + target + "\n\tsetter:\t" + setter + "\n\ttoHandle:\t" + toHandle
+                LOGGER.debug("Entered SetterForceHandler with args: \n\ttarget:\t" + target + "\n\tsetter:\t" + setter + "\n\ttoHandle:\t" + toHandle
                                 + "\n\tchain:\t" + chain);
 
                 if (chain.next().handle(target, setter, toHandle, chain)) {
                         return true;
                 }
 
-                logger.debug("Start handling with SetterForceHandler");
+                LOGGER.debug("Start handling with SetterForceHandler");
 
                 Class<?> cls = setter.argTypes()[0];
 
@@ -71,14 +69,16 @@ public class SetterForceHandler extends IOCController implements SetterAnnotatio
                                         } else if (cls == Short.class || cls == short.class) {
                                                 return Short.parseShort(f.value());
                                         }
-                                } else if (cls == String.class)
+                                } else if (cls == String.class) {
                                         return f.value();
-                        } catch (Exception unimportant) {
+                                }
+                        } catch (Exception e1) {
+                                throw new AnnotationHandlingException("parse failed", e1);
                         }
                         throw new AnnotationHandlingException("parse failed");
                 }).Else(() -> null) };
 
-                logger.debug("--Inferred value is " + pv[0]);
+                LOGGER.debug("--Inferred value is " + pv[0]);
 
                 setter.invoke(target, pv);
                 return true;

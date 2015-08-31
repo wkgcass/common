@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Force a setter or one of method's parameter to use the given value.<br/>
- * The system will try to transform the value into proper type.<br/>
+ * Force a setter or one of method's parameter to use the given value.<br>
+ * The system will try to transform the value into proper type.<br>
  * Only use this method on those parameters/setters which types are primitive or
  * String
  * 

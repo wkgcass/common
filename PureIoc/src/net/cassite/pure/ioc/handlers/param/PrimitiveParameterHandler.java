@@ -20,7 +20,7 @@ import net.cassite.style.reflect.MemberSup;
  */
 public class PrimitiveParameterHandler implements ParamAnnotationHandler {
 
-        private static final Logger logger = Logger.getLogger(PrimitiveParameterHandler.class);
+        private static final Logger LOGGER = Logger.getLogger(PrimitiveParameterHandler.class);
 
         @Override
         public boolean canHandle(Annotation[] annotations) {
@@ -29,72 +29,73 @@ public class PrimitiveParameterHandler implements ParamAnnotationHandler {
 
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
-                logger.debug("Entered PrimitiveParameterHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
+                LOGGER.debug("Entered PrimitiveParameterHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
                                 + Arrays.toString(toHandle) + "\n\tchain:\t" + chain);
 
                 try {
                         return chain.next().handle(caller, cls, toHandle, chain);
                 } catch (AnnotationHandlingException e) {
-                }
+                        LOGGER.debug("Start handling with PrimitiveParameterHandler");
 
-                logger.debug("Start handling with PrimitiveParameterHandler");
-
-                if (cls.isPrimitive()) {
-                        // primitive
-                        if (cls == boolean.class) {
-                                return (new Boolean(false));
-                        }
-                        if (cls == int.class) {
-                                return (new Integer(0));
-                        }
-                        if (cls == short.class) {
-                                return (new Short((short) 0));
-                        }
-                        if (cls == long.class) {
-                                return (new Long(0));
-                        }
-                        if (cls == byte.class) {
-                                return (new Byte((byte) 0));
-                        }
-                        if (cls == double.class) {
-                                return (new Double(0));
-                        }
-                        if (cls == float.class) {
-                                return (new Float(0));
-                        }
-                        return (new Character((char) 0));
-                } else if (cls.isArray()) {
-                        if (cls.getComponentType().isPrimitive()) {
-                                // not primitive & is array & component is
+                        if (cls.isPrimitive()) {
                                 // primitive
-                                Class<?> clscmp = cls.getComponentType();
-                                if (clscmp == boolean.class) {
-                                        return (new boolean[0]);
+                                if (cls == boolean.class) {
+                                        return (new Boolean(false));
                                 }
-                                if (clscmp == int.class) {
-                                        return (new int[0]);
+                                if (cls == int.class) {
+                                        return (new Integer(0));
                                 }
-                                if (clscmp == short.class) {
-                                        return (new short[0]);
+                                if (cls == short.class) {
+                                        return (new Short((short) 0));
                                 }
-                                if (clscmp == long.class) {
-                                        return (new long[0]);
+                                if (cls == long.class) {
+                                        return (new Long(0));
                                 }
-                                if (clscmp == byte.class) {
-                                        return (new byte[0]);
+                                if (cls == byte.class) {
+                                        return (new Byte((byte) 0));
                                 }
-                                if (clscmp == double.class) {
-                                        return (new double[0]);
+                                if (cls == double.class) {
+                                        return (new Double(0));
                                 }
-                                if (clscmp == float.class) {
-                                        return (new float[0]);
+                                if (cls == float.class) {
+                                        return (new Float(0));
                                 }
-                                return (new char[0]);
+                                return (new Character((char) 0));
+                        } else if (cls.isArray()) {
+                                if (cls.getComponentType().isPrimitive()) {
+                                        // not primitive & is array & component
+                                        // is
+                                        // primitive
+                                        Class<?> clscmp = cls.getComponentType();
+                                        if (clscmp == boolean.class) {
+                                                return (new boolean[0]);
+                                        }
+                                        if (clscmp == int.class) {
+                                                return (new int[0]);
+                                        }
+                                        if (clscmp == short.class) {
+                                                return (new short[0]);
+                                        }
+                                        if (clscmp == long.class) {
+                                                return (new long[0]);
+                                        }
+                                        if (clscmp == byte.class) {
+                                                return (new byte[0]);
+                                        }
+                                        if (clscmp == double.class) {
+                                                return (new double[0]);
+                                        }
+                                        if (clscmp == float.class) {
+                                                return (new float[0]);
+                                        }
+                                        return (new char[0]);
+                                }
+                                // not primitive & is array & component is not
+                                // primitive
+                                return Array.newInstance(cls.getComponentType(), 0);
+                        } else {
+                                throw new IrrelevantAnnotationHandlingException();
                         }
-                        // not primitive & is array & component is not primitive
-                        return Array.newInstance(cls.getComponentType(), 0);
-                } else {
-                        throw new IrrelevantAnnotationHandlingException();
                 }
         }
 

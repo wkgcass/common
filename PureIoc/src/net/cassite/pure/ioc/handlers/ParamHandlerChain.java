@@ -11,19 +11,20 @@ import net.cassite.pure.ioc.handlers.EmptyHandler;
 
 public class ParamHandlerChain {
 
-        private static final Logger logger = Logger.getLogger(ParamHandlerChain.class);
+        private static final Logger LOGGER = Logger.getLogger(ParamHandlerChain.class);
 
         private final Iterator<ParamAnnotationHandler> it;
 
         public ParamHandlerChain(List<ParamAnnotationHandler> handlers, Annotation[] anns) {
                 List<ParamAnnotationHandler> list = new ArrayList<ParamAnnotationHandler>();
                 handlers.forEach(h -> {
-                        if (h.canHandle(anns))
+                        if (h.canHandle(anns)) {
                                 list.add(h);
+                        }
                 });
                 list.add(EmptyHandler.getInstance());
 
-                logger.debug("Generate Param Chain with Handlers: " + list);
+                LOGGER.debug("Generate Param Chain with Handlers: " + list);
 
                 it = list.iterator();
         }

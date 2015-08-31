@@ -11,17 +11,17 @@ import net.cassite.pure.ioc.handlers.TypeAnnotationHandler;
 import net.cassite.pure.ioc.handlers.TypeHandlerChain;
 
 /**
- * Handler for IsSingleton annotation. <br/>
+ * Handler for IsSingleton annotation. <br>
  * the class would be considered as a singleton.
  * 
  * @author wkgcass
  * 
- * @see cass.toolbox.Singleton.annotations.IsSingleton
+ * @see net.cassite.pure.ioc.annotations.Singleton
  *
  */
 public class TypeIsSingletonHandler extends IOCController implements TypeAnnotationHandler {
 
-        private static final Logger logger = Logger.getLogger(TypeIsSingletonHandler.class);
+        private static final Logger LOGGER = Logger.getLogger(TypeIsSingletonHandler.class);
 
         @Override
         public boolean canHandle(Annotation[] annotations) {
@@ -35,14 +35,13 @@ public class TypeIsSingletonHandler extends IOCController implements TypeAnnotat
 
         @Override
         public Object handle(Class<?> cls, TypeHandlerChain chain) throws AnnotationHandlingException {
-                logger.debug("Entered TypeIsSingletonHandler with args: \n\tcls:\t" + cls + "\n\tchain:\t" + chain);
+                LOGGER.debug("Entered TypeIsSingletonHandler with args: \n\tcls:\t" + cls + "\n\tchain:\t" + chain);
                 try {
                         return chain.next().handle(cls, chain);
                 } catch (AnnotationHandlingException e) {
+                        LOGGER.debug("start handling with TypeIsSingletonHandler");
+                        return getObject(cls);
                 }
-
-                logger.debug("start handling with TypeIsSingletonHandler");
-                return getObject(cls);
         }
 
 }
