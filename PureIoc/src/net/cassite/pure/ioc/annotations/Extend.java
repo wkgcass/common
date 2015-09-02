@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import net.cassite.pure.ioc.ExtendingHandler;
+
 /**
  * This annotations aims to simplify retrieving objects from other object
  * containers.<br>
@@ -19,7 +21,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD })
+@Target({ ElementType.PARAMETER, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE })
 public @interface Extend {
         /**
          * ExtendingHandler implement class. The handler would be retrieved
@@ -28,8 +30,7 @@ public @interface Extend {
          * @return
          * @see net.cassite.pure.ioc.AutoWire#get(Class)
          */
-        @SuppressWarnings("rawtypes")
-        Class handler();
+        Class<ExtendingHandler>handler();
 
         /**
          * Arguments to fill into your handler

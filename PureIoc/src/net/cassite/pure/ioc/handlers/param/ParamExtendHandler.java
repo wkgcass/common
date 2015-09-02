@@ -32,7 +32,6 @@ public class ParamExtendHandler extends Aggregation implements ParamAnnotationHa
                 return null != Utils.getAnno(Extend.class, annotations);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Object handle(MemberSup<?> caller, Class<?> cls, Annotation[] toHandle, ParamHandlerChain chain) throws AnnotationHandlingException {
                 LOGGER.debug("Entered ParamExtendHandler with args:\n\tcaller:\t" + caller + "\n\tcls:\t" + cls + "\n\ttoHandle:\t"
@@ -43,7 +42,7 @@ public class ParamExtendHandler extends Aggregation implements ParamAnnotationHa
                         LOGGER.debug("Start handling with ParamExtendHandler");
 
                         Extend extend = Utils.getAnno(Extend.class, toHandle);
-                        ExtendingHandler handler = (ExtendingHandler) AutoWire.get(extend.handler());
+                        ExtendingHandler handler = AutoWire.get(extend.handler());
 
                         LOGGER.debug("--retrieved extend handler is " + handler + ", filling in args " + Arrays.toString(extend.args()));
 

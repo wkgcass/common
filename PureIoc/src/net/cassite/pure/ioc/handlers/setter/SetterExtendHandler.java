@@ -43,8 +43,7 @@ public class SetterExtendHandler implements SetterAnnotationHandler {
                 LOGGER.debug("Start handling with SetterExtendHandler");
 
                 Extend extend = Utils.getAnno(Extend.class, toHandle);
-                @SuppressWarnings("unchecked")
-                ExtendingHandler handler = (ExtendingHandler) AutoWire.get(extend.handler());
+                ExtendingHandler handler = AutoWire.get(extend.handler());
 
                 LOGGER.debug("--retrieved extend handler is " + handler + ", filling in args " + Arrays.toString(extend.args()));
 
