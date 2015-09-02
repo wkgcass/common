@@ -40,12 +40,14 @@ public class DefaultConstructorFilter extends Aggregation implements Constructor
                 try {
                         nextCon = chain.next().handle(cons, chain);
                 } catch (AnnotationHandlingException e) {
-                        LOGGER.debug("start handling with DefaultConstructorFilter");
                 }
 
                 if (nextCon != null) {
                         return nextCon;
                 }
+
+                LOGGER.debug("start handling with DefaultConstructorFilter");
+
                 if (cons.size() == 1) {
                         return cons.get(0);
                 }
