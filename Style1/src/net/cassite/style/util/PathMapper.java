@@ -8,9 +8,9 @@ import net.cassite.style.def;
 import net.cassite.style.interfaces.RFunc0;
 
 /**
- * A place holding variables based on paths.<br/>
- * The paths are separated with '.',<br/>
- * a map(String, Object) is used to hold variables, it looks like <br/>
+ * A place holding variables based on paths.<br>
+ * The paths are separated with '.',<br>
+ * a map(String, Object) is used to hold variables, it looks like <br>
  * 
  * <pre>
  *  {a={b={c={$value=i am a.b.c}, $value=abc}}}
