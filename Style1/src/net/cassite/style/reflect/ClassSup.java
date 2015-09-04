@@ -19,8 +19,8 @@ import net.cassite.style.util.PathMapper;
  * @param <T>
  */
 public class ClassSup<T> extends Style {
-        private Class<T> cls;
-        private PathMapper mapper = new PathMapper();
+        private final Class<T> cls;
+        private final PathMapper mapper = new PathMapper();
 
         /**
          * retrieve the supported Class object
