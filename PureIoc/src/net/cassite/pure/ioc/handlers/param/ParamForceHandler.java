@@ -10,7 +10,7 @@ import net.cassite.pure.ioc.annotations.Force;
 import net.cassite.pure.ioc.handlers.IrrelevantAnnotationHandlingException;
 import net.cassite.pure.ioc.handlers.ParamAnnotationHandler;
 import net.cassite.pure.ioc.handlers.ParamHandlerChain;
-import net.cassite.style.aggregation.Aggregation;
+import static net.cassite.style.aggregation.Aggregation.*;
 import net.cassite.style.reflect.MemberSup;
 
 /**
@@ -21,7 +21,7 @@ import net.cassite.style.reflect.MemberSup;
  *
  * @see Force
  */
-public class ParamForceHandler extends Aggregation implements ParamAnnotationHandler {
+public class ParamForceHandler implements ParamAnnotationHandler {
 
         private static final Logger LOGGER = Logger.getLogger(ParamForceHandler.class);
 

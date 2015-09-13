@@ -1,5 +1,8 @@
 package test;
 
+import net.cassite.pure.aop.AOP;
+import net.cassite.pure.aop.AOPPoint;
+import net.cassite.pure.aop.Weaver;
 import net.cassite.pure.ioc.AutoWire;
 import net.cassite.pure.ioc.IOCController;
 import net.cassite.pure.ioc.annotations.Default;
@@ -23,6 +26,7 @@ public class IOCTest {
                 System.out.println(a.getB().getC());
                 System.out.println(a.getB().getC().getC());
                 System.out.println(a.getB().getC().getD());
+                ((TestInterface2) a.getB().getC().getD()).print();
                 System.out.println(a.getE());
                 System.out.println(a.getDbl());
 
@@ -102,6 +106,7 @@ class C extends AutoWire {
 
 }
 
+@AOP(Interface1Weaver.class)
 class D implements TestInterface1 {
         private B b;
 
@@ -119,8 +124,32 @@ class D implements TestInterface1 {
 
 }
 
-class E extends AutoWire implements TestInterface2 {
+class Interface1Weaver extends Weaver implements TestInterface2 {
+        @Override
+        protected void before(AOPPoint point) {
+                System.out.println("before");
+        }
 
+        @Override
+        protected void after(AOPPoint point) {
+                System.out.println("after");
+        }
+
+        @Override
+        protected void exception(AOPPoint point) throws Throwable {
+        }
+
+        @Override
+        public void print() {
+                System.out.println("print from weaver");
+        }
+}
+
+class E extends AutoWire implements TestInterface2 {
+        @Override
+        public void print() {
+                System.out.println("print");
+        }
 }
 
 @Wire

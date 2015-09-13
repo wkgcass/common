@@ -3,7 +3,7 @@ package net.cassite.pure.ioc;
 import org.apache.log4j.Logger;
 
 import net.cassite.pure.ioc.annotations.Invoke;
-import net.cassite.style.Style;
+import static net.cassite.style.Style.*;
 
 /**
  * Base of pojo classes requiring auto wire.<br>
@@ -15,7 +15,7 @@ import net.cassite.style.Style;
  * @author wkgcass
  *
  */
-public abstract class AutoWire extends Style {
+public abstract class AutoWire {
 
         private static final Logger LOGGER = Logger.getLogger(AutoWire.class);
 

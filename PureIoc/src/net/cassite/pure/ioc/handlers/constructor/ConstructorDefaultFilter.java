@@ -10,8 +10,9 @@ import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.annotations.Default;
 import net.cassite.pure.ioc.handlers.ConstructorFilter;
 import net.cassite.pure.ioc.handlers.ConstructorFilterChain;
-import net.cassite.style.aggregation.Aggregation;
 import net.cassite.style.reflect.ConstructorSup;
+
+import static net.cassite.style.aggregation.Aggregation.*;
 
 /**
  * Constructor Filter handling Default annotation <br>
@@ -22,7 +23,7 @@ import net.cassite.style.reflect.ConstructorSup;
  * @see Default
  *
  */
-public class ConstructorDefaultFilter extends Aggregation implements ConstructorFilter {
+public class ConstructorDefaultFilter implements ConstructorFilter {
 
         private static final Logger LOGGER = Logger.getLogger(ConstructorDefaultFilter.class);
 

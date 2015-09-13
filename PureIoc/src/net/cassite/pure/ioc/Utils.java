@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import net.cassite.style.Style;
+import static net.cassite.style.Style.*;
 import net.cassite.style.reflect.MethodSupport;
 
 /**
@@ -71,7 +71,7 @@ public abstract class Utils {
                 try {
                         return cls.getDeclaredField(fieldName);
                 } catch (Exception e) {
-                        throw Style.$(e);
+                        throw $(e);
                 }
         }
 
@@ -108,7 +108,7 @@ public abstract class Utils {
                 try {
                         return cls.getDeclaredMethod(name, parameterTypes);
                 } catch (Exception e) {
-                        throw Style.$(e);
+                        throw $(e);
                 }
         }
 

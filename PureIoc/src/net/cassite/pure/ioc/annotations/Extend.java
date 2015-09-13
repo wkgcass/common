@@ -29,8 +29,10 @@ public @interface Extend {
          * 
          * @return
          * @see net.cassite.pure.ioc.AutoWire#get(Class)
+         * @see ExtendingHandler
          */
-        Class<ExtendingHandler>handler();
+        @SuppressWarnings("rawtypes")
+        Class handler();
 
         /**
          * Arguments to fill into your handler

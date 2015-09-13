@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 import net.cassite.pure.ioc.AnnotationHandlingException;
 import net.cassite.pure.ioc.handlers.ConstructorFilter;
 import net.cassite.pure.ioc.handlers.ConstructorFilterChain;
-import net.cassite.style.aggregation.Aggregation;
+import static net.cassite.style.aggregation.Aggregation.*;
 import net.cassite.style.reflect.ConstructorSup;
 
 /**
@@ -24,7 +24,7 @@ import net.cassite.style.reflect.ConstructorSup;
  * @author wkgcass
  *
  */
-public class DefaultConstructorFilter extends Aggregation implements ConstructorFilter {
+public class DefaultConstructorFilter implements ConstructorFilter {
 
         private static final Logger LOGGER = Logger.getLogger(DefaultConstructorFilter.class);
 

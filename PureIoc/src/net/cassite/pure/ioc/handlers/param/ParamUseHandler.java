@@ -13,6 +13,8 @@ import net.cassite.pure.ioc.handlers.ParamAnnotationHandler;
 import net.cassite.pure.ioc.handlers.ParamHandlerChain;
 import net.cassite.style.reflect.MemberSup;
 
+import static net.cassite.style.Style.*;
+
 /**
  * Handler for Use annotation. <br>
  * returns the instance of the class "use" annotation represents.

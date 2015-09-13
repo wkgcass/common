@@ -29,10 +29,11 @@ import net.cassite.pure.ioc.handlers.setter.SetterForceHandler;
 import net.cassite.pure.ioc.handlers.setter.SetterIgnoreHandler;
 import net.cassite.pure.ioc.handlers.setter.SetterUseHandler;
 import net.cassite.pure.ioc.handlers.type.DefaultTypeHandler;
+import net.cassite.pure.ioc.handlers.type.TypeAOPHandler;
 import net.cassite.pure.ioc.handlers.type.TypeDefaultHandler;
 import net.cassite.pure.ioc.handlers.type.TypeIsSingletonHandler;
 import net.cassite.pure.ioc.handlers.type.TypeWireHandler;
-import net.cassite.style.Style;
+import static net.cassite.style.Style.*;
 import net.cassite.style.reflect.*;
 
 /**
@@ -70,7 +71,7 @@ import net.cassite.style.reflect.*;
  * @see net.cassite.pure.ioc.handlers.SetterAnnotationHandler
  *
  */
-public abstract class IOCController extends Style {
+public abstract class IOCController {
 
         private static final Logger LOGGER = Logger.getLogger(IOCController.class);
 
@@ -272,8 +273,8 @@ public abstract class IOCController extends Style {
          * @return invocation result
          * @see ParamHandlerChain
          */
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        protected static Object invokeMethod(MethodSupport method, Object target) {
+        @SuppressWarnings({ "unchecked" })
+        protected static Object invokeMethod(@SuppressWarnings("rawtypes") MethodSupport method, Object target) {
                 LOGGER.debug("Invoking method " + method + " of object " + target);
 
                 Object[] pv = new Object[method.argCount()];
@@ -391,6 +392,7 @@ public abstract class IOCController extends Style {
                 register(new SetterExtendHandler());
                 register(new SetterIgnoreHandler());
 
+                register(new TypeAOPHandler());
                 register(new TypeWireHandler());
                 register(new DefaultTypeHandler());
                 register(new TypeIsSingletonHandler());

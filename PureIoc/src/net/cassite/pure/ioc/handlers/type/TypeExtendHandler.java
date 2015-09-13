@@ -39,7 +39,8 @@ public class TypeExtendHandler implements TypeAnnotationHandler {
                         LOGGER.debug("Start handling with TypeExtendHandler");
 
                         Extend extend = Utils.getAnno(Extend.class, cls.getAnnotations());
-                        ExtendingHandler handler = AutoWire.get(extend.handler());
+                        @SuppressWarnings("unchecked")
+                        ExtendingHandler handler = (ExtendingHandler) AutoWire.get(extend.handler());
 
                         LOGGER.debug("--retrieved extend handler is " + handler + ", filling in args " + Arrays.toString(extend.args()));
 

@@ -12,6 +12,8 @@ import net.cassite.pure.ioc.annotations.Wire;
 import net.cassite.pure.ioc.handlers.TypeAnnotationHandler;
 import net.cassite.pure.ioc.handlers.TypeHandlerChain;
 
+import static net.cassite.style.Style.*;
+
 /**
  * Handler for Wire annotation. <br>
  * if the class extends from AutoWire, this would simply return <br>

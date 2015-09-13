@@ -13,7 +13,6 @@ import net.cassite.pure.ioc.annotations.Extend;
 import net.cassite.pure.ioc.handlers.IrrelevantAnnotationHandlingException;
 import net.cassite.pure.ioc.handlers.ParamAnnotationHandler;
 import net.cassite.pure.ioc.handlers.ParamHandlerChain;
-import net.cassite.style.aggregation.Aggregation;
 import net.cassite.style.reflect.MemberSup;
 
 /**
@@ -23,7 +22,7 @@ import net.cassite.style.reflect.MemberSup;
  * @author wkgcass
  *
  */
-public class ParamExtendHandler extends Aggregation implements ParamAnnotationHandler {
+public class ParamExtendHandler implements ParamAnnotationHandler {
 
         private static final Logger LOGGER = Logger.getLogger(ParamExtendHandler.class);
 
@@ -42,7 +41,8 @@ public class ParamExtendHandler extends Aggregation implements ParamAnnotationHa
                         LOGGER.debug("Start handling with ParamExtendHandler");
 
                         Extend extend = Utils.getAnno(Extend.class, toHandle);
-                        ExtendingHandler handler = AutoWire.get(extend.handler());
+                        @SuppressWarnings("unchecked")
+                        ExtendingHandler handler = (ExtendingHandler) AutoWire.get(extend.handler());
 
                         LOGGER.debug("--retrieved extend handler is " + handler + ", filling in args " + Arrays.toString(extend.args()));
 

@@ -12,6 +12,8 @@ import net.cassite.pure.ioc.handlers.SetterAnnotationHandler;
 import net.cassite.pure.ioc.handlers.SetterHandlerChain;
 import net.cassite.style.reflect.MethodSupport;
 
+import static net.cassite.style.Style.*;
+
 /**
  * Handler for Force annotation <br>
  * invoke the setter with what force.value represents.
