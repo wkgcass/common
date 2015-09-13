@@ -1,17 +1,25 @@
 package net.cassite.pure.aop;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Handler implements InvocationHandler {
+/**
+ * InvocationHandler which supports aop
+ * 
+ * @author wkgcass
+ * @since 0.1.1
+ *
+ */
+class Handler implements InvocationHandler {
 
         private final Weaver[] weavers;
         private final Object target;
 
-        public Handler(Weaver[] weavers, Object target) {
+        Handler(Weaver[] weavers, Object target) {
                 this.weavers = weavers;
                 this.target = target;
         }
@@ -40,6 +48,9 @@ public class Handler implements InvocationHandler {
                                         }
                                 }
                         } catch (Throwable t) {
+                                if (t instanceof InvocationTargetException) {
+                                        t = ((InvocationTargetException) t).getTargetException();
+                                }
                                 p.setThrowable(t);
                                 for (int i = weavers.length - 1; i >= 0; --i) {
                                         weavers[i].doException(p);
@@ -53,7 +64,7 @@ public class Handler implements InvocationHandler {
                 return p.returnValue();
         }
 
-        public Object proxy() {
+        Object proxy() {
                 Set<Class<?>> interfaces = new HashSet<>();
                 for (Class<?> c : target.getClass().getInterfaces()) {
                         interfaces.add(c);

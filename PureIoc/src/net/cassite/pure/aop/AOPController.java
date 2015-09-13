@@ -8,10 +8,24 @@ import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 
+/**
+ * Controls AOP processes
+ * 
+ * @author wkgcass
+ * @since 0.1.1
+ *
+ */
 public abstract class AOPController {
 
         private static final Logger LOGGER = Logger.getLogger(AOPController.class);
 
+        /**
+         * retrieve proxy object
+         * 
+         * @param obj
+         *                the object to enable aop on
+         * @return proxy object
+         */
         @SuppressWarnings("unchecked")
         public static <T> T weave(T obj) {
                 LOGGER.debug("Weaving object " + obj);
