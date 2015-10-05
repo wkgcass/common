@@ -21,4 +21,6 @@ public @interface AOP {
          */
         @SuppressWarnings("rawtypes")
         Class[]value();
+
+        boolean useCglib() default false;
 }

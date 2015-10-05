@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modules name="test">
+	<definitions>
+		<def class="test.A" name="A">
+			<out method="String getPreName()" name="nameOut" />
+			<in method="void setName(String)" name="nameIn" />
+			<in method="void setPreName(String)" name="preNameIn" />
+		</def>
+		<def class="test.B" name="B">
+			<in method="void setString(String)" name="strIn" />
+			<out method="String getString()" name="strOut" />
+		</def>
+	</definitions>
+	<connections>
+		<conn from="A" out="nameOut" to="B" in="strIn" />
+		<conn from="B" out="strOut" to="A" in="nameIn" />
+	</connections>
+	<outer interface="test.TestSlotInterface">
+		<in def="A" in="preNameIn" name="name" method="void nameIn(String)" />
+	</outer>
+</modules>

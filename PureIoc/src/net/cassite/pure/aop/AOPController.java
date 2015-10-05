@@ -30,15 +30,24 @@ public abstract class AOPController {
         public static <T> T weave(T obj) {
                 LOGGER.debug("Weaving object " + obj);
                 AOP aop = obj.getClass().getAnnotation(AOP.class);
+                Weaver[] weavers;
+                boolean useCglib = false;
                 if (aop == null) {
                         return obj;
+                } else {
+                        weavers = new Weaver[aop.value().length];
+                        useCglib = aop.useCglib();
+                        $(aop.value()).forEach((e, i) -> {
+                                weavers[$(i)] = (Weaver) AutoWire.get(e);
+                        });
                 }
-                Weaver[] weavers = new Weaver[aop.value().length];
-                $(aop.value()).forEach((e, i) -> {
-                        weavers[$(i)] = (Weaver) AutoWire.get(e);
-                });
                 LOGGER.debug("retrieved weavers are " + Arrays.toString(weavers));
-                Handler h = new Handler(weavers, obj);
-                return (T) h.proxy();
+                if (useCglib) {
+                        CglibHandler h = new CglibHandler(weavers, obj);
+                        return (T) h.proxy();
+                } else {
+                        Handler h = new Handler(weavers, obj);
+                        return (T) h.proxy();
+                }
         }
 }

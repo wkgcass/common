@@ -106,7 +106,7 @@ class C extends AutoWire {
 
 }
 
-@AOP(Interface1Weaver.class)
+@AOP(value = Interface1Weaver.class, useCglib = true)
 class D implements TestInterface1 {
         private B b;
 

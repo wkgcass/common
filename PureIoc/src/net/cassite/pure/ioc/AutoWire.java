@@ -46,17 +46,24 @@ public abstract class AutoWire {
          *                the object to wire
          */
         public static void wire(Object o) {
-                LOGGER.debug("Start Wiring object " + o);
-                IOCController.registerSingleton(o);
-                $(cls(o).setters()).forEach(m -> IOCController.invokeSetter(o, m));
-                LOGGER.debug("Finished Wiring " + o);
+                if (!o.getClass().getName().contains("$$EnhancerByCGLIB$$")) { // prevent
+                                                                               // wiring
+                                                                               // cglib
+                                                                               // generated
+                                                                               // objects
 
-                LOGGER.debug("Start Invoking methods of object " + o);
-                $(cls(o).allMethods()).forEach(m -> {
-                        if (m.annotation(Invoke.class) != null && !m.isStatic()) {
-                                IOCController.invokeMethod(m, (Object) o);
-                        }
-                });
-                LOGGER.debug("Finished Invoking methods of object " + o);
+                        LOGGER.debug("Start Wiring object " + o);
+                        IOCController.registerSingleton(o);
+                        $(cls(o).setters()).forEach(m -> IOCController.invokeSetter(o, m));
+                        LOGGER.debug("Finished Wiring " + o);
+
+                        LOGGER.debug("Start Invoking methods of object " + o);
+                        $(cls(o).allMethods()).forEach(m -> {
+                                if (m.annotation(Invoke.class) != null && !m.isStatic()) {
+                                        IOCController.invokeMethod(m, (Object) o);
+                                }
+                        });
+                        LOGGER.debug("Finished Invoking methods of object " + o);
+                }
         }
 }
