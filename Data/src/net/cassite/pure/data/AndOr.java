@@ -7,9 +7,13 @@ public interface AndOr {
 
         And and(Or or);
 
+        And and(ExpressionBoolean expBool);
+
         Or or(Condition condition);
 
         Or or(And a);
 
         Or or(Or o);
+
+        Or or(ExpressionBoolean expBool);
 }

@@ -8,7 +8,7 @@ public interface DataAccess {
 
     Map<String, Object> map(Class<?> entityClass, Where whereClause, QueryParameter parameter);
 
-    <En> void update(Class<En> entityClass, Where whereClause, En samples);
+    <En> void update(Class<En> entityClass, Where whereClause, UpdateEntry[] toUpdate);
 
     void remove(Class<?> entityClass, Where whereClause);
 

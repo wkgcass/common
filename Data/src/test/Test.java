@@ -22,7 +22,7 @@ public class Test {
         // test member
         System.out.println(query.from(role).where(user.age.$gt(18).and(role.id.member(user.roles))));
 
-        // test exists
+        // test exists and sub query
         System.out.println(query.from(user).where(exists(query.from(role).where(role.id.$ne(1)))));
     }
 }

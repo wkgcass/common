@@ -1,5 +1,7 @@
 package net.cassite.pure.data;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +33,23 @@ public class PreResult<En> {
     }
 
     public void saveAs(En samples) {
-        dataAccess.update(entityClass, whereClause, samples);
+        List<UpdateEntry> tmpList = new ArrayList<UpdateEntry>();
+        try {
+            for (Field f : samples.getClass().getFields()) {
+                Object o = f.get(samples);
+                if ((o instanceof IData) && !(o instanceof ParameterAggregate)) {
+                    IData<?> data = (IData<?>) o;
+                    tmpList.add(data.as(data.get()));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        dataAccess.update(entityClass, whereClause, tmpList.toArray(new UpdateEntry[tmpList.size()]));
+    }
+
+    public void set(UpdateEntry... toUpdate) {
+        dataAccess.update(entityClass, whereClause, toUpdate);
     }
 
     public void remove() {

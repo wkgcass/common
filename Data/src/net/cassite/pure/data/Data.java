@@ -1,7 +1,5 @@
 package net.cassite.pure.data;
 
-import java.lang.reflect.Field;
-
 public class Data<T> extends Parameter implements IData<T> {
     protected T item;
     final Object entity;
@@ -42,8 +40,13 @@ public class Data<T> extends Parameter implements IData<T> {
     }
 
     @Override
+     public UpdateEntry as(Object o) {
+        return new UpdateEntry(this, o);
+    }
+
+    @Override
     public String toString() {
-        return DataUtils.toStringUtil(this);
+        return DataUtils.dataToStringUtil(this);
     }
 
 }

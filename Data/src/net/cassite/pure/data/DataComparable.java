@@ -44,11 +44,16 @@ public class DataComparable<T extends Comparable<T>> extends ParameterComparable
 
     @Override
     public String toString() {
-        return DataUtils.toStringUtil(this);
+        return DataUtils.dataToStringUtil(this);
     }
 
     @Override
     public int compareTo(T o) {
         return item.compareTo(o);
+    }
+
+    @Override
+    public UpdateEntry as(Object o) {
+        return new UpdateEntry(this, o);
     }
 }

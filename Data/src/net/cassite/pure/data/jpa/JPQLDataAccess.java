@@ -2,6 +2,7 @@ package net.cassite.pure.data.jpa;
 
 import net.cassite.pure.data.DataAccess;
 import net.cassite.pure.data.QueryParameter;
+import net.cassite.pure.data.UpdateEntry;
 import net.cassite.pure.data.Where;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     @Override
-    public <En> void update(Class<En> entityClass, Where whereClause, En samples) {
+    public <En> void update(Class<En> entityClass, Where whereClause, UpdateEntry[] entries) {
 
     }
 

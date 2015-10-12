@@ -1,75 +1,85 @@
 package net.cassite.pure.data;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class Condition implements Where, AndOr {
+/**
+ * Created by blador01 on 2015/10/12.
+ */
+public class ExpressionBoolean extends Parameter implements Where, AndOr {
 
-    public final Parameter data;
-    public final ConditionTypes type;
-    public final List<Object> args;
+    final ExpressionType type;
+    final Object[] parameters;
 
-    Condition(Parameter data, ConditionTypes type, Object[] args) {
-        this.data = data;
+    ExpressionBoolean(ExpressionType type, Object... parameters) {
         this.type = type;
-        this.args = new ArrayList<Object>(args.length);
-        for (Object o : args) {
-            this.args.add(o);
-        }
-    }
-
-    public And and(Condition condition) {
-        And a = new And();
-        a.conditions.add(this);
-        a.conditions.add(condition);
-        return a;
-    }
-
-    public And and(And a) {
-        a.conditions.add(this);
-        return a;
-    }
-
-    public And and(Or or) {
-        And a = new And();
-        a.conditions.add(this);
-        a.ors.add(or);
-        return a;
+        this.parameters = Arrays.copyOf(parameters, parameters.length);
     }
 
     @Override
     public And and(ExpressionBoolean expBool) {
         And a = new And();
-        a.conditions.add(this);
         a.expBools.add(expBool);
+        a.expBools.add(this);
         return a;
-    }
-
-    public Or or(Condition condition) {
-        Or o = new Or();
-        o.conditions.add(this);
-        o.conditions.add(condition);
-        return o;
-    }
-
-    public Or or(And a) {
-        Or o = new Or();
-        o.conditions.add(this);
-        o.ands.add(a);
-        return o;
-    }
-
-    public Or or(Or o) {
-        o.conditions.add(this);
-        return o;
     }
 
     @Override
     public Or or(ExpressionBoolean expBool) {
         Or o = new Or();
-        o.conditions.add(this);
+        o.expBools.add(this);
         o.expBools.add(expBool);
         return o;
+    }
+
+    @Override
+    public And and(Condition condition) {
+        And a = new And();
+        a.conditions.add(condition);
+        a.expBools.add(this);
+        return a;
+    }
+
+    @Override
+    public And and(And a) {
+        a.expBools.add(this);
+        return a;
+    }
+
+    @Override
+    public And and(Or or) {
+        And a = new And();
+        a.ors.add(or);
+        a.expBools.add(this);
+        return a;
+    }
+
+    @Override
+    public Or or(Condition condition) {
+        Or o = new Or();
+        o.conditions.add(condition);
+        o.expBools.add(this);
+        return o;
+    }
+
+    @Override
+    public Or or(And a) {
+        Or o = new Or();
+        o.ands.add(a);
+        o.expBools.add(this);
+        return o;
+    }
+
+    @Override
+    public Or or(Or o) {
+        o.expBools.add(this);
+        return o;
+    }
+
+    @Override
+    public String toString() {
+        return DataUtils.expToStringUtil(type, parameters);
     }
 
     @Override
@@ -84,9 +94,7 @@ public class Condition implements Where, AndOr {
 
     @Override
     public List<Condition> getConditionList() {
-        List<Condition> list = new ArrayList<Condition>(1);
-        list.add(this);
-        return list;
+        return null;
     }
 
     @Override
@@ -101,26 +109,21 @@ public class Condition implements Where, AndOr {
 
     @Override
     public ExpressionType expType() {
-        return null;
+        return type;
     }
 
     @Override
     public Object[] expArgs() {
-        return null;
+        return parameters;
     }
 
     @Override
     public boolean isCondition() {
-        return true;
-    }
-
-    @Override
-    public boolean isExpression() {
         return false;
     }
 
     @Override
-    public String toString() {
-        return data + "." + type + args;
+    public boolean isExpression() {
+        return true;
     }
 }

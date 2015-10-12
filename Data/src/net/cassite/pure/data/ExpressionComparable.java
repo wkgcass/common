@@ -3,11 +3,14 @@ package net.cassite.pure.data;
 import java.util.Arrays;
 import java.util.List;
 
-public class Expression extends Parameter implements Where {
+/**
+ * Created by blador01 on 2015/10/12.
+ */
+public class ExpressionComparable extends ParameterComparable implements Where {
     final ExpressionType type;
     final Object[] parameters;
 
-    Expression(ExpressionType type, Object... parameters) {
+    ExpressionComparable(ExpressionType type, Object... parameters) {
         this.type = type;
         this.parameters = Arrays.copyOf(parameters, parameters.length);
     }

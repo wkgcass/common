@@ -6,6 +6,7 @@ import java.util.List;
 public class And implements Where, AndOr {
     final List<Condition> conditions = new ArrayList<Condition>();
     final List<Or> ors = new ArrayList<Or>();
+    final List<ExpressionBoolean> expBools = new ArrayList<ExpressionBoolean>();
 
     public And and(Condition condition) {
         conditions.add(condition);
@@ -23,6 +24,12 @@ public class And implements Where, AndOr {
         return this;
     }
 
+    @Override
+    public And and(ExpressionBoolean expBool) {
+        expBool.and(expBool);
+        return this;
+    }
+
     public Or or(Condition condition) {
         Or o = new Or();
         o.conditions.add(condition);
@@ -32,6 +39,14 @@ public class And implements Where, AndOr {
 
     public Or or(Or o) {
         o.ands.add(this);
+        return o;
+    }
+
+    @Override
+    public Or or(ExpressionBoolean expBool) {
+        Or o = new Or();
+        o.ands.add(this);
+        o.expBools.add(expBool);
         return o;
     }
 
@@ -106,6 +121,14 @@ public class And implements Where, AndOr {
                 sb.append(" and ");
             }
             sb.append("(").append(o.toString()).append(")");
+        }
+        for (ExpressionBoolean expBool : expBools) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                sb.append(" and ");
+            }
+            sb.append(expBool);
         }
         return sb.toString();
     }

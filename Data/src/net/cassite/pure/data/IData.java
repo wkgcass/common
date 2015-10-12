@@ -13,4 +13,6 @@ public interface IData<T> {
     OrderBase desc();
 
     OrderBase asc();
+
+    UpdateEntry as(Object o);
 }

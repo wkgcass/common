@@ -3,7 +3,7 @@ package net.cassite.pure.data;
 /**
  * Created by wkgcass on 15/10/11.
  */
-public class ParameterAggregate extends Parameter {
+public abstract class ParameterAggregate extends Parameter {
     public Condition reverseMember(Object o) {
         return new Condition(this, ConditionTypes.reverseMember, new Object[]{o});
     }
