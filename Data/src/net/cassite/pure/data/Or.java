@@ -86,4 +86,27 @@ public class Or implements Where, AndOr {
         public boolean isExpression() {
                 return false;
         }
+
+        @Override
+        public String toString() {
+                StringBuilder sb = new StringBuilder();
+                boolean isFirst = true;
+                for (Condition c : conditions) {
+                        if (isFirst) {
+                                isFirst = false;
+                        } else {
+                                sb.append(" or ");
+                        }
+                        sb.append(c.toString());
+                }
+                for (And a : ands) {
+                        if (isFirst) {
+                                isFirst = false;
+                        } else {
+                                sb.append(" or ");
+                        }
+                        sb.append("(").append(a.toString()).append(")");
+                }
+                return sb.toString();
+        }
 }

@@ -3,21 +3,21 @@ package net.cassite.pure.data;
 import java.util.List;
 
 public interface Where {
-        List<And> getAndList();
+    List<And> getAndList();
 
-        List<Or> getOrList();
+    List<Or> getOrList();
 
-        List<Condition> getConditionList();
+    List<Condition> getConditionList();
 
-        ExpressionType expType();
+    ExpressionType expType();
 
-        Object[] expArgs();
+    Object[] expArgs();
 
-        boolean isAnd();
+    boolean isAnd();
 
-        boolean isOr();
+    boolean isOr();
 
-        boolean isCondition();
+    boolean isCondition();
 
-        boolean isExpression();
+    boolean isExpression();
 }

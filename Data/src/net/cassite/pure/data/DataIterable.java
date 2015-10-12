@@ -1,18 +1,14 @@
 package net.cassite.pure.data;
 
-import java.lang.reflect.Field;
+/**
+ * Created by wkgcass on 15/10/11.
+ */
+public class DataIterable<E, T extends Iterable<E>> extends ParameterAggregate implements IData<T> {
+    private T item;
+    public final Object entity;
 
-public class Data<T> extends Parameter implements IData<T> {
-    protected T item;
-    final Object entity;
-
-    public Data(Object entity) {
-        this.item = null;
-        this.entity = entity;
-    }
-
-    public Data(T item, Object entity) {
-        this.item = item;
+    public DataIterable(T it, Object entity) {
+        this.item = it;
         this.entity = entity;
     }
 
@@ -22,8 +18,8 @@ public class Data<T> extends Parameter implements IData<T> {
     }
 
     @Override
-    public void set(T item) {
-        this.item = item;
+    public void set(T t) {
+        this.item = t;
     }
 
     @Override
@@ -45,5 +41,4 @@ public class Data<T> extends Parameter implements IData<T> {
     public String toString() {
         return DataUtils.toStringUtil(this);
     }
-
 }

@@ -1,17 +1,18 @@
 package net.cassite.pure.data;
 
-import java.lang.reflect.Field;
-
-public class Data<T> extends Parameter implements IData<T> {
-    protected T item;
+/**
+ * Created by wkgcass on 15/10/11.
+ */
+public class DataComparable<T extends Comparable<T>> extends ParameterComparable implements IData<T>, Comparable<T> {
+    private T item;
     final Object entity;
 
-    public Data(Object entity) {
+    public DataComparable(Object entity) {
         this.item = null;
         this.entity = entity;
     }
 
-    public Data(T item, Object entity) {
+    public DataComparable(T item, Object entity) {
         this.item = item;
         this.entity = entity;
     }
@@ -46,4 +47,8 @@ public class Data<T> extends Parameter implements IData<T> {
         return DataUtils.toStringUtil(this);
     }
 
+    @Override
+    public int compareTo(T o) {
+        return item.compareTo(o);
+    }
 }
