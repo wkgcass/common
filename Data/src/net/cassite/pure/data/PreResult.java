@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class PreResult<En> {
     private final DataAccess dataAccess;
-    private final Class<En> entityClass;
-    private final Where whereClause;
+    public final Class<En> entityClass;
+    public final Where whereClause;
 
     PreResult(DataAccess dataAccess, Class<En> entityClass, Where whereClause) {
         this.dataAccess = dataAccess;
@@ -24,11 +24,17 @@ public class PreResult<En> {
         return dataAccess.list(entityClass, whereClause, parameters);
     }
 
-    public Map<String, Object> map() {
+    public En first() {
+        List<En> list = dataAccess.list(entityClass, whereClause, new QueryParameter().top(1));
+        if (list == null || list.isEmpty()) return null;
+        return list.get(0);
+    }
+
+    public List<Map<String, Object>> map() {
         return dataAccess.map(entityClass, whereClause, null);
     }
 
-    public Map<String, Object> map(QueryParameter parameters) {
+    public List<Map<String, Object>> map(QueryParameterWithFocus parameters) {
         return dataAccess.map(entityClass, whereClause, parameters);
     }
 
@@ -54,10 +60,6 @@ public class PreResult<En> {
 
     public void remove() {
         dataAccess.remove(entityClass, whereClause);
-    }
-
-    public Where getWhereClause() {
-        return whereClause;
     }
 
     @Override

@@ -1,9 +1,11 @@
 package net.cassite.pure.data;
 
+import net.cassite.pure.data.util.DataUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
-public class Expression extends Parameter implements Where {
+public class Expression extends Parameter implements Where, IExpression {
     final ExpressionType type;
     final Object[] parameters;
 
@@ -15,21 +17,6 @@ public class Expression extends Parameter implements Where {
     @Override
     public String toString() {
         return DataUtils.expToStringUtil(type, parameters);
-    }
-
-    @Override
-    public List<And> getAndList() {
-        return null;
-    }
-
-    @Override
-    public List<Or> getOrList() {
-        return null;
-    }
-
-    @Override
-    public List<Condition> getConditionList() {
-        return null;
     }
 
     @Override

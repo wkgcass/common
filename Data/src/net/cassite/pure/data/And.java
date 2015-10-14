@@ -57,19 +57,16 @@ public class And implements Where, AndOr {
         return o;
     }
 
-    @Override
-    public List<And> getAndList() {
-        return null;
-    }
-
-    @Override
     public List<Or> getOrList() {
         return ors;
     }
 
-    @Override
     public List<Condition> getConditionList() {
         return conditions;
+    }
+
+    public List<ExpressionBoolean> getExpBoolList() {
+        return expBools;
     }
 
     @Override
@@ -80,16 +77,6 @@ public class And implements Where, AndOr {
     @Override
     public boolean isOr() {
         return false;
-    }
-
-    @Override
-    public ExpressionType expType() {
-        return null;
-    }
-
-    @Override
-    public Object[] expArgs() {
-        return null;
     }
 
     @Override

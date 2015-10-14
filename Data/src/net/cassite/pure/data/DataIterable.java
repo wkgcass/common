@@ -1,5 +1,7 @@
 package net.cassite.pure.data;
 
+import net.cassite.pure.data.util.DataUtils;
+
 /**
  * Created by wkgcass on 15/10/11.
  */

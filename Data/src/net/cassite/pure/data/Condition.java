@@ -72,17 +72,6 @@ public class Condition implements Where, AndOr {
         return o;
     }
 
-    @Override
-    public List<And> getAndList() {
-        return null;
-    }
-
-    @Override
-    public List<Or> getOrList() {
-        return null;
-    }
-
-    @Override
     public List<Condition> getConditionList() {
         List<Condition> list = new ArrayList<Condition>(1);
         list.add(this);
@@ -97,16 +86,6 @@ public class Condition implements Where, AndOr {
     @Override
     public boolean isOr() {
         return false;
-    }
-
-    @Override
-    public ExpressionType expType() {
-        return null;
-    }
-
-    @Override
-    public Object[] expArgs() {
-        return null;
     }
 
     @Override

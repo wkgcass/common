@@ -1,12 +1,14 @@
 package net.cassite.pure.data;
 
+import net.cassite.pure.data.util.DataUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by blador01 on 2015/10/12.
  */
-public class ExpressionComparable extends ParameterComparable implements Where {
+public class ExpressionComparable extends ParameterComparable<ExpressionComparable> implements Where,IExpression {
     final ExpressionType type;
     final Object[] parameters;
 
@@ -18,21 +20,6 @@ public class ExpressionComparable extends ParameterComparable implements Where {
     @Override
     public String toString() {
         return DataUtils.expToStringUtil(type, parameters);
-    }
-
-    @Override
-    public List<And> getAndList() {
-        return null;
-    }
-
-    @Override
-    public List<Or> getOrList() {
-        return null;
-    }
-
-    @Override
-    public List<Condition> getConditionList() {
-        return null;
     }
 
     @Override
@@ -63,5 +50,10 @@ public class ExpressionComparable extends ParameterComparable implements Where {
     @Override
     public boolean isExpression() {
         return true;
+    }
+
+    @Override
+    public int compareTo(ExpressionComparable o) {
+        return 0;
     }
 }

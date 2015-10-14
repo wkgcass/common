@@ -1,13 +1,14 @@
 package net.cassite.pure.data;
 
-import java.util.ArrayList;
+import net.cassite.pure.data.util.DataUtils;
+
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by blador01 on 2015/10/12.
  */
-public class ExpressionBoolean extends Parameter implements Where, AndOr {
+public class ExpressionBoolean extends Parameter implements Where, AndOr, IExpression {
 
     final ExpressionType type;
     final Object[] parameters;
@@ -80,21 +81,6 @@ public class ExpressionBoolean extends Parameter implements Where, AndOr {
     @Override
     public String toString() {
         return DataUtils.expToStringUtil(type, parameters);
-    }
-
-    @Override
-    public List<And> getAndList() {
-        return null;
-    }
-
-    @Override
-    public List<Or> getOrList() {
-        return null;
-    }
-
-    @Override
-    public List<Condition> getConditionList() {
-        return null;
     }
 
     @Override

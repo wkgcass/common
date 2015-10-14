@@ -16,13 +16,12 @@ public class Test {
         Role role = new Role();
 
         // test > <>
-        System.out.println(query.from(user).
-                where(user.age.$gt(15).and(role.name.$ne(user.name))));
+        query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();
 
         // test member
-        System.out.println(query.from(role).where(user.age.$gt(18).and(role.id.member(user.roles))));
+        query.from(role).where(user.age.$gt(18).and(role.id.member(user.roles))).list();
 
         // test exists and sub query
-        System.out.println(query.from(user).where(exists(query.from(role).where(role.id.$ne(1)))));
+        query.from(user).where(exists(query.from(role).where(role.id.$ne(1)))).list();
     }
 }

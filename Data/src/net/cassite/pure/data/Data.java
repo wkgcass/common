@@ -1,5 +1,7 @@
 package net.cassite.pure.data;
 
+import net.cassite.pure.data.util.DataUtils;
+
 public class Data<T> extends Parameter implements IData<T> {
     protected T item;
     final Object entity;
