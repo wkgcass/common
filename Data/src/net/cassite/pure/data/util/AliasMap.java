@@ -1,11 +1,12 @@
 package net.cassite.pure.data.util;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 /**
  * Created by wkgcass on 15/10/13.
  */
-public class AliasMap extends HashMap<Class<?>, String> {
+public class AliasMap extends HashMap<Field, String> {
     private final String prefix;
     private int aliasCount = 0;
 
@@ -19,11 +20,11 @@ public class AliasMap extends HashMap<Class<?>, String> {
     }
 
     @Override
-    public String get(Object cls) {
-        if (cls instanceof Class) {
-            if (containsKey(cls)) return super.get(cls);
-            put((Class<?>) cls, prefix + (++aliasCount));
-            return super.get(cls);
+    public String get(Object field) {
+        if (field instanceof Field) {
+            if (containsKey(field)) return super.get(field);
+            put((Field) field, prefix + (++aliasCount));
+            return super.get(field);
         } else {
             return null;
         }

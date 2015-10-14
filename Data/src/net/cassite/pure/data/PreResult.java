@@ -7,35 +7,35 @@ import java.util.Map;
 
 public class PreResult<En> {
     private final DataAccess dataAccess;
-    public final Class<En> entityClass;
+    public final En entity;
     public final Where whereClause;
 
-    PreResult(DataAccess dataAccess, Class<En> entityClass, Where whereClause) {
+    PreResult(DataAccess dataAccess, En entity, Where whereClause) {
         this.dataAccess = dataAccess;
-        this.entityClass = entityClass;
+        this.entity = entity;
         this.whereClause = whereClause;
     }
 
     public List<En> list() {
-        return dataAccess.list(entityClass, whereClause, null);
+        return dataAccess.list(entity, whereClause, null);
     }
 
     public List<En> list(QueryParameter parameters) {
-        return dataAccess.list(entityClass, whereClause, parameters);
+        return dataAccess.list(entity, whereClause, parameters);
     }
 
     public En first() {
-        List<En> list = dataAccess.list(entityClass, whereClause, new QueryParameter().top(1));
+        List<En> list = dataAccess.list(entity, whereClause, new QueryParameter().top(1));
         if (list == null || list.isEmpty()) return null;
         return list.get(0);
     }
 
     public List<Map<String, Object>> map() {
-        return dataAccess.map(entityClass, whereClause, null);
+        return dataAccess.map(entity, whereClause, null);
     }
 
     public List<Map<String, Object>> map(QueryParameterWithFocus parameters) {
-        return dataAccess.map(entityClass, whereClause, parameters);
+        return dataAccess.map(entity, whereClause, parameters);
     }
 
     public void saveAs(En samples) {
@@ -51,19 +51,19 @@ public class PreResult<En> {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        dataAccess.update(entityClass, whereClause, tmpList.toArray(new UpdateEntry[tmpList.size()]));
+        dataAccess.update(entity, whereClause, tmpList.toArray(new UpdateEntry[tmpList.size()]));
     }
 
     public void set(UpdateEntry... toUpdate) {
-        dataAccess.update(entityClass, whereClause, toUpdate);
+        dataAccess.update(entity, whereClause, toUpdate);
     }
 
     public void remove() {
-        dataAccess.remove(entityClass, whereClause);
+        dataAccess.remove(entity, whereClause);
     }
 
     @Override
     public String toString() {
-        return "from " + entityClass.getSimpleName() + " where " + whereClause;
+        return "from " + entity.getClass().getSimpleName() + " where " + whereClause;
     }
 }

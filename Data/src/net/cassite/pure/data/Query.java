@@ -7,13 +7,9 @@ public class Query {
         this.dataAccess = dataAccess;
     }
 
-    public <En> From<En> from(Class<En> entityClass) {
-        return new From<En>(entityClass, dataAccess);
-    }
-
     @SuppressWarnings("unchecked")
     public <En> From<En> from(En entity) {
-        return new From<En>((Class<En>) entity.getClass(), dataAccess);
+        return new From<En>(entity, dataAccess);
     }
 
     public void save(Object... entities) {
@@ -21,7 +17,11 @@ public class Query {
     }
 
     public <E, T extends Iterable<E>> T find(Class<E> res, String query) {
-        return dataAccess.find(res, query);
+        return dataAccess.find(res, query, null);
+    }
+
+    public <E, T extends Iterable<E>> T find(Class<E> res, String query, QueryParameter parameter) {
+        return dataAccess.find(res, query, parameter);
     }
 
     public void execute(String query) {

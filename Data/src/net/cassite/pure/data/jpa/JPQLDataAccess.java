@@ -4,6 +4,8 @@ import net.cassite.pure.data.*;
 import net.cassite.pure.data.util.AliasMap;
 import net.cassite.pure.data.util.ConstantMap;
 import net.cassite.pure.data.util.DataUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.persistence.Query;
@@ -20,11 +22,14 @@ import java.util.Map;
  */
 public class JPQLDataAccess implements DataAccess {
 
+    private Logger logger = LoggerFactory.getLogger(DataAccess.class);
+
     private static class Args {
         public StringBuilder sb;
         public Where whereClause;
         public QueryParameter queryParameter;
 
+        public Object entity;
         public Class<?> entityClass;
         public AliasMap aliasMap;
         public ConstantMap constantMap;
@@ -39,6 +44,7 @@ public class JPQLDataAccess implements DataAccess {
             args.sb = this.sb;
             args.whereClause = this.whereClause;
             args.queryParameter = queryParameter;
+            args.entity = entity;
             args.entityClass = this.entityClass;
             args.aliasMap = this.aliasMap;
             args.constantMap = this.constantMap;
@@ -49,14 +55,8 @@ public class JPQLDataAccess implements DataAccess {
 
     private final EntityManager entityManager;
 
-    /*
-        public JPQLDataAccess(EntityManager entityManager) {
-            this.entityManager = entityManager;
-        }
-    */
-    // TODO
-    public JPQLDataAccess() {
-        entityManager = null;
+    public JPQLDataAccess(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     private Args fillArgsWithObj(Args toClone, Object obj) {
@@ -83,10 +83,11 @@ public class JPQLDataAccess implements DataAccess {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = new Args();
             a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
-            a.constantMap=args.constantMap;
-            a.toJoin=new LinkedHashMap<Class<?>, String>();
-            a.entityClass=query.entityClass;
-            a.sb=new StringBuilder();
+            a.constantMap = args.constantMap;
+            a.toJoin = new LinkedHashMap<Class<?>, String>();
+            a.entity = args.entity;
+            a.entityClass = query.entity.getClass();
+            a.sb = new StringBuilder();
             a.whereClause = query.whereClause;
             a.queryParameter = null;
             String toReturn = "EXISTS(" + generateSelect(a) + ")";
@@ -112,10 +113,11 @@ public class JPQLDataAccess implements DataAccess {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = new Args();
             a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
-            a.constantMap=args.constantMap;
-            a.toJoin=new LinkedHashMap<Class<?>, String>();
-            a.entityClass=query.entityClass;
-            a.sb=new StringBuilder();
+            a.constantMap = args.constantMap;
+            a.toJoin = new LinkedHashMap<Class<?>, String>();
+            a.entity = args.entity;
+            a.entityClass = query.entity.getClass();
+            a.sb = new StringBuilder();
             a.whereClause = query.whereClause;
             a.queryParameter = null;
             String toReturn = "NOT EXISTS(" + generateSelect(a) + ")";
@@ -415,38 +417,36 @@ public class JPQLDataAccess implements DataAccess {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <En> List<En> list(Class<En> entityClass, Where whereClause, QueryParameter parameter) {
+    public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {
         AliasMap clsToAlias = new AliasMap("var");
         ConstantMap constantMap = new ConstantMap();
 
         Args args = new Args();
         args.sb = new StringBuilder();
-        args.entityClass = entityClass;
+        args.entityClass = entity.getClass();
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;
         args.constantMap = constantMap;
         args.toJoin = new LinkedHashMap<Class<?>, String>();
-        // TODO
-        System.out.println(generateSelect(args));
-        return null;
-/*
-        javax.persistence.Query query = entityManager.createQuery(generateSelect(args));
+
+        String selectQuery = generateSelect(args);
+        logger.debug("GENERATED SELECT JPQL QUERY IS : {} ---- WITH PARAMETERS : {}", selectQuery, constantMap);
+
+        javax.persistence.Query query = entityManager.createQuery(selectQuery);
 
         setParametersToQuery(query, parameter, constantMap);
 
         return (List<En>) query.getResultList();
-*/
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> map(Class<?> entityClass, Where whereClause, QueryParameterWithFocus parameter) {
+    public <En> List<Map<String, Object>> map(En entity, Where whereClause, QueryParameterWithFocus parameter) {
         if (parameter == null) {
             try {
                 parameter = new QueryParameterWithFocus();
-                Object entity = entityClass.newInstance();
-                for (Field f : entityClass.getFields()) {
+                for (Field f : entity.getClass().getFields()) {
                     if (IData.class.isAssignableFrom(f.getType())) {
                         parameter.focus((IData<?>) f.get(entity));
                     }
@@ -460,13 +460,16 @@ public class JPQLDataAccess implements DataAccess {
         ConstantMap constantMap = new ConstantMap();
 
         Args args = new Args();
-        args.entityClass = entityClass;
+        args.entityClass = entity.getClass();
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;
         args.constantMap = constantMap;
 
-        javax.persistence.Query query = entityManager.createQuery(generateSelect(args));
+        String selectQuery = generateSelect(args);
+        logger.debug("GENERATED SELECT JPQL QUERY IS : {} ---- WITH PARAMETERS : {}", selectQuery, constantMap);
+
+        javax.persistence.Query query = entityManager.createQuery(selectQuery);
 
         setParametersToQuery(query, parameter, constantMap);
 
@@ -483,12 +486,12 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     @Override
-    public <En> void update(Class<En> entityClass, Where whereClause, UpdateEntry[] entries) {
+    public <En> void update(En entityClass, Where whereClause, UpdateEntry[] entries) {
 
     }
 
     @Override
-    public void remove(Class<?> entityClass, Where whereClause) {
+    public <En> void remove(En entity, Where whereClause) {
 
     }
 
@@ -498,7 +501,7 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     @Override
-    public <E, T extends Iterable<E>> T find(Class<E> cls, String query) {
+    public <E, T extends Iterable<E>> T find(Class<E> cls, String query, QueryParameter parameter) {
         return null;
     }
 
