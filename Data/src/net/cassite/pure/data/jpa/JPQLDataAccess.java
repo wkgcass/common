@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import javax.persistence.*;
 import javax.persistence.Query;
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,9 +29,10 @@ public class JPQLDataAccess implements DataAccess {
 
         public Object entity;
         public Class<?> entityClass;
+        public String entityAlias;
         public AliasMap aliasMap;
         public ConstantMap constantMap;
-        public Map<Class<?>, String> toJoin;
+        public Map<Field, String> toJoin;
 
         public IExpression expression;
         public Object obj;
@@ -46,6 +45,7 @@ public class JPQLDataAccess implements DataAccess {
             args.queryParameter = queryParameter;
             args.entity = entity;
             args.entityClass = this.entityClass;
+            args.entityAlias = this.entityAlias;
             args.aliasMap = this.aliasMap;
             args.constantMap = this.constantMap;
             args.toJoin = this.toJoin;
@@ -81,12 +81,9 @@ public class JPQLDataAccess implements DataAccess {
             return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + "/" + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.exists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
-            Args a = new Args();
+            Args a = args.doClone();
             a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
-            a.constantMap = args.constantMap;
-            a.toJoin = new LinkedHashMap<Class<?>, String>();
-            a.entity = args.entity;
-            a.entityClass = query.entity.getClass();
+            a.toJoin = new LinkedHashMap<Field, String>();
             a.sb = new StringBuilder();
             a.whereClause = query.whereClause;
             a.queryParameter = null;
@@ -111,12 +108,9 @@ public class JPQLDataAccess implements DataAccess {
             return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " * " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.notExists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
-            Args a = new Args();
+            Args a = args.doClone();
             a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
-            a.constantMap = args.constantMap;
-            a.toJoin = new LinkedHashMap<Class<?>, String>();
-            a.entity = args.entity;
-            a.entityClass = query.entity.getClass();
+            a.toJoin = new LinkedHashMap<Field, String>();
             a.sb = new StringBuilder();
             a.whereClause = query.whereClause;
             a.queryParameter = null;
@@ -190,10 +184,18 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     private String dataToString(IData<?> data, Args args) {
-        if (!args.aliasMap.containsKey(data.getEntity().getClass())) {
-            args.toJoin.put(data.getEntity().getClass(), args.aliasMap.get(data.getEntity().getClass()));
+        Object entity = data.getEntity();
+        String alias;
+        if (entity == args.entity) {
+            alias = args.entityAlias;
+        } else {
+            Field f = DataUtils.findFieldByContainedEntity(entity, args.entity);
+            alias = args.aliasMap.get(f);
+            if (!args.toJoin.containsKey(f)) {
+                args.toJoin.put(f, alias);
+            }
         }
-        return args.aliasMap.get(data.getEntity().getClass()) + "." + DataUtils.findFieldNameByIData(data);
+        return alias + "." + DataUtils.findFieldNameByIData(data);
     }
 
     /**
@@ -306,15 +308,6 @@ public class JPQLDataAccess implements DataAccess {
                 sb.append(generateWhere(fillArgsWithWhereClause(args, expBool)));
             }
         } else if (args.whereClause.isCondition()) {
-            Condition condition = (Condition) args.whereClause;
-            Parameter parameter = condition.data;
-            if (parameter instanceof IData) {
-                Class<?> cls = ((IData<?>) parameter).getEntity().getClass();
-                String alias = args.aliasMap.get(cls);
-                if (cls != args.entityClass && !args.toJoin.containsKey(cls)) {
-                    args.toJoin.put(cls, alias);
-                }
-            }
             sb.append(generateCondition(fillArgsWithCondition(args, (Condition) args.whereClause)));
         } else if (args.whereClause.isExpression()) {
             sb.append(generateExpression(fillArgsWithExpression(args, (IExpression) args.whereClause)));
@@ -324,23 +317,8 @@ public class JPQLDataAccess implements DataAccess {
 
     private String generateJoin(Args args) {
         StringBuilder sb = new StringBuilder();
-        for (Class<?> joinCls : args.toJoin.keySet()) {
-            boolean found = false;
-            for (Field f : args.entityClass.getFields()) {
-                if (IData.class.isAssignableFrom(f.getType())) {
-                    ParameterizedType pt = (ParameterizedType) f.getGenericType();
-                    Type[] types = pt.getActualTypeArguments();
-                    Class<?> genericType = (Class<?>) types[0];
-                    if (joinCls.isAssignableFrom(genericType)) {
-                        sb.append(" JOIN ").append(args.aliasMap.get(args.entityClass)).append(".").append(f.getName());
-                        found = true;
-                        break;
-                    }
-                }
-            }
-            if (!found) throw new RuntimeException("Cannot find type reference of " + joinCls + " in fields of " + args.entityClass);
-            String alias = args.toJoin.get(joinCls);
-            sb.append(" ").append(alias);
+        for (Field joinField : args.toJoin.keySet()) {
+            sb.append(" JOIN ").append(args.entityAlias).append(".").append(joinField.getName()).append(" ").append(args.aliasMap.get(joinField));
         }
         return sb.toString();
     }
@@ -363,14 +341,13 @@ public class JPQLDataAccess implements DataAccess {
     private String generateSelect(Args args) {
         args.sb.append("SELECT ");
         if (args.queryParameter == null || !(args.queryParameter instanceof QueryParameterWithFocus)) {
-            args.sb.append(args.aliasMap.get(args.entityClass));
+            args.sb.append(args.entityAlias);
         } else {
-            String entityAlias = args.aliasMap.get(args.entityClass);
             for (IData<?> data : ((QueryParameterWithFocus) args.queryParameter).focusList) {
-                args.sb.append(entityAlias).append(".").append(DataUtils.findFieldNameByIData(data));
+                args.sb.append(args.entityAlias).append(".").append(DataUtils.findFieldNameByIData(data));
             }
         }
-        args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(args.aliasMap.get(args.entityClass));
+        args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(args.entityAlias);
 
         generateJoinWhere(args, true);
 
@@ -381,8 +358,8 @@ public class JPQLDataAccess implements DataAccess {
                     args.sb.append(" ORDER BY ");
                     for (Object o : argsArr) {
                         OrderBase order = (OrderBase) o;
-                        String fieldName = DataUtils.findFieldNameByIData(order.data);
-                        args.sb.append(args.aliasMap.get(order.data.getClass())).append(".").append(fieldName);
+                        Field f = DataUtils.findFieldByContainedEntity(order.data.getEntity(), args.entity);
+                        args.sb.append(args.aliasMap.get(f)).append(".").append(f.getName());
                     }
                 } else if (type != QueryParameterTypes.limit && type != QueryParameterTypes.top) {
                     throw new UnsupportedOperationException(type + " not supported");
@@ -423,12 +400,14 @@ public class JPQLDataAccess implements DataAccess {
 
         Args args = new Args();
         args.sb = new StringBuilder();
+        args.entity = entity;
         args.entityClass = entity.getClass();
+        args.entityAlias = args.entityClass.getSimpleName().substring(0, 1).toLowerCase() + "_var0";
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;
         args.constantMap = constantMap;
-        args.toJoin = new LinkedHashMap<Class<?>, String>();
+        args.toJoin = new LinkedHashMap<Field, String>();
 
         String selectQuery = generateSelect(args);
         logger.debug("GENERATED SELECT JPQL QUERY IS : {} ---- WITH PARAMETERS : {}", selectQuery, constantMap);
@@ -456,11 +435,14 @@ public class JPQLDataAccess implements DataAccess {
             }
         }
 
-        AliasMap clsToAlias = new AliasMap("var");
+        AliasMap clsToAlias = new AliasMap("var", 0);
         ConstantMap constantMap = new ConstantMap();
 
         Args args = new Args();
+        args.sb = new StringBuilder();
+        args.entity = entity;
         args.entityClass = entity.getClass();
+        args.entityAlias = args.entityClass.getSimpleName().substring(0, 1).toLowerCase() + "_var0";
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;

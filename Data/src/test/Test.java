@@ -194,6 +194,8 @@ public class Test {
 
         User user = new User();
         Role role = new Role();
+        user.getRoles().add(role);
+        role.getUsers().add(user);
 
         // test > <>
         query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();

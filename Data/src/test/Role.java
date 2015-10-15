@@ -13,7 +13,7 @@ import java.util.List;
 public class Role {
     public final DataComparable<Integer> id = new DataComparable<Integer>(this);
     public final Data<String> name = new Data<String>(this);
-    public final DataIterable<User, List<User>> users=new DataIterable<User, List<User>>(new ArrayList<User>(),this);
+    public final DataIterable<User, List<User>> users = new DataIterable<User, List<User>>(new ArrayList<User>(), this);
 
     public Integer getId() {
         return id.get();
@@ -29,5 +29,9 @@ public class Role {
 
     public void setName(String name) {
         this.name.set(name);
+    }
+
+    public List<User> getUsers() {
+        return users.get();
     }
 }

@@ -1,6 +1,9 @@
 package net.cassite.pure.data.util;
 
+import net.cassite.pure.data.IData;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
 /**
@@ -20,11 +23,11 @@ public class AliasMap extends HashMap<Field, String> {
     }
 
     @Override
-    public String get(Object field) {
-        if (field instanceof Field) {
-            if (containsKey(field)) return super.get(field);
-            put((Field) field, prefix + (++aliasCount));
-            return super.get(field);
+    public String get(Object o) {
+        if (o instanceof Field) {
+            if (containsKey(o)) return super.get(o);
+            put((Field) o, ((Class<?>) ((ParameterizedType) ((Field) o).getGenericType()).getActualTypeArguments()[0]).getSimpleName().substring(0, 1).toLowerCase() + "_" + prefix + (++aliasCount));
+            return super.get(o);
         } else {
             return null;
         }
