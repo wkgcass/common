@@ -204,6 +204,6 @@ public class Test {
         query.from(role).where(user.age.$gt(18).and(role.id.member(user.roles))).list();
 
         // test exists and sub query
-        query.from(user).where(exists(query.from(role).where(role.id.$ne(1)))).list();
+        query.from(user).where(exists(query.from(role).where(role.id.$ne(1).and(user.id.$ne(5))))).list();
     }
 }

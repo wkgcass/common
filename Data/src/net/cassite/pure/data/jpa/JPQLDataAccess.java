@@ -20,7 +20,13 @@ import java.util.Map;
  */
 public class JPQLDataAccess implements DataAccess {
 
+    private static final String aliasPrefix = "var";
+
     private Logger logger = LoggerFactory.getLogger(DataAccess.class);
+
+    private static String generateAlias(Object entity, int count) {
+        return entity.getClass().getSimpleName().substring(0, 1).toLowerCase() + "_" + aliasPrefix + count;
+    }
 
     private static class Args {
         public StringBuilder sb;
@@ -82,9 +88,12 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.expression.expType() == ExpressionType.exists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = args.doClone();
-            a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
+            a.aliasMap = new AliasMap(aliasPrefix, args.aliasMap.getAliasCount() + 1);
             a.toJoin = new LinkedHashMap<Field, String>();
             a.sb = new StringBuilder();
+            a.entity = query.entity;
+            a.entityClass = query.entity.getClass();
+            a.entityAlias = generateAlias(query.entity, args.aliasMap.getAliasCount() + 1);
             a.whereClause = query.whereClause;
             a.queryParameter = null;
             String toReturn = "EXISTS(" + generateSelect(a) + ")";
@@ -109,9 +118,12 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.expression.expType() == ExpressionType.notExists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = args.doClone();
-            a.aliasMap = new AliasMap("var", args.aliasMap.getAliasCount());
+            a.aliasMap = new AliasMap(aliasPrefix, args.aliasMap.getAliasCount() + 1);
             a.toJoin = new LinkedHashMap<Field, String>();
             a.sb = new StringBuilder();
+            a.entity = query.entity;
+            a.entityClass = query.entity.getClass();
+            a.entityAlias = generateAlias(query.entity, args.aliasMap.getAliasCount() + 1);
             a.whereClause = query.whereClause;
             a.queryParameter = null;
             String toReturn = "NOT EXISTS(" + generateSelect(a) + ")";
@@ -395,14 +407,14 @@ public class JPQLDataAccess implements DataAccess {
     @SuppressWarnings("unchecked")
     @Override
     public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {
-        AliasMap clsToAlias = new AliasMap("var");
+        AliasMap clsToAlias = new AliasMap(aliasPrefix);
         ConstantMap constantMap = new ConstantMap();
 
         Args args = new Args();
         args.sb = new StringBuilder();
         args.entity = entity;
         args.entityClass = entity.getClass();
-        args.entityAlias = args.entityClass.getSimpleName().substring(0, 1).toLowerCase() + "_var0";
+        args.entityAlias = generateAlias(args.entity, 0);
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;
@@ -435,14 +447,14 @@ public class JPQLDataAccess implements DataAccess {
             }
         }
 
-        AliasMap clsToAlias = new AliasMap("var", 0);
+        AliasMap clsToAlias = new AliasMap(aliasPrefix, 0);
         ConstantMap constantMap = new ConstantMap();
 
         Args args = new Args();
         args.sb = new StringBuilder();
         args.entity = entity;
         args.entityClass = entity.getClass();
-        args.entityAlias = args.entityClass.getSimpleName().substring(0, 1).toLowerCase() + "_var0";
+        args.entityAlias = generateAlias(args.entity, 0);
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = clsToAlias;
