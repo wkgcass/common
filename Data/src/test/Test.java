@@ -197,13 +197,16 @@ public class Test {
         user.getRoles().add(role);
         role.getUsers().add(user);
 
-        // test > <>
+        // test > <> and
         query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();
+
+        // test > <> or
+        query.from(user).where(user.age.$gt(15).or(role.name.$ne(user.name))).list();
 
         // test member
         query.from(role).where(user.age.$gt(18).and(role.id.member(user.roles))).list();
 
         // test exists and sub query
-        query.from(user).where(exists(query.from(role).where(role.id.$ne(1).and(user.id.$ne(5))))).list();
+        query.from(user).where(exists(query.from(role).where(role.id.$ne(1).and(user.id.$ne(5)))).and(user.id.$gt(1))).list();
     }
 }

@@ -84,7 +84,7 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.expression.expType() == ExpressionType.count) {
             return "Count(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.divide) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + "/" + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
+            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " / " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.exists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = args.doClone();
@@ -167,11 +167,11 @@ public class JPQLDataAccess implements DataAccess {
                 sb.append(objToString(fillArgsWithObj(args, o)));
             }
             return sb.append(")").toString();
-        } else if (args.obj instanceof List) {
+        } else if (args.obj instanceof Iterable) {
             StringBuilder sb = new StringBuilder();
             sb.append("(");
             boolean isFirst = true;
-            for (Object o : (List<?>) args.obj) {
+            for (Object o : (Iterable<?>) args.obj) {
                 if (isFirst) {
                     isFirst = false;
                 } else {
@@ -338,13 +338,9 @@ public class JPQLDataAccess implements DataAccess {
     /**
      * generate select query after 'from ...', including join and where
      */
-    private void generateJoinWhere(Args args, boolean generateJoin) {
+    private void generateJoinWhere(Args args) {
         String where = " WHERE " + generateWhere(args);
-        if (generateJoin) {
-            args.sb.append(generateJoin(args)).append(where);
-        } else {
-            args.sb.append(where);
-        }
+        args.sb.append(generateJoin(args)).append(where);
     }
 
     /**
@@ -361,7 +357,7 @@ public class JPQLDataAccess implements DataAccess {
         }
         args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(args.entityAlias);
 
-        generateJoinWhere(args, true);
+        generateJoinWhere(args);
 
         if (args.queryParameter != null) {
             for (QueryParameterTypes type : args.queryParameter.parameters.keySet()) {
@@ -404,29 +400,30 @@ public class JPQLDataAccess implements DataAccess {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {
-        AliasMap clsToAlias = new AliasMap(aliasPrefix);
-        ConstantMap constantMap = new ConstantMap();
-
-        Args args = new Args();
+    private void initArgs(Args args, Object entity, Where whereClause, QueryParameter parameter) {
         args.sb = new StringBuilder();
         args.entity = entity;
         args.entityClass = entity.getClass();
         args.entityAlias = generateAlias(args.entity, 0);
         args.whereClause = whereClause;
         args.queryParameter = parameter;
-        args.aliasMap = clsToAlias;
-        args.constantMap = constantMap;
+        args.aliasMap = new AliasMap(aliasPrefix);
+        args.constantMap = new ConstantMap();
         args.toJoin = new LinkedHashMap<Field, String>();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {
+        Args args = new Args();
+        initArgs(args, entity, whereClause, parameter);
 
         String selectQuery = generateSelect(args);
-        logger.debug("GENERATED SELECT JPQL QUERY IS : {} ---- WITH PARAMETERS : {}", selectQuery, constantMap);
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS : {}", selectQuery, args.constantMap);
 
         javax.persistence.Query query = entityManager.createQuery(selectQuery);
 
-        setParametersToQuery(query, parameter, constantMap);
+        setParametersToQuery(query, parameter, args.constantMap);
 
         return (List<En>) query.getResultList();
     }
@@ -447,25 +444,15 @@ public class JPQLDataAccess implements DataAccess {
             }
         }
 
-        AliasMap clsToAlias = new AliasMap(aliasPrefix, 0);
-        ConstantMap constantMap = new ConstantMap();
-
         Args args = new Args();
-        args.sb = new StringBuilder();
-        args.entity = entity;
-        args.entityClass = entity.getClass();
-        args.entityAlias = generateAlias(args.entity, 0);
-        args.whereClause = whereClause;
-        args.queryParameter = parameter;
-        args.aliasMap = clsToAlias;
-        args.constantMap = constantMap;
+        initArgs(args, entity, whereClause, parameter);
 
         String selectQuery = generateSelect(args);
-        logger.debug("GENERATED SELECT JPQL QUERY IS : {} ---- WITH PARAMETERS : {}", selectQuery, constantMap);
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS : {}", selectQuery, args.constantMap);
 
         javax.persistence.Query query = entityManager.createQuery(selectQuery);
 
-        setParametersToQuery(query, parameter, constantMap);
+        setParametersToQuery(query, parameter, args.constantMap);
 
         List<Object[]> resultList = (List<Object[]>) query.getResultList();
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(resultList.size());
