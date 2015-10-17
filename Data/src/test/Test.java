@@ -15,182 +15,30 @@ import java.util.List;
  */
 public class Test {
     public static void main(String[] args) {
-        Query query = new Query(new JPQLDataAccess(new EntityManager() {
-            @Override
-            public void persist(Object o) {
+        // hibernate initiate
+        EntityManager manager = Persistence.createEntityManagerFactory("mysqlJPA").createEntityManager();
+        /*
+        EntityTransaction tx=manager.getTransaction();
+        tx.begin();
 
-            }
+        // init data
+        User userToSave = new User();
+        userToSave.setAge(21);
+        userToSave.setName("kg");
 
-            @Override
-            public <T> T merge(T t) {
-                return null;
-            }
+        Role roleToSave = new Role();
+        roleToSave.setName("usr");
 
-            @Override
-            public void remove(Object o) {
+        roleToSave.getUsers().add(userToSave);
+        userToSave.getRoles().add(roleToSave);
 
-            }
+        manager.persist(userToSave);
+        manager.persist(roleToSave);
 
-            @Override
-            public <T> T find(Class<T> aClass, Object o) {
-                return null;
-            }
+        tx.commit();
+        */
 
-            @Override
-            public <T> T getReference(Class<T> aClass, Object o) {
-                return null;
-            }
-
-            @Override
-            public void flush() {
-
-            }
-
-            @Override
-            public void setFlushMode(FlushModeType flushModeType) {
-
-            }
-
-            @Override
-            public FlushModeType getFlushMode() {
-                return null;
-            }
-
-            @Override
-            public void lock(Object o, LockModeType lockModeType) {
-
-            }
-
-            @Override
-            public void refresh(Object o) {
-
-            }
-
-            @Override
-            public void clear() {
-
-            }
-
-            @Override
-            public boolean contains(Object o) {
-                return false;
-            }
-
-            @Override
-            public javax.persistence.Query createQuery(String s) {
-                return new javax.persistence.Query() {
-                    @Override
-                    public List getResultList() {
-                        return null;
-                    }
-
-                    @Override
-                    public Object getSingleResult() {
-                        return null;
-                    }
-
-                    @Override
-                    public int executeUpdate() {
-                        return 0;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setMaxResults(int i) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setFirstResult(int i) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setHint(String s, Object o) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(String s, Object o) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(String s, Date date, TemporalType temporalType) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(String s, Calendar calendar, TemporalType temporalType) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(int i, Object o) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(int i, Date date, TemporalType temporalType) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setParameter(int i, Calendar calendar, TemporalType temporalType) {
-                        return null;
-                    }
-
-                    @Override
-                    public javax.persistence.Query setFlushMode(FlushModeType flushModeType) {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public javax.persistence.Query createNamedQuery(String s) {
-                return null;
-            }
-
-            @Override
-            public javax.persistence.Query createNativeQuery(String s) {
-                return null;
-            }
-
-            @Override
-            public javax.persistence.Query createNativeQuery(String s, Class aClass) {
-                return null;
-            }
-
-            @Override
-            public javax.persistence.Query createNativeQuery(String s, String s1) {
-                return null;
-            }
-
-            @Override
-            public void joinTransaction() {
-
-            }
-
-            @Override
-            public Object getDelegate() {
-                return null;
-            }
-
-            @Override
-            public void close() {
-
-            }
-
-            @Override
-            public boolean isOpen() {
-                return false;
-            }
-
-            @Override
-            public EntityTransaction getTransaction() {
-                return null;
-            }
-        }));
+        Query query = new Query(new JPQLDataAccess(manager));
 
         User user = new User();
         Role role = new Role();
@@ -198,7 +46,18 @@ public class Test {
         role.getUsers().add(user);
 
         // test > <> and
-        query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();
+        List<User> list = query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();
+        System.out.println("!!!");
+        for (User u : list) {
+            System.out.println(u.getId());
+            System.out.println(u.getName());
+            System.out.println(u.getAge());
+
+            for (Role r : u.getRoles()) {
+                System.out.println(r.getId());
+                System.out.println(r.getName());
+            }
+        }
 
         // test > <> or
         query.from(user).where(user.age.$gt(15).or(role.name.$ne(user.name))).list();

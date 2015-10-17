@@ -4,18 +4,22 @@ import net.cassite.pure.data.Data;
 import net.cassite.pure.data.DataComparable;
 import net.cassite.pure.data.DataIterable;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by wkgcass on 15/10/10.
  */
+@Entity
 public class User {
     public final DataComparable<Integer> id = new DataComparable<Integer>(this);
     public final Data<String> name = new Data<String>(this);
     public final DataComparable<Integer> age = new DataComparable<Integer>(this);
     public final DataIterable<Role, List<Role>> roles = new DataIterable<Role, List<Role>>(new ArrayList<Role>(), this);
 
+    @Id
+    @GeneratedValue
     public Integer getId() {
         return id.get();
     }
@@ -44,6 +48,7 @@ public class User {
         this.roles.set(roles);
     }
 
+    @ManyToMany
     public List<Role> getRoles() {
         return this.roles.get();
     }
