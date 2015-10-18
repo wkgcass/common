@@ -4,6 +4,7 @@ import javax.persistence.Id;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 public class Query {
     private final DataAccess dataAccess;
@@ -36,4 +37,17 @@ public class Query {
     public <En> En find(Class<En> entityClass, Object pkValue) {
         return dataAccess.find(entityClass, pkValue);
     }
+
+    public <En> List<En> execute(NamedListQuery<En> query) {
+        return dataAccess.runNamedListQuery(query);
+    }
+
+    public List<Map<String, Object>> execute(NamedMapQuery query) {
+        return dataAccess.runNamedMapQuery(query);
+    }
+
+    public void execute(NamedUpdateQuery query) {
+        dataAccess.runNamedUpdateQuery(query);
+    }
+
 }

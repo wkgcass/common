@@ -6,10 +6,13 @@ import java.util.Map;
 /**
  * Created by wkgcass on 15/10/18.
  */
-public abstract class NamedMapQuery extends NamedQuery {
+public abstract class NamedMapQuery extends NamedQuery<NamedMapQuery> {
     protected NamedMapQuery(String name) {
         super(name);
+        QueryContainer.register(name, this);
     }
 
-    public abstract List<Map<String, Object>> map();
+    public List<Map<String, Object>> map(Query query) {
+        return query.execute(this);
+    }
 }

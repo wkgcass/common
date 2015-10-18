@@ -62,6 +62,22 @@ public class PreResult<En> {
         dataAccess.remove(entity, whereClause);
     }
 
+    public void makeList(String name, QueryParameter parameter) {
+        // TODO
+    }
+
+    public void makeMap(String name, QueryParameterWithFocus parameter) {
+        // TODO
+    }
+
+    public void makeUpdate(String name, UpdateEntry... entires) {
+        // TODO
+    }
+
+    public void makeDelete(String name) {
+        // TODO
+    }
+
     @Override
     public String toString() {
         return "from " + entity.getClass().getSimpleName() + " where " + whereClause;

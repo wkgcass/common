@@ -5,10 +5,13 @@ import java.util.List;
 /**
  * Created by wkgcass on 15/10/18.
  */
-public abstract class NamedListQuery<En> extends NamedQuery {
+public abstract class NamedListQuery<En> extends NamedQuery<NamedListQuery<En>> {
     protected NamedListQuery(String name) {
         super(name);
+        QueryContainer.register(name, this);
     }
 
-    public abstract List<En> list();
+    public List<En> list(Query query) {
+        return query.execute(this);
+    }
 }

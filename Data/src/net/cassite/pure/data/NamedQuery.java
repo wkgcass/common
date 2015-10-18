@@ -1,5 +1,6 @@
 package net.cassite.pure.data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,9 +8,11 @@ import java.util.Map;
 /**
  * Created by wkgcass on 15/10/18.
  */
-public abstract class NamedQuery {
-    private String name;
+abstract class NamedQuery<T extends NamedQuery<T>> implements Serializable {
+    private final String name;
     private Map<String, Integer> map = new HashMap<String, Integer>();
+
+    private Map<Integer, Object> constants = new HashMap<Integer, Object>();
 
     protected NamedQuery(String name) {
         this.name = name;
@@ -21,7 +24,17 @@ public abstract class NamedQuery {
      * @param index index start at 1
      * @param arg   arg to fill
      */
-    public abstract void fill(int index, Object arg);
+    public void fill(int index, Object arg) {
+        constants.put(index, arg);
+    }
+
+    public Map<Integer, Object> getConstants() {
+        Map<Integer, Object> mapToReturn = new HashMap<Integer, Object>();
+        for (Integer i : constants.keySet()) {
+            mapToReturn.put(i, constants.get(i));
+        }
+        return mapToReturn;
+    }
 
     public final String getName() {
         return name;

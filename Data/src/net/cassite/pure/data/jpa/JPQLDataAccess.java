@@ -336,7 +336,7 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * generate select query after 'from ...', including join and where
+     * generate select selectQuery after 'from ...', including join and where
      */
     private void generateJoinWhere(Args args) {
         String where = " WHERE " + generateWhere(args);
@@ -344,7 +344,7 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * generate a jqpl query select string
+     * generate a jqpl selectQuery select string
      */
     private String generateSelect(Args args) {
         args.sb.append("SELECT ");
@@ -407,7 +407,7 @@ public class JPQLDataAccess implements DataAccess {
     /**
      * fill constants
      */
-    private void setConstants(Query query, ConstantMap constantMap) {
+    private void setConstants(Query query, Map<Integer, Object> constantMap) {
         for (Integer i : constantMap.keySet()) {
             query.setParameter(i, constantMap.get(i));
         }
@@ -446,9 +446,7 @@ public class JPQLDataAccess implements DataAccess {
         return (List<En>) query.getResultList();
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public <En> List<Map<String, Object>> map(En entity, Where whereClause, QueryParameterWithFocus parameter) {
+    private QueryParameterWithFocus validateQueryParameterWithFocus(Object entity, QueryParameterWithFocus parameter) {
         if (parameter == null) {
             try {
                 parameter = new QueryParameterWithFocus();
@@ -461,18 +459,16 @@ public class JPQLDataAccess implements DataAccess {
                 throw new RuntimeException(e);
             }
         }
+        return parameter;
+    }
 
-        Args args = new Args();
+    private String mapInit(Args args, Object entity, Where whereClause, QueryParameterWithFocus parameter) {
         initArgs(args, entity, whereClause, parameter);
 
-        String selectQuery = generateSelect(args);
-        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS : {}", selectQuery, args.constantMap);
+        return generateSelect(args);
+    }
 
-        javax.persistence.Query query = entityManager.createQuery(selectQuery);
-
-        setParametersToQuery(query, parameter, args.constantMap);
-
-        List<Object[]> resultList = (List<Object[]>) query.getResultList();
+    private List<Map<String, Object>> listToMap(List<Object[]> resultList, QueryParameterWithFocus parameter) {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(resultList.size());
         for (Object[] res : resultList) {
             Map<String, Object> map = new LinkedHashMap<String, Object>();
@@ -484,15 +480,34 @@ public class JPQLDataAccess implements DataAccess {
         return list;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <En> void update(En entity, Where whereClause, UpdateEntry[] entries) {
+    public List<Map<String, Object>> map(Object entity, Where whereClause, QueryParameterWithFocus parameter) {
         Args args = new Args();
+        parameter = validateQueryParameterWithFocus(entity, parameter);
+        String selectQuery = mapInit(args, entity, whereClause, parameter);
+
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS : {}", selectQuery, args.constantMap);
+
+        javax.persistence.Query query = entityManager.createQuery(selectQuery);
+
+        setParametersToQuery(query, parameter, args.constantMap);
+
+        return listToMap(query.getResultList(), parameter);
+    }
+
+    private void updateInit(Args args, Object entity, Where whereClause, UpdateEntry[] entries) {
         initArgs(args, entity, whereClause, null);
         args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(" SET ");
         for (UpdateEntry entry : entries) {
             args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(fillArgsWithObj(args, entry.updateValue)));
         }
         args.sb.append(" WHERE ").append(generateWhere(args));
+    }
+
+    @Override
+    public void update(Object entity, Where whereClause, UpdateEntry[] entries) {
+        Args args = new Args();
 
         logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
 
@@ -501,11 +516,15 @@ public class JPQLDataAccess implements DataAccess {
         query.executeUpdate();
     }
 
-    @Override
-    public <En> void remove(En entity, Where whereClause) {
-        Args args = new Args();
+    private void removeInit(Args args, Object entity, Where whereClause) {
         initArgs(args, entity, whereClause, null);
         args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(generateWhere(args));
+    }
+
+    @Override
+    public void remove(Object entity, Where whereClause) {
+        Args args = new Args();
+        removeInit(args, entity, whereClause);
 
         logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
 
@@ -525,6 +544,62 @@ public class JPQLDataAccess implements DataAccess {
     @Override
     public <E> List<E> find(String query, QueryParameter parameter) {
         return (List<E>) entityManager.createQuery(query).getResultList();
+    }
+
+    @Override
+    public <En> NamedListQuery<En> makeList(String name, En entity, Where whereClause, QueryParameter parameter) {
+        Args args = new Args();
+        initArgs(args, entity, whereClause, parameter);
+
+        String selectQuery = generateSelect(args);
+
+        return new JPQLNamedListQuery<En>(name, selectQuery);
+    }
+
+    @Override
+    public NamedMapQuery makeMap(String name, Object entity, Where whereClause, QueryParameterWithFocus parameter) {
+        Args args = new Args();
+        parameter = validateQueryParameterWithFocus(entity, parameter);
+        String selectQuery = mapInit(args, entity, whereClause, parameter);
+
+        return new JPQLNamedMapQuery(name, selectQuery, parameter);
+    }
+
+    @Override
+    public NamedUpdateQuery makeUpdate(String name, Object entity, Where whereClause, UpdateEntry[] entries) {
+        Args args = new Args();
+        updateInit(args, entity, whereClause, entries);
+        return new JPQLNamedUpdateQuery(name, args.sb.toString());
+    }
+
+    @Override
+    public NamedUpdateQuery makeDelete(String name, Object entity, Where whereClause) {
+        Args args = new Args();
+        removeInit(args, entity, whereClause);
+        return new JPQLNamedUpdateQuery(name, args.sb.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <En> List<En> runNamedListQuery(NamedListQuery<En> query) throws IllegalArgumentException {
+        Query q = entityManager.createQuery(((JPQLNamedListQuery<En>) query).queryString);
+        setConstants(q, query.getConstants());
+        return (List<En>) q.getResultList();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> runNamedMapQuery(NamedMapQuery query) throws IllegalArgumentException {
+        Query q = entityManager.createQuery(((JPQLNamedMapQuery) query).selectQuery);
+        setConstants(q, query.getConstants());
+        return listToMap(q.getResultList(), ((JPQLNamedMapQuery) query).parameter);
+    }
+
+    @Override
+    public void runNamedUpdateQuery(NamedUpdateQuery query) throws IllegalArgumentException {
+        Query q = entityManager.createQuery(((JPQLNamedUpdateQuery) query).updateQuery);
+        setConstants(q, query.getConstants());
+        q.executeUpdate();
     }
 
     @Override
