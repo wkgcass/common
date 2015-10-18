@@ -43,9 +43,4 @@ public class DataIterable<E, T extends Iterable<E>> extends ParameterAggregate i
     public String toString() {
         return DataUtils.dataToStringUtil(this);
     }
-
-    @Override
-    public UpdateEntry as(Object o) {
-        return new UpdateEntry(this, o);
-    }
 }

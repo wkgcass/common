@@ -5,7 +5,7 @@ import net.cassite.pure.data.util.DataUtils;
 /**
  * Created by wkgcass on 15/10/11.
  */
-public class DataComparable<T extends Comparable<T>> extends ParameterComparable<T> implements IData<T>, Comparable<T> {
+public class DataComparable<T extends Comparable<T>> extends ParameterComparable<T> implements Comparable<T>, IDataAssignable<T> {
     private T item;
     final Object entity;
 

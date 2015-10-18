@@ -2,7 +2,7 @@ package net.cassite.pure.data;
 
 import net.cassite.pure.data.util.DataUtils;
 
-public class Data<T> extends Parameter implements IData<T> {
+public class Data<T> extends Parameter implements IDataAssignable<T> {
     protected T item;
     final Object entity;
 
@@ -42,7 +42,7 @@ public class Data<T> extends Parameter implements IData<T> {
     }
 
     @Override
-     public UpdateEntry as(Object o) {
+    public UpdateEntry as(Object o) {
         return new UpdateEntry(this, o);
     }
 
