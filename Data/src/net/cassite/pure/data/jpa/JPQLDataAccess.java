@@ -395,6 +395,13 @@ public class JPQLDataAccess implements DataAccess {
             }
         }
 
+        setConstants(query, constantMap);
+    }
+
+    /**
+     * fill constants
+     */
+    private void setConstants(Query query, ConstantMap constantMap) {
         for (Integer i : constantMap.keySet()) {
             query.setParameter(i, constantMap.get(i));
         }
@@ -467,27 +474,46 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     @Override
-    public <En> void update(En entityClass, Where whereClause, UpdateEntry[] entries) {
+    public <En> void update(En entity, Where whereClause, UpdateEntry[] entries) {
+        Args args = new Args();
+        initArgs(args, entity, whereClause, null);
+        args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(" SET ");
+        for (UpdateEntry entry : entries) {
+            args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(fillArgsWithObj(args, entry.updateValue)));
+        }
+        args.sb.append(" WHERE ").append(generateWhere(args));
 
+        Query query = entityManager.createQuery(args.sb.toString());
+        setConstants(query, args.constantMap);
+        query.executeUpdate();
     }
 
     @Override
     public <En> void remove(En entity, Where whereClause) {
+        Args args = new Args();
+        initArgs(args, entity, whereClause, null);
+        args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(generateWhere(args));
 
+        Query query = entityManager.createQuery(args.sb.toString());
+        setConstants(query, args.constantMap);
+        query.executeUpdate();
     }
 
     @Override
     public void save(Object[] entity) {
-
+        for (Object e : entity) {
+            entityManager.persist(e);
+        }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public <E, T extends Iterable<E>> T find(Class<E> cls, String query, QueryParameter parameter) {
-        return null;
+    public <E> List<E> find(String query, QueryParameter parameter) {
+        return (List<E>) entityManager.createQuery(query).getResultList();
     }
 
     @Override
     public void execute(String query) {
-
+        entityManager.createQuery(query).executeUpdate();
     }
 }

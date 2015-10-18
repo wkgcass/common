@@ -14,7 +14,7 @@ public interface DataAccess {
 
     <En> void save(En[] entity);
 
-    <E, T extends Iterable<E>> T find(Class<E> cls, String query, QueryParameter parameter);
+    <E> List<E> find(String query, QueryParameter parameter);
 
     void execute(String query);
 }
