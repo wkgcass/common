@@ -1,5 +1,7 @@
 package net.cassite.pure.data;
 
+import java.util.List;
+
 public class Query {
     private final DataAccess dataAccess;
 
@@ -16,12 +18,12 @@ public class Query {
         dataAccess.save(entities);
     }
 
-    public <E, T extends Iterable<E>> T find(Class<E> res, String query) {
-        return dataAccess.find(res, query, null);
+    public <E> List<E> find(String query) {
+        return dataAccess.find(query, null);
     }
 
-    public <E, T extends Iterable<E>> T find(Class<E> res, String query, QueryParameter parameter) {
-        return dataAccess.find(res, query, parameter);
+    public <E> List<E> find(String query, QueryParameter parameter) {
+        return dataAccess.find(query, parameter);
     }
 
     public void execute(String query) {

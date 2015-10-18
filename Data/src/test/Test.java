@@ -9,6 +9,7 @@ import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wkgcass on 15/10/10.
@@ -47,7 +48,6 @@ public class Test {
 
         // test > <> and
         List<User> list = query.from(user).where(user.age.$gt(15).and(role.name.$ne(user.name))).list();
-        System.out.println("!!!");
         for (User u : list) {
             System.out.println(u.getId());
             System.out.println(u.getName());
@@ -58,6 +58,9 @@ public class Test {
                 System.out.println(r.getName());
             }
         }
+
+        List<Map<String, Object>> listMap = query.from(user).where(user.age.$gt(15)).map();
+        System.out.println(listMap);
 
         // test > <> or
         query.from(user).where(user.age.$gt(15).or(role.name.$ne(user.name))).list();

@@ -351,7 +351,13 @@ public class JPQLDataAccess implements DataAccess {
         if (args.queryParameter == null || !(args.queryParameter instanceof QueryParameterWithFocus)) {
             args.sb.append(args.entityAlias);
         } else {
+            boolean isFirst = true;
             for (IData<?> data : ((QueryParameterWithFocus) args.queryParameter).focusList) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    args.sb.append(", ");
+                }
                 args.sb.append(args.entityAlias).append(".").append(DataUtils.findFieldNameByIData(data));
             }
         }
@@ -442,7 +448,7 @@ public class JPQLDataAccess implements DataAccess {
             try {
                 parameter = new QueryParameterWithFocus();
                 for (Field f : entity.getClass().getFields()) {
-                    if (IData.class.isAssignableFrom(f.getType())) {
+                    if (IData.class.isAssignableFrom(f.getType()) && !ParameterAggregate.class.isAssignableFrom(f.getType())) {
                         parameter.focus((IData<?>) f.get(entity));
                     }
                 }
@@ -483,6 +489,8 @@ public class JPQLDataAccess implements DataAccess {
         }
         args.sb.append(" WHERE ").append(generateWhere(args));
 
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
+
         Query query = entityManager.createQuery(args.sb.toString());
         setConstants(query, args.constantMap);
         query.executeUpdate();
@@ -493,6 +501,8 @@ public class JPQLDataAccess implements DataAccess {
         Args args = new Args();
         initArgs(args, entity, whereClause, null);
         args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(generateWhere(args));
+
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
 
         Query query = entityManager.createQuery(args.sb.toString());
         setConstants(query, args.constantMap);
