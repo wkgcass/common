@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface DataAccess {
+    <En> En find(Class<En> entityClass, Object pkValue);
+
     <En> List<En> list(En entityClass, Where whereClause, QueryParameter parameter);
 
     <En> List<Map<String, Object>> map(En entity, Where whereClause, QueryParameterWithFocus parameter);

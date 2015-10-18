@@ -1,5 +1,8 @@
 package net.cassite.pure.data;
 
+import javax.persistence.Id;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class Query {
@@ -28,5 +31,9 @@ public class Query {
 
     public void execute(String query) {
         dataAccess.execute(query);
+    }
+
+    public <En> En find(Class<En> entityClass, Object pkValue) {
+        return dataAccess.find(entityClass, pkValue);
     }
 }

@@ -425,6 +425,11 @@ public class JPQLDataAccess implements DataAccess {
         args.toJoin = new LinkedHashMap<Field, String>();
     }
 
+    @Override
+    public <En> En find(Class<En> entityClass, Object pkValue) {
+        return entityManager.find(entityClass, pkValue);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {

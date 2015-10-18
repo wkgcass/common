@@ -1,8 +1,6 @@
 package test;
 
-import net.cassite.pure.data.Data;
-import net.cassite.pure.data.DataComparable;
-import net.cassite.pure.data.DataIterable;
+import net.cassite.pure.data.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
