@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,7 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by wkgcass on 15/10/10.
+ * JPA的DataAccess实现.<br>
+ * 将Pure.Data Query转化为JPQL(或者直接传入)并通过JPQL进行增删改查.<br>
+ * 构造时传入EntityManagerFactory
  */
 public class JPQLDataAccess implements DataAccess {
 
@@ -57,34 +60,58 @@ public class JPQLDataAccess implements DataAccess {
             args.toJoin = this.toJoin;
             return args;
         }
+
+        public Args fillObj(Object obj) {
+            Args a = doClone();
+            a.obj = obj;
+            return a;
+        }
+
+        public Args fillExp(IExpression exp) {
+            Args a = doClone();
+            a.expression = exp;
+            return a;
+        }
+
+        public Args fillWhere(Where where) {
+            Args a = doClone();
+            a.whereClause = where;
+            return a;
+        }
+
+        public Args fillCondition(Condition condition) {
+            Args a = doClone();
+            a.condition = condition;
+            return a;
+        }
     }
 
     private final EntityManager entityManager;
 
-    public JPQLDataAccess(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    private Args fillArgsWithObj(Args toClone, Object obj) {
-        Args a = toClone.doClone();
-        a.obj = obj;
-        return a;
+    public JPQLDataAccess(EntityManagerFactory entityManagerFactory) {
+        this.entityManager = entityManagerFactory.createEntityManager();
     }
 
     /**
-     * generate + - * / % and functions
+     * 生成表达式<br>
+     * 调用objToString,对于exists也调用generateSelect
+     *
+     * @param args Args对象
+     * @return 生成的表达式语句
+     * @see JPQLDataAccess#objToString(Args)
+     * @see JPQLDataAccess#generateSelect(Args)
      */
     private String generateExpression(Args args) {
         if (args.expression.expType() == ExpressionType.add) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0]));
+            return objToString(args.fillObj(args.expression.expArgs()[0]));
         } else if (args.expression.expType() == ExpressionType.avg) {
-            return "AVG(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "AVG(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.concat) {
-            return "CONCAT(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ", " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1])) + ")";
+            return "CONCAT(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ", " + objToString(args.fillObj(args.expression.expArgs()[1])) + ")";
         } else if (args.expression.expType() == ExpressionType.count) {
-            return "Count(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "Count(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.divide) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " / " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
+            return objToString(args.fillObj(args.expression.expArgs()[0])) + " / " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.exists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = args.doClone();
@@ -100,21 +127,21 @@ public class JPQLDataAccess implements DataAccess {
             args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
             return toReturn;
         } else if (args.expression.expType() == ExpressionType.length) {
-            return "LENGTH(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "LENGTH(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.locate) {
-            return "LOCATE(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ", " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1])) + ")";
+            return "LOCATE(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ", " + objToString(args.fillObj(args.expression.expArgs()[1])) + ")";
         } else if (args.expression.expType() == ExpressionType.lower) {
-            return "LOWER(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "LOWER(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.max) {
-            return "MAX(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "MAX(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.min) {
-            return "MIN(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "MIN(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.minus) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " - " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
+            return objToString(args.fillObj(args.expression.expArgs()[0])) + " - " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.mod) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " % " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
+            return objToString(args.fillObj(args.expression.expArgs()[0])) + " % " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.multi) {
-            return objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + " * " + objToString(fillArgsWithObj(args, args.expression.expArgs()[1]));
+            return objToString(args.fillObj(args.expression.expArgs()[0])) + " * " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.notExists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
             Args a = args.doClone();
@@ -130,28 +157,29 @@ public class JPQLDataAccess implements DataAccess {
             args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
             return toReturn;
         } else if (args.expression.expType() == ExpressionType.substring) {
-            return "SUBSTRING(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ", " + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ", " + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "SUBSTRING(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ", " + objToString(args.fillObj(args.expression.expArgs()[1])) + ", " + objToString(args.fillObj(args.expression.expArgs()[2])) + ")";
         } else if (args.expression.expType() == ExpressionType.sum) {
-            return "SUM(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "SUM(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.trim) {
-            return "TRIM(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "TRIM(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.unary_negative) {
-            return "- " + objToString(fillArgsWithObj(args, args.expression.expArgs()[0]));
+            return "- " + objToString(args.fillObj(args.expression.expArgs()[0]));
         } else if (args.expression.expType() == ExpressionType.upper) {
-            return "UPPER(" + objToString(fillArgsWithObj(args, args.expression.expArgs()[0])) + ")";
+            return "UPPER(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else {
             throw new UnsupportedOperationException(args.expression.expType() + " not supported");
         }
     }
 
-    private Args fillArgsWithExpression(Args toClone, IExpression expression) {
-        Args a = toClone.doClone();
-        a.expression = expression;
-        return a;
-    }
-
     /**
-     * convert an object to string, for constants it leave a place to fill
+     * 转换obj为String.对于pure.data下的对象转换为字符串,对于java自带对象转换为数字的占位符(从1开始)<br>
+     * 对于IData,执行dataToString
+     * 对于IExpression,执行generateExpression
+     *
+     * @param args Args对象
+     * @return 生成的字符串
+     * @see JPQLDataAccess#dataToString(IData, Args)
+     * @see JPQLDataAccess#generateExpression(Args)
      */
     private String objToString(Args args) {
         if (args.obj.getClass().isArray()) {
@@ -164,7 +192,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(", ");
                 }
-                sb.append(objToString(fillArgsWithObj(args, o)));
+                sb.append(objToString(args.fillObj(o)));
             }
             return sb.append(")").toString();
         } else if (args.obj instanceof Iterable) {
@@ -177,7 +205,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(", ");
                 }
-                sb.append(objToString(fillArgsWithObj(args, o)));
+                sb.append(objToString(args.fillObj(o)));
             }
             return sb.append(")").toString();
         } else {
@@ -187,7 +215,7 @@ public class JPQLDataAccess implements DataAccess {
                 if (args.obj instanceof IData) {
                     return dataToString((IData<?>) args.obj, args);
                 } else if (args.obj instanceof IExpression) {
-                    return generateExpression(fillArgsWithExpression(args, (IExpression) args.obj));
+                    return generateExpression(args.fillExp((IExpression) args.obj));
                 } else {
                     throw new UnsupportedOperationException(args.obj.getClass() + " not supported");
                 }
@@ -195,6 +223,15 @@ public class JPQLDataAccess implements DataAccess {
         }
     }
 
+    /**
+     * 将IData转化为字符串<br>
+     * 调用DataUtils.findFieldNameByIData
+     *
+     * @param data 要转换的IData对象
+     * @param args Args对象
+     * @return 生成的字符串
+     * @see DataUtils#findFieldNameByIData(IData)
+     */
     private String dataToString(IData<?> data, Args args) {
         Object entity = data.getEntity();
         String alias;
@@ -211,60 +248,61 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * generate condition, such as user.id=1
+     * 生成condition类型对应的语句,例如 u.age > 18<br>
+     * 生成过程中调用objToString
+     *
+     * @param args Args对象
+     * @return 生成的条件语句
+     * @see ConditionTypes
+     * @see JPQLDataAccess#objToString(Args)
      */
     private String generateCondition(Args args) {
         if (args.condition.type == ConditionTypes.between) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " BETWEEN " + objToString(fillArgsWithObj(args, args.condition.args.get(0))) + " AND " + objToString(fillArgsWithObj(args, args.condition.args.get(1)));
+            return objToString(args.fillObj(args.condition.data)) + " BETWEEN " + objToString(args.fillObj(args.condition.args.get(0))) + " AND " + objToString(args.fillObj(args.condition.args.get(1)));
         } else if (args.condition.type == ConditionTypes.eq) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " = " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " = " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.ge) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " >= " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " >= " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.gt) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " > " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " > " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.in) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " IN " + objToString(fillArgsWithObj(args, args.condition.args));
+            return objToString(args.fillObj(args.condition.data)) + " IN " + objToString(args.fillObj(args.condition.args));
         } else if (args.condition.type == ConditionTypes.isNotNull) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " IS NOT NULL";
+            return objToString(args.fillObj(args.condition.data)) + " IS NOT NULL";
         } else if (args.condition.type == ConditionTypes.isNull) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " IS NULL";
+            return objToString(args.fillObj(args.condition.data)) + " IS NULL";
         } else if (args.condition.type == ConditionTypes.le) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " <= " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " <= " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.like) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " LIKE " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " LIKE " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.lt) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " < " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " < " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.member) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " MEMBER " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " MEMBER " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.ne) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " <> " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " <> " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.notIn) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " NOT IN " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " NOT IN " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.notMember) {
-            return objToString(fillArgsWithObj(args, args.condition.data)) + " NOT MEMBER " + objToString(fillArgsWithObj(args, args.condition.args.get(0)));
+            return objToString(args.fillObj(args.condition.data)) + " NOT MEMBER " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.reverseMember) {
-            return objToString(fillArgsWithObj(args, args.condition.args.get(0))) + " MEMBER " + objToString(fillArgsWithObj(args, args.condition.data));
+            return objToString(args.fillObj(args.condition.args.get(0))) + " MEMBER " + objToString(args.fillObj(args.condition.data));
         } else if (args.condition.type == ConditionTypes.reverseNotMember) {
-            return objToString(fillArgsWithObj(args, args.condition.args.get(0))) + " NOT MEMBER " + objToString(fillArgsWithObj(args, args.condition.data));
+            return objToString(args.fillObj(args.condition.args.get(0))) + " NOT MEMBER " + objToString(args.fillObj(args.condition.data));
         } else {
             throw new UnsupportedOperationException(args.condition.type + " not supported");
         }
     }
 
-    private Args fillArgsWithWhereClause(Args toClone, Where whereClause) {
-        Args a = toClone.doClone();
-        a.whereClause = whereClause;
-        return a;
-    }
-
-    private Args fillArgsWithCondition(Args toClone, Condition condition) {
-        Args a = toClone.doClone();
-        a.condition = condition;
-        return a;
-    }
-
     /**
-     * generate where clause (the generate string won't contain the word 'WHERE')
+     * 生成where子句<br>
+     * 若给定where为 And 类型,对每一个分支递归执行本方法,并用and连接
+     * 若给定where为 Or 类型,对每一个分支递归执行本方法,并用or连接
+     * 若给定where为 Condition 类型,则调用generateCondition
+     * 若给定where为 IExpression 类型,则调用generateExpression
+     *
+     * @param args Args对象
+     * @return where子句内容(不包括where这个词)
      */
     private String generateWhere(Args args) {
         StringBuilder sb = new StringBuilder();
@@ -276,7 +314,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append("(").append(generateWhere(fillArgsWithWhereClause(args, or))).append(")");
+                sb.append("(").append(generateWhere(args.fillWhere(or))).append(")");
             }
             for (Condition condition : ((And) args.whereClause).getConditionList()) {
                 if (isFirst) {
@@ -284,7 +322,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append(generateWhere(fillArgsWithWhereClause(args, condition)));
+                sb.append(generateWhere(args.fillWhere(condition)));
             }
             for (ExpressionBoolean expBool : ((And) args.whereClause).getExpBoolList()) {
                 if (isFirst) {
@@ -292,7 +330,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append(generateWhere(fillArgsWithWhereClause(args, expBool)));
+                sb.append(generateWhere(args.fillWhere(expBool)));
             }
         } else if (args.whereClause.isOr()) {
             for (And and : ((Or) args.whereClause).getAndList()) {
@@ -301,7 +339,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(fillArgsWithWhereClause(args, and)));
+                sb.append(generateWhere(args.fillWhere(and)));
             }
             for (Condition condition : ((Or) args.whereClause).getConditionList()) {
                 if (isFirst) {
@@ -309,7 +347,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(fillArgsWithWhereClause(args, condition)));
+                sb.append(generateWhere(args.fillWhere(condition)));
             }
             for (ExpressionBoolean expBool : ((Or) args.whereClause).getExpBoolList()) {
                 if (isFirst) {
@@ -317,16 +355,23 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(fillArgsWithWhereClause(args, expBool)));
+                sb.append(generateWhere(args.fillWhere(expBool)));
             }
         } else if (args.whereClause.isCondition()) {
-            sb.append(generateCondition(fillArgsWithCondition(args, (Condition) args.whereClause)));
+            sb.append(generateCondition(args.fillCondition((Condition) args.whereClause)));
         } else if (args.whereClause.isExpression()) {
-            sb.append(generateExpression(fillArgsWithExpression(args, (IExpression) args.whereClause)));
+            sb.append(generateExpression(args.fillExp((IExpression) args.whereClause)));
         }
         return sb.toString();
     }
 
+    /**
+     * 生成join子句<br>
+     * 根据args.toJoin生成
+     *
+     * @param args Args对象
+     * @return join子句内容
+     */
     private String generateJoin(Args args) {
         StringBuilder sb = new StringBuilder();
         for (Field joinField : args.toJoin.keySet()) {
@@ -336,7 +381,10 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * generate select selectQuery after 'from ...', including join and where
+     * 生成join和where子句<br>
+     * 调用generateWhere和generateJoin
+     *
+     * @param args Args对象
      */
     private void generateJoinWhere(Args args) {
         String where = " WHERE " + generateWhere(args);
@@ -344,7 +392,16 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * generate a jqpl selectQuery select string
+     * 生成select语句<br>
+     * <ul>
+     * <li>根据传入的queryParameter确定是否查询部分字段,调用DataUtils.findFieldNameByIData</li>
+     * <li>根据entity类型生成from子句</li>
+     * <li>调用generateJoinWhere生成join和where子句</li>
+     * <li>根据传入的queryParameter生成末尾的语句,例如order by</li>
+     * </ul>
+     *
+     * @param args Args对象
+     * @return 生成的语句
      */
     private String generateSelect(Args args) {
         args.sb.append("SELECT ");
@@ -385,7 +442,13 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * Set Paging Parameters and fill constants
+     * 向Query填入额外信息,例如limit,top,以及填入需要填写的常量<br>
+     * 调用setConstants
+     *
+     * @param query       Query对象
+     * @param parameter   查询信息
+     * @param constantMap 常量Map
+     * @see JPQLDataAccess#setConstants(Query, Map)
      */
     private void setParametersToQuery(Query query, QueryParameter parameter, ConstantMap constantMap) {
         if (parameter != null) {
@@ -405,7 +468,10 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
-     * fill constants
+     * 向Query填入常量
+     *
+     * @param query       Query对象
+     * @param constantMap 常量Map
      */
     private void setConstants(Query query, Map<Integer, Object> constantMap) {
         for (Integer i : constantMap.keySet()) {
@@ -413,6 +479,15 @@ public class JPQLDataAccess implements DataAccess {
         }
     }
 
+    /**
+     * 初始化Args对象<br>
+     * 初始化args.sb/entity/entityClass/entityAlias/whereClause/queryParameter/aliasMap/constantMap/toJoin
+     *
+     * @param args        要初始化的Args对象
+     * @param entity      目标实体
+     * @param whereClause 条件
+     * @param parameter   查询参数
+     */
     private void initArgs(Args args, Object entity, Where whereClause, QueryParameter parameter) {
         args.sb = new StringBuilder();
         args.entity = entity;
@@ -430,6 +505,20 @@ public class JPQLDataAccess implements DataAccess {
         return entityManager.find(entityClass, pkValue);
     }
 
+    /**
+     * 执行查询,注入实体并返回结果List<br>
+     * 调用initArgs,generateSelect,[createQuery],setParametersToQuery
+     *
+     * @param entity      要查询的实体
+     * @param whereClause 查询条件
+     * @param parameter   查询参数(可以为空)
+     * @param <En>        实体类型
+     * @return 查询的实体结果List
+     * @see JPQLDataAccess#initArgs(Args, Object, Where, QueryParameter)
+     * @see JPQLDataAccess#generateSelect(Args)
+     * @see EntityManager#createQuery(String)
+     * @see JPQLDataAccess#setParametersToQuery(Query, QueryParameter, ConstantMap)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public <En> List<En> list(En entity, Where whereClause, QueryParameter parameter) {
@@ -446,6 +535,13 @@ public class JPQLDataAccess implements DataAccess {
         return (List<En>) query.getResultList();
     }
 
+    /**
+     * 检查parameter,若为空则返回一个"查询所有非Iterable字段"的parameter.若不为空则直接返回
+     *
+     * @param entity    要查询的实体
+     * @param parameter 查询参数
+     * @return 非空的parameter
+     */
     private QueryParameterWithFocus validateQueryParameterWithFocus(Object entity, QueryParameterWithFocus parameter) {
         if (parameter == null) {
             try {
@@ -462,12 +558,28 @@ public class JPQLDataAccess implements DataAccess {
         return parameter;
     }
 
+    /**
+     * 查询部分字段的查询的初始化
+     *
+     * @param args        Args对象
+     * @param entity      要查询实体
+     * @param whereClause 查询条件
+     * @param parameter   查询参数
+     * @return 生成的查询语句
+     */
     private String mapInit(Args args, Object entity, Where whereClause, QueryParameterWithFocus parameter) {
         initArgs(args, entity, whereClause, parameter);
 
         return generateSelect(args);
     }
 
+    /**
+     * 将JPA返回的List&lt;Object[]&gt;转化为List&lt;Map&lt;字段名,对象&gt;&gt;
+     *
+     * @param resultList JPA返回List
+     * @param parameter  查询参数
+     * @return 转换后的List&lt;Map&gt;
+     */
     private List<Map<String, Object>> listToMap(List<Object[]> resultList, QueryParameterWithFocus parameter) {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(resultList.size());
         for (Object[] res : resultList) {
@@ -480,6 +592,19 @@ public class JPQLDataAccess implements DataAccess {
         return list;
     }
 
+    /**
+     * 执行查询,生成List&lt;Map&lt;字段名,对象&gt;&gt;形式的结果<br>
+     * 调用validateQueryParameterWithFocus,mapInit,[createQuery],setParametersToQuery
+     *
+     * @param entity      要查询的实体
+     * @param whereClause 条件
+     * @param parameter   要查询的字段以及查询参数(可以为空,若空则查询所有非Iterable的字段)
+     * @return 查询的Map结果
+     * @see JPQLDataAccess#validateQueryParameterWithFocus(Object, QueryParameterWithFocus)
+     * @see JPQLDataAccess#mapInit(Args, Object, Where, QueryParameterWithFocus)
+     * @see EntityManager#createQuery(String)
+     * @see JPQLDataAccess#setParametersToQuery(Query, QueryParameter, ConstantMap)
+     */
     @SuppressWarnings("unchecked")
     @Override
     public List<Map<String, Object>> map(Object entity, Where whereClause, QueryParameterWithFocus parameter) {
@@ -496,19 +621,38 @@ public class JPQLDataAccess implements DataAccess {
         return listToMap(query.getResultList(), parameter);
     }
 
+    /**
+     * 初始化更新<br>
+     * 在args.sb中生成完整Update语句
+     *
+     * @param args        Args对象
+     * @param entity      要更新实体
+     * @param whereClause 更新条件
+     * @param entries     更新内容
+     */
     private void updateInit(Args args, Object entity, Where whereClause, UpdateEntry[] entries) {
         initArgs(args, entity, whereClause, null);
         args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(" SET ");
         for (UpdateEntry entry : entries) {
-            args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(fillArgsWithObj(args, entry.updateValue)));
+            args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(args.fillObj(entry.updateValue)));
         }
         args.sb.append(" WHERE ").append(generateWhere(args));
     }
 
+    /**
+     * 更新<br>
+     * 调用updateInit,setConstants
+     *
+     * @param entity      要更新的实体
+     * @param whereClause 更新条件
+     * @param entries     更新内容(set)
+     * @see JPQLDataAccess#updateInit(Args, Object, Where, UpdateEntry[])
+     * @see JPQLDataAccess#setConstants(Query, Map)
+     */
     @Override
     public void update(Object entity, Where whereClause, UpdateEntry[] entries) {
         Args args = new Args();
-
+        updateInit(args, entity, whereClause, entries);
         logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
 
         Query query = entityManager.createQuery(args.sb.toString());
@@ -516,11 +660,28 @@ public class JPQLDataAccess implements DataAccess {
         query.executeUpdate();
     }
 
+    /**
+     * 删除初始化<br>
+     * 生成完整Delete语句
+     *
+     * @param args        Args对象
+     * @param entity      删除实体
+     * @param whereClause 删除条件
+     */
     private void removeInit(Args args, Object entity, Where whereClause) {
         initArgs(args, entity, whereClause, null);
         args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(generateWhere(args));
     }
 
+    /**
+     * 删除<br>
+     * 调用removeInit,setConstants
+     *
+     * @param entity      要删除实体
+     * @param whereClause 删除条件
+     * @see JPQLDataAccess#removeInit(Args, Object, Where)
+     * @see JPQLDataAccess#setConstants(Query, Map)
+     */
     @Override
     public void remove(Object entity, Where whereClause) {
         Args args = new Args();
@@ -534,16 +695,37 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void save(Object[] entity) {
-        for (Object e : entity) {
+    public void save(Object[] entities) {
+        for (Object e : entities) {
             entityManager.persist(e);
         }
     }
 
+    /**
+     * 执行查询,返回实体
+     *
+     * @param query     JPQL查询语句
+     * @param parameter 查询参数
+     * @param <E>       实体类型
+     * @return List&lt;实体&gt;
+     */
     @SuppressWarnings("unchecked")
     @Override
-    public <E> List<E> find(String query, QueryParameter parameter) {
-        return (List<E>) entityManager.createQuery(query).getResultList();
+    public <E> List<E> find(Object query, QueryParameter parameter) {
+        return (List<E>) entityManager.createQuery((String) query).getResultList();
+    }
+
+    /**
+     * 执行查询,返回字段Map
+     *
+     * @param query     JPQL查询语句
+     * @param parameter 查询参数
+     * @return List&lt;Map&lt;字段名,值&gt;&gt;
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Map<String, Object>> find(Object query, QueryParameterWithFocus parameter) {
+        return listToMap(entityManager.createQuery((String) query).getResultList(), parameter);
     }
 
     @Override
@@ -582,6 +764,7 @@ public class JPQLDataAccess implements DataAccess {
     @SuppressWarnings("unchecked")
     @Override
     public <En> List<En> runNamedListQuery(NamedListQuery<En> query) throws IllegalArgumentException {
+        if (!(query instanceof JPQLNamedListQuery)) throw new IllegalArgumentException();
         Query q = entityManager.createQuery(((JPQLNamedListQuery<En>) query).queryString);
         setConstants(q, query.getConstants());
         return (List<En>) q.getResultList();
@@ -590,6 +773,7 @@ public class JPQLDataAccess implements DataAccess {
     @SuppressWarnings("unchecked")
     @Override
     public List<Map<String, Object>> runNamedMapQuery(NamedMapQuery query) throws IllegalArgumentException {
+        if (!(query instanceof JPQLNamedMapQuery)) throw new IllegalArgumentException();
         Query q = entityManager.createQuery(((JPQLNamedMapQuery) query).selectQuery);
         setConstants(q, query.getConstants());
         return listToMap(q.getResultList(), ((JPQLNamedMapQuery) query).parameter);
@@ -597,13 +781,14 @@ public class JPQLDataAccess implements DataAccess {
 
     @Override
     public void runNamedUpdateQuery(NamedUpdateQuery query) throws IllegalArgumentException {
+        if (!(query instanceof JPQLNamedUpdateQuery)) throw new IllegalArgumentException();
         Query q = entityManager.createQuery(((JPQLNamedUpdateQuery) query).updateQuery);
         setConstants(q, query.getConstants());
         q.executeUpdate();
     }
 
     @Override
-    public void execute(String query) {
-        entityManager.createQuery(query).executeUpdate();
+    public void execute(Object query) {
+        entityManager.createQuery((String) query).executeUpdate();
     }
 }

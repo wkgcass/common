@@ -16,8 +16,6 @@ import java.util.Map;
  */
 public class Test {
     public static void main(String[] args) {
-        // hibernate initiate
-        EntityManager manager = Persistence.createEntityManagerFactory("mysqlJPA").createEntityManager();
         /*
         EntityTransaction tx=manager.getTransaction();
         tx.begin();
@@ -39,7 +37,7 @@ public class Test {
         tx.commit();
         */
 
-        Query query = new Query(new JPQLDataAccess(manager));
+        Query query = new Query(new JPQLDataAccess(Persistence.createEntityManagerFactory("mysqlJPA")));
 
         User user = new User();
         Role role = new Role();
