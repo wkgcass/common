@@ -6,8 +6,6 @@ package net.cassite.pure.data;
 public interface IData<T> {
     T get();
 
-    void set(T t);
-
     Object getEntity();
 
     OrderBase desc();

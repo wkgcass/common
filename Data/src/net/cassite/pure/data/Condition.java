@@ -1,21 +1,41 @@
 package net.cassite.pure.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+/**
+ * 条件表达式.仅在Parameter和其子类中创建.可进行的操作可查看ConditionTypes以及Parameter及其子类.
+ *
+ * @see ConditionTypes
+ * @see Parameter
+ * @see ParameterComparable
+ * @see ParameterAggregate
+ */
 public class Condition implements Where, AndOr {
 
+    /**
+     * Parameter对象
+     *
+     * @see Parameter
+     */
     public final Parameter data;
+    /**
+     * 条件类型
+     *
+     * @see ConditionTypes
+     */
     public final ConditionTypes type;
+    /**
+     * 该表达式参数
+     */
     public final List<Object> args;
 
     Condition(Parameter data, ConditionTypes type, Object[] args) {
         this.data = data;
         this.type = type;
         this.args = new ArrayList<Object>(args.length);
-        for (Object o : args) {
-            this.args.add(o);
-        }
+        Collections.addAll(this.args, args);
     }
 
     public And and(Condition condition) {
@@ -70,12 +90,6 @@ public class Condition implements Where, AndOr {
         o.conditions.add(this);
         o.expBools.add(expBool);
         return o;
-    }
-
-    public List<Condition> getConditionList() {
-        List<Condition> list = new ArrayList<Condition>(1);
-        list.add(this);
-        return list;
     }
 
     @Override

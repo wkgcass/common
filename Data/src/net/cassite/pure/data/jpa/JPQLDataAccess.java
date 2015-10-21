@@ -3,18 +3,16 @@ package net.cassite.pure.data.jpa;
 import net.cassite.pure.data.*;
 import net.cassite.pure.data.util.AliasMap;
 import net.cassite.pure.data.util.ConstantMap;
-import net.cassite.pure.data.util.DataUtils;
+import net.cassite.pure.data.DataUtils;
+import net.cassite.pure.data.util.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
 
 /**
  * JPA的DataAccess实现.<br>
@@ -27,10 +25,6 @@ public class JPQLDataAccess implements DataAccess {
 
     private Logger logger = LoggerFactory.getLogger(DataAccess.class);
 
-    private static String generateAlias(Object entity, int count) {
-        return entity.getClass().getSimpleName().substring(0, 1).toLowerCase() + "_" + aliasPrefix + count;
-    }
-
     private static class Args {
         public StringBuilder sb;
         public Where whereClause;
@@ -38,14 +32,16 @@ public class JPQLDataAccess implements DataAccess {
 
         public Object entity;
         public Class<?> entityClass;
-        public String entityAlias;
         public AliasMap aliasMap;
         public ConstantMap constantMap;
-        public Map<Field, String> toJoin;
+        public Map<Location, String> toJoin;
 
         public IExpression expression;
         public Object obj;
         public Condition condition;
+
+        public String aggregateFunctions;
+        public List<String> selectNonAggregationAliases;
 
         public Args doClone() {
             Args args = new Args();
@@ -54,10 +50,11 @@ public class JPQLDataAccess implements DataAccess {
             args.queryParameter = queryParameter;
             args.entity = entity;
             args.entityClass = this.entityClass;
-            args.entityAlias = this.entityAlias;
             args.aliasMap = this.aliasMap;
             args.constantMap = this.constantMap;
             args.toJoin = this.toJoin;
+            args.aggregateFunctions = this.aggregateFunctions;
+            args.selectNonAggregationAliases = this.selectNonAggregationAliases;
             return args;
         }
 
@@ -82,6 +79,20 @@ public class JPQLDataAccess implements DataAccess {
         public Args fillCondition(Condition condition) {
             Args a = doClone();
             a.condition = condition;
+            return a;
+        }
+
+        public Args prepareForSubQuery(PreResult<?> query) {
+            Args a = this.doClone();
+            a.aliasMap = new AliasMap(aliasPrefix, this.aliasMap.getAliasCount());
+            a.toJoin = new LinkedHashMap<Location, String>();
+            a.sb = new StringBuilder();
+            a.entity = query.entity;
+            a.entityClass = query.entity.getClass();
+            a.whereClause = query.whereClause;
+            a.queryParameter = null;
+            a.aggregateFunctions = null;
+            a.selectNonAggregationAliases = new ArrayList<String>();
             return a;
         }
     }
@@ -114,15 +125,7 @@ public class JPQLDataAccess implements DataAccess {
             return objToString(args.fillObj(args.expression.expArgs()[0])) + " / " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.exists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
-            Args a = args.doClone();
-            a.aliasMap = new AliasMap(aliasPrefix, args.aliasMap.getAliasCount() + 1);
-            a.toJoin = new LinkedHashMap<Field, String>();
-            a.sb = new StringBuilder();
-            a.entity = query.entity;
-            a.entityClass = query.entity.getClass();
-            a.entityAlias = generateAlias(query.entity, args.aliasMap.getAliasCount() + 1);
-            a.whereClause = query.whereClause;
-            a.queryParameter = null;
+            Args a = args.prepareForSubQuery(query);
             String toReturn = "EXISTS(" + generateSelect(a) + ")";
             args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
             return toReturn;
@@ -144,15 +147,7 @@ public class JPQLDataAccess implements DataAccess {
             return objToString(args.fillObj(args.expression.expArgs()[0])) + " * " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.notExists) {
             PreResult<?> query = (PreResult<?>) args.expression.expArgs()[0];
-            Args a = args.doClone();
-            a.aliasMap = new AliasMap(aliasPrefix, args.aliasMap.getAliasCount() + 1);
-            a.toJoin = new LinkedHashMap<Field, String>();
-            a.sb = new StringBuilder();
-            a.entity = query.entity;
-            a.entityClass = query.entity.getClass();
-            a.entityAlias = generateAlias(query.entity, args.aliasMap.getAliasCount() + 1);
-            a.whereClause = query.whereClause;
-            a.queryParameter = null;
+            Args a = args.prepareForSubQuery(query);
             String toReturn = "NOT EXISTS(" + generateSelect(a) + ")";
             args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
             return toReturn;
@@ -224,6 +219,100 @@ public class JPQLDataAccess implements DataAccess {
     }
 
     /**
+     * 获取实体的调用位置<br>
+     * 使用广度优先搜索
+     *
+     * @param entity          从该实体开始寻找
+     * @param toFind          要寻找的实体
+     * @param list            已经经过的路径
+     * @param args            Args对象
+     * @param alreadySearched 已经寻找过的实体
+     * @return 找到的实体位置(Location对象), 没找到则返回null
+     */
+    private Location findEntity(Object entity, Object toFind, List<String> list, Args args, Set<Object> alreadySearched) {
+        Map<Object, String> objectStringMap = new LinkedHashMap<Object, String>();
+        try {
+            for (Field f : entity.getClass().getFields()) {
+                // is IData
+                if (IData.class.isAssignableFrom(f.getType())) {
+                    // get 1st generic type
+                    Class<?> cls = ((Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]);
+                    // is not java. / javax.
+                    if (!cls.getName().startsWith("java.") && !cls.getName().startsWith("javax.")) {
+                        IData<?> data = (IData<?>) f.get(entity);
+                        Object obj = data.get();
+                        if (obj == null) continue;
+
+                        if (obj instanceof Iterable) {
+                            // is aggregate
+                            Iterator<?> it = ((Iterable<?>) obj).iterator();
+                            if (it.hasNext()) {
+                                Object o = it.next();
+                                if (o == toFind) {
+                                    list.add(f.getName());
+                                    Location location = DataUtils.generateLocationAndFillMap(list, args.aliasMap);
+                                    if (!args.toJoin.containsKey(location) && toFind != args.entity) {
+                                        args.toJoin.put(location, args.aliasMap.get(location));
+                                    }
+                                    return location;
+                                } else {
+                                    if (!alreadySearched.contains(o)) {
+                                        alreadySearched.add(o);
+                                        objectStringMap.put(o, f.getName());
+                                    }
+                                }
+                            }
+                        } else {
+                            // is plain object
+                            if (obj == toFind) {
+                                list.add(f.getName());
+                                Location location = DataUtils.generateLocationAndFillMap(list, args.aliasMap);
+                                if (!args.toJoin.containsKey(location) && toFind != args.entity) {
+                                    args.toJoin.put(location, args.aliasMap.get(location));
+                                }
+                                return location;
+                            } else {
+                                if (!alreadySearched.contains(obj)) {
+                                    alreadySearched.add(obj);
+                                    objectStringMap.put(obj, f.getName());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // not found
+            for (Object obj : objectStringMap.keySet()) {
+                List<String> nextList = new ArrayList<String>(list);
+                nextList.add(objectStringMap.get(obj));
+                Location location = findEntity(obj, toFind, nextList, args, alreadySearched);
+                if (null != location) {
+                    // found
+                    return location;
+                }
+            }
+            return null;
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 获取Entity位置,若没有找到则抛出异常
+     *
+     * @param toFind 要寻找的实体
+     * @param args   Args对象
+     * @return 实体的位置(Location对象)
+     */
+    private Location findEntity(Object toFind, Args args) {
+        Location l = findEntity(args.entity, toFind, new ArrayList<String>(), args, new HashSet<Object>());
+        if (l == null) {
+            throw new IllegalArgumentException("Cannot find location of " + toFind);
+        }
+        return l;
+    }
+
+    /**
      * 将IData转化为字符串<br>
      * 调用DataUtils.findFieldNameByIData
      *
@@ -234,15 +323,10 @@ public class JPQLDataAccess implements DataAccess {
      */
     private String dataToString(IData<?> data, Args args) {
         Object entity = data.getEntity();
-        String alias;
-        if (entity == args.entity) {
-            alias = args.entityAlias;
-        } else {
-            Field f = DataUtils.findFieldByContainedEntity(entity, args.entity);
-            alias = args.aliasMap.get(f);
-            if (!args.toJoin.containsKey(f)) {
-                args.toJoin.put(f, alias);
-            }
+        String alias = args.aliasMap.get(new Location(new ArrayList<String>()));
+        if (entity != args.entity) {
+            Location location = findEntity(entity, args);
+            alias = args.aliasMap.get(location);
         }
         return alias + "." + DataUtils.findFieldNameByIData(data);
     }
@@ -266,7 +350,10 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.condition.type == ConditionTypes.gt) {
             return objToString(args.fillObj(args.condition.data)) + " > " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.in) {
-            return objToString(args.fillObj(args.condition.data)) + " IN " + objToString(args.fillObj(args.condition.args));
+            Args a = args.prepareForSubQuery((PreResult<?>) args.condition.args.get(0));
+            String subQuery = generateSelect(a);
+            args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
+            return objToString(args.fillObj(args.condition.data)) + " IN (" + subQuery + ")";
         } else if (args.condition.type == ConditionTypes.isNotNull) {
             return objToString(args.fillObj(args.condition.data)) + " IS NOT NULL";
         } else if (args.condition.type == ConditionTypes.isNull) {
@@ -282,7 +369,10 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.condition.type == ConditionTypes.ne) {
             return objToString(args.fillObj(args.condition.data)) + " <> " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.notIn) {
-            return objToString(args.fillObj(args.condition.data)) + " NOT IN " + objToString(args.fillObj(args.condition.args.get(0)));
+            Args a = args.prepareForSubQuery((PreResult<?>) args.condition.args.get(0));
+            String subQuery = generateSelect(a);
+            args.aliasMap.setAliasCount(a.aliasMap.getAliasCount());
+            return objToString(args.fillObj(args.condition.data)) + " NOT IN (" + subQuery + ")";
         } else if (args.condition.type == ConditionTypes.notMember) {
             return objToString(args.fillObj(args.condition.data)) + " NOT MEMBER " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.reverseMember) {
@@ -301,36 +391,45 @@ public class JPQLDataAccess implements DataAccess {
      * 若给定where为 Condition 类型,则调用generateCondition
      * 若给定where为 IExpression 类型,则调用generateExpression
      *
-     * @param args Args对象
+     * @param args   Args对象
+     * @param having 向args中添加having项
      * @return where子句内容(不包括where这个词)
      */
-    private String generateWhere(Args args) {
+    private String generateWhere(Args args, boolean having) {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
         if (args.whereClause.isAnd()) {
+            if (having) {
+                Where Optionalhaving = DataUtils.getAggregate(args.whereClause);
+                if (Optionalhaving != null) args.aggregateFunctions = generateWhere(args.fillWhere(Optionalhaving), false);
+                if (Optionalhaving == null) having = false;
+            }
             for (Or or : ((And) args.whereClause).getOrList()) {
+                if (having && DataUtils.getAggregate(or) != null) continue;
                 if (isFirst) {
                     isFirst = false;
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append("(").append(generateWhere(args.fillWhere(or))).append(")");
+                sb.append("(").append(generateWhere(args.fillWhere(or), false)).append(")");
             }
             for (Condition condition : ((And) args.whereClause).getConditionList()) {
+                if (having && DataUtils.getAggregate(condition) != null) continue;
                 if (isFirst) {
                     isFirst = false;
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append(generateWhere(args.fillWhere(condition)));
+                sb.append(generateWhere(args.fillWhere(condition), false));
             }
             for (ExpressionBoolean expBool : ((And) args.whereClause).getExpBoolList()) {
+                if (having && DataUtils.getAggregate(expBool) != null) continue;
                 if (isFirst) {
                     isFirst = false;
                 } else {
                     sb.append(" AND ");
                 }
-                sb.append(generateWhere(args.fillWhere(expBool)));
+                sb.append(generateWhere(args.fillWhere(expBool), false));
             }
         } else if (args.whereClause.isOr()) {
             for (And and : ((Or) args.whereClause).getAndList()) {
@@ -339,7 +438,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(args.fillWhere(and)));
+                sb.append(generateWhere(args.fillWhere(and), false));
             }
             for (Condition condition : ((Or) args.whereClause).getConditionList()) {
                 if (isFirst) {
@@ -347,7 +446,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(args.fillWhere(condition)));
+                sb.append(generateWhere(args.fillWhere(condition), false));
             }
             for (ExpressionBoolean expBool : ((Or) args.whereClause).getExpBoolList()) {
                 if (isFirst) {
@@ -355,7 +454,7 @@ public class JPQLDataAccess implements DataAccess {
                 } else {
                     sb.append(" OR ");
                 }
-                sb.append(generateWhere(args.fillWhere(expBool)));
+                sb.append(generateWhere(args.fillWhere(expBool), false));
             }
         } else if (args.whereClause.isCondition()) {
             sb.append(generateCondition(args.fillCondition((Condition) args.whereClause)));
@@ -374,21 +473,53 @@ public class JPQLDataAccess implements DataAccess {
      */
     private String generateJoin(Args args) {
         StringBuilder sb = new StringBuilder();
-        for (Field joinField : args.toJoin.keySet()) {
-            sb.append(" JOIN ").append(args.entityAlias).append(".").append(joinField.getName()).append(" ").append(args.aliasMap.get(joinField));
+        for (Location joinLocation : args.toJoin.keySet()) {
+            sb.append(" JOIN ").append(args.aliasMap.get(new Location(null))).append(".").append(joinLocation.toString()).append(" ").append(args.toJoin.get(joinLocation));
         }
         return sb.toString();
     }
 
     /**
      * 生成join和where子句<br>
+     * 单个Expression或者And的第二个语句可能是having子句
      * 调用generateWhere和generateJoin
      *
      * @param args Args对象
      */
     private void generateJoinWhere(Args args) {
-        String where = " WHERE " + generateWhere(args);
-        args.sb.append(generateJoin(args)).append(where);
+        if (args.whereClause != null) {
+            if (args.whereClause instanceof IExpression && DataUtils.expressionIsAggregate((IExpression) args.whereClause)) {
+                args.aggregateFunctions = generateWhere(args, false);
+                args.sb.append(generateJoin(args));
+            } else if (args.whereClause instanceof Condition && null != DataUtils.getAggregate(args.whereClause)) {
+                args.aggregateFunctions = generateWhere(args, false);
+                args.sb.append(generateJoin(args));
+            } else {
+                String where = " WHERE " + generateWhere(args, true);
+                args.sb.append(generateJoin(args)).append(where);
+            }
+        }
+    }
+
+    /**
+     * 生成group by和having子句
+     *
+     * @param args Args对象
+     */
+    private void generateGroupByHaving(Args args) {
+        if (args.aggregateFunctions != null) {
+            args.sb.append(" GROUP BY ");
+            boolean isFirst = true;
+            for (String s : args.selectNonAggregationAliases) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    args.sb.append(", ");
+                }
+                args.sb.append(s);
+            }
+            args.sb.append(" HAVING ").append(args.aggregateFunctions);
+        }
     }
 
     /**
@@ -397,6 +528,7 @@ public class JPQLDataAccess implements DataAccess {
      * <li>根据传入的queryParameter确定是否查询部分字段,调用DataUtils.findFieldNameByIData</li>
      * <li>根据entity类型生成from子句</li>
      * <li>调用generateJoinWhere生成join和where子句</li>
+     * <li>调用generateGroupByHaving生成groupby和having子句</li>
      * <li>根据传入的queryParameter生成末尾的语句,例如order by</li>
      * </ul>
      *
@@ -404,23 +536,28 @@ public class JPQLDataAccess implements DataAccess {
      * @return 生成的语句
      */
     private String generateSelect(Args args) {
+        String entityAlias = args.aliasMap.get(new Location(new ArrayList<String>(0)));
         args.sb.append("SELECT ");
-        if (args.queryParameter == null || !(args.queryParameter instanceof QueryParameterWithFocus)) {
-            args.sb.append(args.entityAlias);
+        if (args.queryParameter == null || !(args.queryParameter instanceof QueryParameterWithFocus) || ((QueryParameterWithFocus) args.queryParameter).focusMap.size() == 0) {
+            args.sb.append(entityAlias);
+            args.selectNonAggregationAliases.add(entityAlias);
         } else {
             boolean isFirst = true;
-            for (IData<?> data : ((QueryParameterWithFocus) args.queryParameter).focusList) {
+            for (IData<?> o : ((QueryParameterWithFocus) args.queryParameter).focusMap.keySet()) {
                 if (isFirst) {
                     isFirst = false;
                 } else {
                     args.sb.append(", ");
                 }
-                args.sb.append(args.entityAlias).append(".").append(DataUtils.findFieldNameByIData(data));
+                String alias = ((QueryParameterWithFocus) args.queryParameter).focusMap.get(o);
+                args.sb.append(entityAlias).append(".").append(DataUtils.findFieldNameByIData(o)).append(" as ").append(alias);
+                args.selectNonAggregationAliases.add(alias);
             }
         }
-        args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(args.entityAlias);
+        args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(entityAlias);
 
-        generateJoinWhere(args);
+        generateJoinWhere(args); // where
+        generateGroupByHaving(args); // group by having
 
         if (args.queryParameter != null) {
             for (QueryParameterTypes type : args.queryParameter.parameters.keySet()) {
@@ -429,8 +566,9 @@ public class JPQLDataAccess implements DataAccess {
                     args.sb.append(" ORDER BY ");
                     for (Object o : argsArr) {
                         OrderBase order = (OrderBase) o;
+                        Location loc = findEntity(order.data.getEntity(), args);
                         Field f = DataUtils.findFieldByContainedEntity(order.data.getEntity(), args.entity);
-                        args.sb.append(args.aliasMap.get(f)).append(".").append(f.getName());
+                        args.sb.append(args.aliasMap.get(loc)).append(".").append(f.getName());
                     }
                 } else if (type != QueryParameterTypes.limit && type != QueryParameterTypes.top) {
                     throw new UnsupportedOperationException(type + " not supported");
@@ -492,12 +630,12 @@ public class JPQLDataAccess implements DataAccess {
         args.sb = new StringBuilder();
         args.entity = entity;
         args.entityClass = entity.getClass();
-        args.entityAlias = generateAlias(args.entity, 0);
         args.whereClause = whereClause;
         args.queryParameter = parameter;
         args.aliasMap = new AliasMap(aliasPrefix);
         args.constantMap = new ConstantMap();
-        args.toJoin = new LinkedHashMap<Field, String>();
+        args.toJoin = new LinkedHashMap<Location, String>();
+        args.selectNonAggregationAliases = new ArrayList<String>();
     }
 
     @Override
@@ -580,14 +718,21 @@ public class JPQLDataAccess implements DataAccess {
      * @param parameter  查询参数
      * @return 转换后的List&lt;Map&gt;
      */
-    private List<Map<String, Object>> listToMap(List<Object[]> resultList, QueryParameterWithFocus parameter) {
+    private List<Map<String, Object>> listToMap(List<Object> resultList, QueryParameterWithFocus parameter) {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(resultList.size());
-        for (Object[] res : resultList) {
+        for (Object res : resultList) {
             Map<String, Object> map = new LinkedHashMap<String, Object>();
-            for (int i = 0; i < res.length; ++i) {
-                map.put(DataUtils.findFieldNameByIData(parameter.focusList.get(i)), res[i]);
+            if (res.getClass().isArray()) {
+                int i = 0;
+                for (String alias : parameter.focusMap.values()) {
+                    map.put(alias, ((Object[]) res)[i]);
+                    ++i;
+                }
+            } else {
+                map.put(parameter.focusMap.values().iterator().next(), res);
             }
             list.add(map);
+
         }
         return list;
     }
@@ -607,7 +752,7 @@ public class JPQLDataAccess implements DataAccess {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> map(Object entity, Where whereClause, QueryParameterWithFocus parameter) {
+    public List<Map<String, Object>> projection(Object entity, Where whereClause, QueryParameterWithFocus parameter) {
         Args args = new Args();
         parameter = validateQueryParameterWithFocus(entity, parameter);
         String selectQuery = mapInit(args, entity, whereClause, parameter);
@@ -632,11 +777,11 @@ public class JPQLDataAccess implements DataAccess {
      */
     private void updateInit(Args args, Object entity, Where whereClause, UpdateEntry[] entries) {
         initArgs(args, entity, whereClause, null);
-        args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(" SET ");
+        args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.aliasMap.get(new Location(null))).append(" SET ");
         for (UpdateEntry entry : entries) {
             args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(args.fillObj(entry.updateValue)));
         }
-        args.sb.append(" WHERE ").append(generateWhere(args));
+        args.sb.append(" WHERE ").append(generateWhere(args, false));
     }
 
     /**
@@ -670,7 +815,7 @@ public class JPQLDataAccess implements DataAccess {
      */
     private void removeInit(Args args, Object entity, Where whereClause) {
         initArgs(args, entity, whereClause, null);
-        args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.entityAlias).append(generateWhere(args));
+        args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.aliasMap.get(new Location(null))).append(generateWhere(args, false));
     }
 
     /**
@@ -726,65 +871,6 @@ public class JPQLDataAccess implements DataAccess {
     @Override
     public List<Map<String, Object>> find(Object query, QueryParameterWithFocus parameter) {
         return listToMap(entityManager.createQuery((String) query).getResultList(), parameter);
-    }
-
-    @Override
-    public <En> NamedListQuery<En> makeList(String name, En entity, Where whereClause, QueryParameter parameter) {
-        Args args = new Args();
-        initArgs(args, entity, whereClause, parameter);
-
-        String selectQuery = generateSelect(args);
-
-        return new JPQLNamedListQuery<En>(name, selectQuery);
-    }
-
-    @Override
-    public NamedMapQuery makeMap(String name, Object entity, Where whereClause, QueryParameterWithFocus parameter) {
-        Args args = new Args();
-        parameter = validateQueryParameterWithFocus(entity, parameter);
-        String selectQuery = mapInit(args, entity, whereClause, parameter);
-
-        return new JPQLNamedMapQuery(name, selectQuery, parameter);
-    }
-
-    @Override
-    public NamedUpdateQuery makeUpdate(String name, Object entity, Where whereClause, UpdateEntry[] entries) {
-        Args args = new Args();
-        updateInit(args, entity, whereClause, entries);
-        return new JPQLNamedUpdateQuery(name, args.sb.toString());
-    }
-
-    @Override
-    public NamedUpdateQuery makeDelete(String name, Object entity, Where whereClause) {
-        Args args = new Args();
-        removeInit(args, entity, whereClause);
-        return new JPQLNamedUpdateQuery(name, args.sb.toString());
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <En> List<En> runNamedListQuery(NamedListQuery<En> query) throws IllegalArgumentException {
-        if (!(query instanceof JPQLNamedListQuery)) throw new IllegalArgumentException();
-        Query q = entityManager.createQuery(((JPQLNamedListQuery<En>) query).queryString);
-        setConstants(q, query.getConstants());
-        return (List<En>) q.getResultList();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<Map<String, Object>> runNamedMapQuery(NamedMapQuery query) throws IllegalArgumentException {
-        if (!(query instanceof JPQLNamedMapQuery)) throw new IllegalArgumentException();
-        Query q = entityManager.createQuery(((JPQLNamedMapQuery) query).selectQuery);
-        setConstants(q, query.getConstants());
-        return listToMap(q.getResultList(), ((JPQLNamedMapQuery) query).parameter);
-    }
-
-    @Override
-    public void runNamedUpdateQuery(NamedUpdateQuery query) throws IllegalArgumentException {
-        if (!(query instanceof JPQLNamedUpdateQuery)) throw new IllegalArgumentException();
-        Query q = entityManager.createQuery(((JPQLNamedUpdateQuery) query).updateQuery);
-        setConstants(q, query.getConstants());
-        q.executeUpdate();
     }
 
     @Override

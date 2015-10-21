@@ -10,12 +10,12 @@ public abstract class Parameter {
         return new Condition(this, ConditionTypes.ne, new Object[]{obj});
     }
 
-    public Condition in(Object... objs) {
-        return new Condition(this, ConditionTypes.in, objs);
+    public Condition in(PreResult<?> query) {
+        return new Condition(this, ConditionTypes.in, new Object[]{query});
     }
 
-    public Condition notIn(Object... objs) {
-        return new Condition(this, ConditionTypes.notIn, objs);
+    public Condition notIn(PreResult<?> query) {
+        return new Condition(this, ConditionTypes.notIn, new Object[]{query});
     }
 
     public Condition like(Object... obj) {

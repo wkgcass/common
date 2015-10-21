@@ -1,12 +1,9 @@
 package net.cassite.pure.data;
 
-import net.cassite.pure.data.util.DataUtils;
-
 import java.util.Arrays;
-import java.util.List;
 
 /**
- * Created by blador01 on 2015/10/12.
+ * 表示一个返回布尔值的表达式(可以进行AndOr操作,但不能进行比较操作)
  */
 public class ExpressionBoolean extends Parameter implements Where, AndOr, IExpression {
 
@@ -111,5 +108,15 @@ public class ExpressionBoolean extends Parameter implements Where, AndOr, IExpre
     @Override
     public boolean isExpression() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return DataUtils.expressionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return DataUtils.expressionHashCode(this);
     }
 }

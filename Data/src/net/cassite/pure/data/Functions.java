@@ -1,21 +1,47 @@
 package net.cassite.pure.data;
 
+/**
+ * 用于创建函数<br>
+ * 建议使用import static直接使用其下方法
+ */
 public class Functions {
     private Functions() {
     }
 
+    /**
+     * 求和
+     *
+     * @param toSum 要求和的字段
+     * @return 可进行比较的表达式
+     */
     public static ExpressionComparable sum(DataComparable<? extends Number> toSum) {
         return new ExpressionComparable(ExpressionType.sum, toSum);
     }
 
+    /**
+     * 平均数
+     *
+     * @param toAvg 要求平均的字段
+     * @return 可进行比较的表达式
+     */
     public static ExpressionComparable avg(DataComparable<? extends Number> toAvg) {
         return new ExpressionComparable(ExpressionType.avg, toAvg);
     }
 
+    /**
+     * 计数
+     * @param toCount 要计数的字段
+     * @return 可进行比较的表达式
+     */
     public static ExpressionComparable count(IData<?> toCount) {
         return new ExpressionComparable(ExpressionType.count, toCount);
     }
 
+    /**
+     * 最大值
+     * @param col 要进行比较的
+     * @return
+     */
     public static ExpressionComparable max(DataComparable<? extends Comparable<?>> col) {
         return new ExpressionComparable(ExpressionType.max, col);
     }

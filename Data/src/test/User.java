@@ -23,7 +23,7 @@ public class User {
     }
 
     public void setId(Integer id) {
-        this.id.set(id);
+        DataUtils.set(this.id, id);
     }
 
     public String getName() {
@@ -31,7 +31,7 @@ public class User {
     }
 
     public void setName(String name) {
-        this.name.set(name);
+        DataUtils.set(this.name, name);
     }
 
     public Integer getAge() {
@@ -39,11 +39,11 @@ public class User {
     }
 
     public void setAge(Integer age) {
-        this.age.set(age);
+        DataUtils.set(this.age, age);
     }
 
     public void setRoles(List<Role> roles) {
-        this.roles.set(roles);
+        DataUtils.set(this.roles, roles);
     }
 
     @ManyToMany

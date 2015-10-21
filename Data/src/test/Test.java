@@ -6,8 +6,6 @@ import net.cassite.pure.data.Query;
 import net.cassite.pure.data.jpa.JPQLDataAccess;
 
 import javax.persistence.*;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +55,7 @@ public class Test {
             }
         }
 
-        List<Map<String, Object>> listMap = query.from(user).where(user.age.$gt(15)).map();
+        List<Map<String, Object>> listMap = query.from(user).where(user.age.$gt(15)).projection();
         System.out.println(listMap);
 
         // test > <> or
@@ -68,5 +66,7 @@ public class Test {
 
         // test exists and sub query
         query.from(user).where(exists(query.from(role).where(role.id.$ne(1).and(user.id.$ne(5)))).and(user.id.$gt(1))).list();
+
+        query.from(user).where(sum(user.age).$gt(1l).and(user.id.$gt(2))).list();
     }
 }

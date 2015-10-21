@@ -3,6 +3,7 @@ package test;
 import net.cassite.pure.data.Data;
 import net.cassite.pure.data.DataComparable;
 import net.cassite.pure.data.DataIterable;
+import net.cassite.pure.data.DataUtils;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -28,11 +29,11 @@ public class Role {
     }
 
     public void setId(Integer id) {
-        this.id.set(id);
+        DataUtils.set(this.id, id);
     }
 
     public void setName(String name) {
-        this.name.set(name);
+        DataUtils.set(this.name, name);
     }
 
     @ManyToMany
@@ -41,6 +42,6 @@ public class Role {
     }
 
     public void setUsers(List<User> users) {
-        this.users.set(users);
+        DataUtils.set(this.users, users);
     }
 }

@@ -14,6 +14,7 @@ public class PreResult<En> {
     private final DataAccess dataAccess;
     public final En entity;
     public final Where whereClause;
+    private QueryParameterWithFocus parameter = null;
 
     PreResult(DataAccess dataAccess, En entity, Where whereClause) {
         this.dataAccess = dataAccess;
@@ -22,24 +23,28 @@ public class PreResult<En> {
     }
 
     /**
-     * 执行查询
+     * 设置查询参数
+     *
+     * @param parameter 查询参数
+     * @return 该PreResult对象本身
+     */
+    public PreResult<En> param(QueryParameter parameter) {
+        if (parameter instanceof QueryParameterWithFocus) {
+            this.parameter = (QueryParameterWithFocus) parameter;
+        } else {
+            this.parameter = new QueryParameterWithFocus(parameter);
+        }
+        return this;
+    }
+
+    /**
+     * 执行查询.
      *
      * @return 查询结果List[实体]
      * @see DataAccess#list(Object, Where, QueryParameter)
      */
     public List<En> list() {
-        return list(null);
-    }
-
-    /**
-     * 执行查询
-     *
-     * @param parameters 查询参数
-     * @return 查询结果List[实体]
-     * @see DataAccess#list(Object, Where, QueryParameter)
-     */
-    public List<En> list(QueryParameter parameters) {
-        return dataAccess.list(entity, whereClause, parameters);
+        return dataAccess.list(entity, whereClause, parameter);
     }
 
     /**
@@ -48,30 +53,23 @@ public class PreResult<En> {
      * @return 第一个查询结果
      */
     public En first() {
-        List<En> list = dataAccess.list(entity, whereClause, new QueryParameter().top(1));
+        if (parameter == null) {
+            param(new QueryParameter());
+        }
+        parameter.top(1);
+        List<En> list = dataAccess.list(entity, whereClause, parameter);
         if (list == null || list.isEmpty()) return null;
         return list.get(0);
     }
 
     /**
-     * 查询部分字段
+     * 查询部分字段.若没有设置查询参数 或 没有指定字段 ,则视为查询所有字段
      *
      * @return 查询结果List[Map{字段名,值}]
-     * @see DataAccess#map(Object, Where, QueryParameterWithFocus)
+     * @see DataAccess#projection(Object, Where, QueryParameterWithFocus)
      */
-    public List<Map<String, Object>> map() {
-        return map(null);
-    }
-
-    /**
-     * 查询部分字段
-     *
-     * @param parameters 查询参数
-     * @return 查询结果List[Map{字段名,值}]
-     * @see DataAccess#map(Object, Where, QueryParameterWithFocus)
-     */
-    public List<Map<String, Object>> map(QueryParameterWithFocus parameters) {
-        return dataAccess.map(entity, whereClause, parameters);
+    public List<Map<String, Object>> projection() {
+        return dataAccess.projection(entity, whereClause, parameter);
     }
 
     /**
@@ -114,55 +112,8 @@ public class PreResult<En> {
         dataAccess.remove(entity, whereClause);
     }
 
-    /**
-     * 生成用于查询的NamedListQuery
-     *
-     * @param name      定义query的名称
-     * @param parameter 查询参数
-     * @return 生成的Query
-     * @see DataAccess#makeList(String, Object, Where, QueryParameter)
-     */
-    public NamedListQuery<En> makeList(String name, QueryParameter parameter) {
-        return dataAccess.makeList(name, entity, whereClause, parameter);
-    }
-
-    /**
-     * 生成用于查询的NamedMapQuery
-     *
-     * @param name      定义query的名称
-     * @param parameter 查询参数
-     * @return 生成的Query
-     * @see DataAccess#makeList(String, Object, Where, QueryParameter)
-     */
-    public NamedMapQuery makeMap(String name, QueryParameterWithFocus parameter) {
-        return dataAccess.makeMap(name, entity, whereClause, parameter);
-    }
-
-    /**
-     * 生成用于更新的NamedUpdateQuery
-     *
-     * @param name    定义query的名称
-     * @param entires 更新内容
-     * @return 生成的Query
-     * @see DataAccess#makeUpdate(String, Object, Where, UpdateEntry[])
-     */
-    public NamedUpdateQuery makeUpdate(String name, UpdateEntry... entires) {
-        return dataAccess.makeUpdate(name, entity, whereClause, entires);
-    }
-
-    /**
-     * 生成用于删除的NamedUpdateQuery
-     *
-     * @param name 定义query的名称
-     * @return 生成的Query
-     * @see DataAccess#makeDelete(String, Object, Where)
-     */
-    public NamedUpdateQuery makeDelete(String name) {
-        return dataAccess.makeDelete(name, entity, whereClause);
-    }
-
     @Override
     public String toString() {
-        return "from " + entity.getClass().getSimpleName() + " where " + whereClause;
+        return "from " + entity.getClass().getSimpleName() + " where " + whereClause + " with param " + parameter;
     }
 }

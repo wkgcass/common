@@ -38,10 +38,10 @@ public interface DataAccess {
      *
      * @param entity      要查询的实体
      * @param whereClause 查询条件
-     * @param parameter   查询参数(可以为空,若为空则查询所有非iterable字段)
-     * @return 查询的Map结果
+     * @param parameter   查询参数(可以为空,若为空则查询所有非聚合类型的字段)
+     * @return 查询的Projection结果
      */
-    List<Map<String, Object>> map(Object entity, Where whereClause, QueryParameterWithFocus parameter);
+    List<Map<String, Object>> projection(Object entity, Where whereClause, QueryParameterWithFocus parameter);
 
     /**
      * 执行更新
@@ -92,75 +92,4 @@ public interface DataAccess {
      * @param query 要执行的语句
      */
     void execute(Object query);
-
-    /**
-     * 创建一个用于执行查询的NamedListQuery并返回
-     *
-     * @param name        query名称
-     * @param entity      查询实体
-     * @param whereClause 查询条件
-     * @param parameter   查询参数
-     * @param <En>        实体类型
-     * @return 创建的NamedListQuery
-     */
-    <En> NamedListQuery<En> makeList(String name, En entity, Where whereClause, QueryParameter parameter);
-
-    /**
-     * 创建一个用于执行查询的NamedMapQuery并返回
-     *
-     * @param name        query名称
-     * @param entity      查询实体
-     * @param whereClause 查询条件
-     * @param parameter   查询参数
-     * @return 生成的NamedMapQuery
-     */
-    NamedMapQuery makeMap(String name, Object entity, Where whereClause, QueryParameterWithFocus parameter);
-
-    /**
-     * 创建一个用于更新的NamedUpdateQuery并返回
-     *
-     * @param name        query名称
-     * @param entity      更新实体
-     * @param whereClause 更新条件
-     * @param entries     更新参数
-     * @return 生成的NamedUpdateQuery
-     */
-    NamedUpdateQuery makeUpdate(String name, Object entity, Where whereClause, UpdateEntry[] entries);
-
-    /**
-     * 创建一个用于删除的NamedUpdateQuery并返回
-     *
-     * @param name        query名称
-     * @param entity      删除实体
-     * @param whereClause 删除条件
-     * @return 生成的NamedUpdateQuery
-     */
-    NamedUpdateQuery makeDelete(String name, Object entity, Where whereClause);
-
-    /**
-     * 执行NamedListQuery,返回查询结果
-     *
-     * @param query 查询
-     * @param <En>  实体类型
-     * @return 查询结果
-     * @throws IllegalArgumentException 当给出query不是本DataAccess可支持的类型时抛出
-     */
-    <En> List<En> runNamedListQuery(NamedListQuery<En> query) throws IllegalArgumentException;
-
-    /**
-     * 执行NamedMapQuery,返回查询结果
-     *
-     * @param query 查询
-     * @return 查询结果
-     * @throws IllegalArgumentException 当给出query不是本DataAccess可支持的类型时抛出
-     */
-    List<Map<String, Object>> runNamedMapQuery(NamedMapQuery query) throws IllegalArgumentException;
-
-    /**
-     * 执行NamedUpdateQuery
-     *
-     * @param query 要执行的query
-     * @throws IllegalArgumentException 当给出query不是本DataAccess可支持的类型时抛出
-     */
-    void runNamedUpdateQuery(NamedUpdateQuery query) throws IllegalArgumentException;
 }

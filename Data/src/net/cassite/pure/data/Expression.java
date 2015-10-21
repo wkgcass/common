@@ -1,10 +1,10 @@
 package net.cassite.pure.data;
 
-import net.cassite.pure.data.util.DataUtils;
-
 import java.util.Arrays;
-import java.util.List;
 
+/**
+ * 表示一个普通的表达式(表达式返回值不能进行AndOr操作,也不能进行比较操作)
+ */
 public class Expression extends Parameter implements Where, IExpression {
     final ExpressionType type;
     final Object[] parameters;
@@ -47,5 +47,15 @@ public class Expression extends Parameter implements Where, IExpression {
     @Override
     public boolean isExpression() {
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return DataUtils.expressionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return DataUtils.expressionHashCode(this);
     }
 }

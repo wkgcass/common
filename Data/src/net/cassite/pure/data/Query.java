@@ -102,38 +102,4 @@ public class Query {
     public <En> En find(Class<En> entityClass, Object pkValue) {
         return dataAccess.find(entityClass, pkValue);
     }
-
-    /**
-     * 在此Query的DataAccess上执行NamedListQuery
-     *
-     * @param query 要执行的NamedListQuery
-     * @param <En>  返回实体类型
-     * @return List[实体]
-     * @see DataAccess#runNamedListQuery(NamedListQuery)
-     */
-    public <En> List<En> execute(NamedListQuery<En> query) {
-        return dataAccess.runNamedListQuery(query);
-    }
-
-    /**
-     * 在此Query的DataAccess上执行NamedMapQuery
-     *
-     * @param query 要执行的NamedMapQuery
-     * @return List[Map{字段名,值}]
-     * @see DataAccess#runNamedMapQuery(NamedMapQuery)
-     */
-    public List<Map<String, Object>> execute(NamedMapQuery query) {
-        return dataAccess.runNamedMapQuery(query);
-    }
-
-    /**
-     * 在此Query的DataAccess上执行NamedUpdateQuery
-     *
-     * @param query 要执行的NamedUpdateQuery
-     * @see DataAccess#runNamedUpdateQuery(NamedUpdateQuery)
-     */
-    public void execute(NamedUpdateQuery query) {
-        dataAccess.runNamedUpdateQuery(query);
-    }
-
 }

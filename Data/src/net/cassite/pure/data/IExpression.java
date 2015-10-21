@@ -7,4 +7,8 @@ public interface IExpression {
     ExpressionType expType();
 
     Object[] expArgs();
+
+    boolean equals(Object o);
+
+    int hashCode();
 }

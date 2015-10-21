@@ -1,14 +1,11 @@
 package net.cassite.pure.data;
 
-import net.cassite.pure.data.util.DataUtils;
-
 import java.util.Arrays;
-import java.util.List;
 
 /**
- * Created by blador01 on 2015/10/12.
+ * 表示一个返回可比较值的表达式(可以进行比较,但不能进行AndOr操作)
  */
-public class ExpressionComparable extends ParameterComparable<ExpressionComparable> implements Where,IExpression {
+public class ExpressionComparable extends ParameterComparable<ExpressionComparable> implements Where, IExpression {
     final ExpressionType type;
     final Object[] parameters;
 
@@ -55,5 +52,15 @@ public class ExpressionComparable extends ParameterComparable<ExpressionComparab
     @Override
     public int compareTo(ExpressionComparable o) {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return DataUtils.expressionEquals(this, o);
+    }
+
+    @Override
+    public int hashCode() {
+        return DataUtils.expressionHashCode(this);
     }
 }
