@@ -361,7 +361,19 @@ public class JPQLDataAccess implements DataAccess {
         } else if (args.condition.type == ConditionTypes.le) {
             return objToString(args.fillObj(args.condition.data)) + " <= " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.like) {
-            return objToString(args.fillObj(args.condition.data)) + " LIKE " + objToString(args.fillObj(args.condition.args.get(0)));
+            StringBuilder sb = new StringBuilder();
+            sb.append(objToString(args.fillObj(args.condition.data)));
+            sb.append(" LIKE ");
+            boolean isFirst = true;
+            for (Object o : args.condition.args) {
+                if (isFirst) {
+                    isFirst = false;
+                } else {
+                    sb.append(" + ");
+                }
+                sb.append(objToString(args.fillObj(o)));
+            }
+            return sb.toString();
         } else if (args.condition.type == ConditionTypes.lt) {
             return objToString(args.fillObj(args.condition.data)) + " < " + objToString(args.fillObj(args.condition.args.get(0)));
         } else if (args.condition.type == ConditionTypes.member) {

@@ -1,7 +1,8 @@
 package net.cassite.pure.data;
 
 /**
- * Created by wkgcass on 15/10/11.
+ * 
+ * @param <T>
  */
 public abstract class ParameterComparable<T extends Comparable<T>> extends Parameter implements Comparable<T> {
     public Condition $gt(Comparable<?> obj) {

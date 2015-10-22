@@ -3,6 +3,10 @@ package net.cassite.pure.data;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 查询条件中的或操作<br>
+ * 该对象中存储的对象应当以"或"逻辑操作连接起来
+ */
 public class Or implements Where, AndOr {
     final List<Condition> conditions = new ArrayList<Condition>();
     final List<And> ands = new ArrayList<And>();
@@ -57,14 +61,29 @@ public class Or implements Where, AndOr {
         return a;
     }
 
+    /**
+     * 获取存储的"与"逻辑操作对象
+     *
+     * @return 存放And的List
+     */
     public List<And> getAndList() {
         return ands;
     }
 
+    /**
+     * 获取存储的"条件"对象
+     *
+     * @return 存放Condition的List
+     */
     public List<Condition> getConditionList() {
         return conditions;
     }
 
+    /**
+     * 获取存储的"返回布尔值的表达式"对象
+     *
+     * @return 存放ExpressionBoolean的List
+     */
     public List<ExpressionBoolean> getExpBoolList() {
         return expBools;
     }
