@@ -1,4 +1,4 @@
-package test;
+package test.x;
 
 import net.cassite.pure.data.Data;
 import net.cassite.pure.data.DataComparable;

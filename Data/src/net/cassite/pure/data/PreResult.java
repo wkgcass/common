@@ -112,6 +112,13 @@ public class PreResult<En> {
         dataAccess.remove(entity, whereClause);
     }
 
+    /**
+     * 执行计数
+     */
+    public long count() {
+        return dataAccess.count(entity, whereClause);
+    }
+
     @Override
     public String toString() {
         return "from " + entity.getClass().getSimpleName() + " where " + whereClause + " with param " + parameter;

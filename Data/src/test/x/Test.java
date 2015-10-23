@@ -1,4 +1,4 @@
-package test;
+package test.x;
 
 import static net.cassite.pure.data.Functions.*;
 
@@ -34,8 +34,9 @@ public class Test {
 
         tx.commit();
         */
-
-        Query query = new Query(new JPQLDataAccess(Persistence.createEntityManagerFactory("mysqlJPA")));
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory("mysqlJPA");
+        EntityManager manager = factory.createEntityManager();
+        Query query = new Query(new JPQLDataAccess(manager));
 
         User user = new User();
         Role role = new Role();
@@ -68,5 +69,13 @@ public class Test {
         query.from(user).where(exists(query.from(role).where(role.id.$ne(1).and(user.id.$ne(5)))).and(user.id.$gt(1))).list();
 
         query.from(user).where(sum(user.age).$gt(1l).and(user.id.$gt(2))).list();
+
+        System.out.println(query.from(user).where(user.age.$gt(15)).count());
+
+        EntityTransaction tx = manager.getTransaction();
+        tx.begin();
+        query.from(user).where(user.age.$gt(18)).set(user.age.as(user.age.add(1)), user.name.as("wkg"));
+        tx.commit();
+
     }
 }

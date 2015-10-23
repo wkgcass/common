@@ -69,26 +69,6 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
     }
 
     /**
-     * +运算
-     *
-     * @param obj 要进行运算的对象
-     * @return 可进行比较的表达式
-     */
-    public ExpressionComparable add(Number obj) {
-        return new ExpressionComparable(ExpressionType.add, this, obj);
-    }
-
-    /**
-     * -运算
-     *
-     * @param obj 要进行运算的对象
-     * @return 可进行比较的表达式
-     */
-    public ExpressionComparable minus(Number obj) {
-        return new ExpressionComparable(ExpressionType.minus, this, obj);
-    }
-
-    /**
      * -运算
      *
      * @param obj 要进行运算的对象
@@ -96,16 +76,6 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
      */
     public ExpressionComparable minus(Comparable<? extends Number> obj) {
         return new ExpressionComparable(ExpressionType.minus, this, obj);
-    }
-
-    /**
-     * *运算
-     *
-     * @param obj 要进行运算的对象
-     * @return 可进行比较的表达式
-     */
-    public ExpressionComparable multi(Number obj) {
-        return new ExpressionComparable(ExpressionType.multi, this, obj);
     }
 
     /**
@@ -124,28 +94,8 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
      * @param obj 要进行运算的对象
      * @return 可进行比较的表达式
      */
-    public ExpressionComparable divide(Number obj) {
-        return new ExpressionComparable(ExpressionType.divide, this, obj);
-    }
-
-    /**
-     * /运算
-     *
-     * @param obj 要进行运算的对象
-     * @return 可进行比较的表达式
-     */
     public ExpressionComparable divide(Comparable<? extends Number> obj) {
         return new ExpressionComparable(ExpressionType.divide, this, obj);
-    }
-
-    /**
-     * %运算
-     *
-     * @param obj 要进行运算的对象
-     * @return 可进行比较的表达式
-     */
-    public ExpressionComparable mod(Number obj) {
-        return new ExpressionComparable(ExpressionType.mod, this, obj);
     }
 
     /**
@@ -164,16 +114,6 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
      * @param obj 要进行运算的对象(放在前面)
      * @return 可进行比较的表达式
      */
-    public ExpressionComparable reverseMinus(Number obj) {
-        return new ExpressionComparable(ExpressionType.minus, obj, this);
-    }
-
-    /**
-     * -运算(该参数放在后面)
-     *
-     * @param obj 要进行运算的对象(放在前面)
-     * @return 可进行比较的表达式
-     */
     public ExpressionComparable reverseMinus(Comparable<? extends Number> obj) {
         return new ExpressionComparable(ExpressionType.minus, obj, this);
     }
@@ -184,28 +124,8 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
      * @param obj 要进行运算的对象(放在前面)
      * @return 可进行比较的表达式
      */
-    public ExpressionComparable reverseDivide(Number obj) {
-        return new ExpressionComparable(ExpressionType.divide, obj, this);
-    }
-
-    /**
-     * /运算(该参数放在后面)
-     *
-     * @param obj 要进行运算的对象(放在前面)
-     * @return 可进行比较的表达式
-     */
     public ExpressionComparable reverseDivide(Comparable<? extends Number> obj) {
         return new ExpressionComparable(ExpressionType.divide, obj, this);
-    }
-
-    /**
-     * %运算(该参数放在后面)
-     *
-     * @param obj 要进行运算的对象(放在前面)
-     * @return 可进行比较的表达式
-     */
-    public ExpressionComparable reverseMod(Number obj) {
-        return new ExpressionComparable(ExpressionType.mod, obj, this);
     }
 
     /**

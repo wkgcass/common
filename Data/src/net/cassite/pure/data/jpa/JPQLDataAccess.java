@@ -99,8 +99,8 @@ public class JPQLDataAccess implements DataAccess {
 
     private final EntityManager entityManager;
 
-    public JPQLDataAccess(EntityManagerFactory entityManagerFactory) {
-        this.entityManager = entityManagerFactory.createEntityManager();
+    public JPQLDataAccess(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     /**
@@ -114,7 +114,7 @@ public class JPQLDataAccess implements DataAccess {
      */
     private String generateExpression(Args args) {
         if (args.expression.expType() == ExpressionType.add) {
-            return objToString(args.fillObj(args.expression.expArgs()[0]));
+            return objToString(args.fillObj(args.expression.expArgs()[0])) + " + " + objToString(args.fillObj(args.expression.expArgs()[1]));
         } else if (args.expression.expType() == ExpressionType.avg) {
             return "AVG(" + objToString(args.fillObj(args.expression.expArgs()[0])) + ")";
         } else if (args.expression.expType() == ExpressionType.concat) {
@@ -203,18 +203,14 @@ public class JPQLDataAccess implements DataAccess {
                 sb.append(objToString(args.fillObj(o)));
             }
             return sb.append(")").toString();
+        } else if (args.obj.getClass().getName().startsWith("java.") || args.obj.getClass().getName().startsWith("javax.")) {
+            return "?" + args.constantMap.add(args.obj);
+        } else if (args.obj instanceof IData) {
+            return dataToString((IData<?>) args.obj, args);
+        } else if (args.obj instanceof IExpression) {
+            return generateExpression(args.fillExp((IExpression) args.obj));
         } else {
-            if (args.obj.getClass().getName().startsWith("java.") || args.obj.getClass().getName().startsWith("javax.")) {
-                return "?" + args.constantMap.add(args.obj);
-            } else {
-                if (args.obj instanceof IData) {
-                    return dataToString((IData<?>) args.obj, args);
-                } else if (args.obj instanceof IExpression) {
-                    return generateExpression(args.fillExp((IExpression) args.obj));
-                } else {
-                    throw new UnsupportedOperationException(args.obj.getClass() + " not supported");
-                }
-            }
+            throw new UnsupportedOperationException(args.obj.getClass() + " not supported");
         }
     }
 
@@ -790,7 +786,13 @@ public class JPQLDataAccess implements DataAccess {
     private void updateInit(Args args, Object entity, Where whereClause, UpdateEntry[] entries) {
         initArgs(args, entity, whereClause, null);
         args.sb.append("UPDATE ").append(entity.getClass().getSimpleName()).append(" ").append(args.aliasMap.get(new Location(null))).append(" SET ");
+        boolean isFirst = true;
         for (UpdateEntry entry : entries) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                args.sb.append(", ");
+            }
             args.sb.append(DataUtils.findFieldNameByIData(entry.data)).append(" = ").append(objToString(args.fillObj(entry.updateValue)));
         }
         args.sb.append(" WHERE ").append(generateWhere(args, false));
@@ -827,7 +829,10 @@ public class JPQLDataAccess implements DataAccess {
      */
     private void removeInit(Args args, Object entity, Where whereClause) {
         initArgs(args, entity, whereClause, null);
-        args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.aliasMap.get(new Location(null))).append(generateWhere(args, false));
+        args.sb.append("DELETE FROM ").append(entity.getClass().getSimpleName()).append(" ").append(args.aliasMap.get(new Location(null)));
+        if (args.whereClause != null) {
+            args.sb.append(" WHERE ").append(generateWhere(args, false));
+        }
     }
 
     /**
@@ -888,5 +893,24 @@ public class JPQLDataAccess implements DataAccess {
     @Override
     public void execute(Object query) {
         entityManager.createQuery((String) query).executeUpdate();
+    }
+
+    @Override
+    public long count(Object entity, Where whereClause) {
+        Args args = new Args();
+        initArgs(args, entity, whereClause, null);
+        String entityAlias = args.aliasMap.get(new Location(null));
+        args.sb.append("SELECT COUNT(").append(entityAlias).append(")");
+        args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(entityAlias);
+        generateJoinWhere(args);
+        generateGroupByHaving(args);
+
+        logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
+
+        Query query = entityManager.createQuery(args.sb.toString());
+        setConstants(query, args.constantMap);
+
+        Object o = query.getResultList().get(0);
+        return (Long) o;
     }
 }

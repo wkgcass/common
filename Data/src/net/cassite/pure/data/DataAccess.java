@@ -92,4 +92,13 @@ public interface DataAccess {
      * @param query 要执行的语句
      */
     void execute(Object query);
+
+    /**
+     * 执行查询
+     *
+     * @param entity      要查询的实体
+     * @param whereClause 条件语句
+     * @return 计数
+     */
+    long count(Object entity, Where whereClause);
 }
