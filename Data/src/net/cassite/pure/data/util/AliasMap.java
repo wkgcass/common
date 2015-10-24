@@ -1,17 +1,16 @@
 package net.cassite.pure.data.util;
 
-import net.cassite.pure.data.IData;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
  * 别名映射.自动生成唯一的别名.别名形如"$prefix$aliasCount".其中prefix在构造时指定,aliasCount是一个自增的整型.
  */
 public class AliasMap extends LinkedHashMap<Location, String> {
-    private final String prefix;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6275755012252632698L;
+	private final String prefix;
     private int aliasCount;
 
     /**

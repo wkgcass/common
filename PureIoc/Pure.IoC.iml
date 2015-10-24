@@ -43,5 +43,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="net.cassite.style-1.1.3-bin-src" level="project" />
+    <orderEntry type="library" name="log4j-1.2.17" level="project" />
   </component>
 </module>

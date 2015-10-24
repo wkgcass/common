@@ -18,6 +18,7 @@ public class IOCTest {
 
         public static void main(String[] args) {
                 IOCController.autoRegister();
+                IOCController.registerExternalClass(B.class);
                 IOCController.closeRegistering();
 
                 A a = new A();
@@ -70,7 +71,7 @@ class A extends AutoWire {
         }
 }
 
-@Wire
+//@Wire
 class B {
         private C c;
 

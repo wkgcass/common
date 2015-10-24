@@ -1,7 +1,5 @@
 package net.cassite.pure.data;
 
-import java.util.ArrayList;
-
 /**
  * 用于实体中的聚合类型的数据项.<br>
  * 对于日期或数字类型(可比较的类型)应当使用DataComparable以获取更多支持<br>

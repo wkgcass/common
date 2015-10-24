@@ -54,7 +54,8 @@ public abstract class ParameterComparable<T extends Comparable<T>> extends Param
      * @param <T>   元素类型
      * @return 条件
      */
-    public <T> Condition between(Comparable<T> start, Comparable<T> end) {
+    @SuppressWarnings("hiding")
+	public <T> Condition between(Comparable<T> start, Comparable<T> end) {
         return new Condition(this, ConditionTypes.between, new Object[]{this, start, end});
     }
 

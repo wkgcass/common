@@ -83,7 +83,7 @@ public class PreResult<En> {
             for (Field f : samples.getClass().getFields()) {
                 Object o = f.get(samples);
                 if (o instanceof IDataAssignable) {
-                    IDataAssignable data = (IDataAssignable) o;
+                    IDataAssignable<?> data = (IDataAssignable<?>) o;
                     tmpList.add(data.as(data.get()));
                 }
             }

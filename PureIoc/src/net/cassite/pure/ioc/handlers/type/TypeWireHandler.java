@@ -18,11 +18,9 @@ import static net.cassite.style.Style.*;
  * Handler for Wire annotation. <br>
  * if the class extends from AutoWire, this would simply return <br>
  * else, all setters would be autowired.
- * 
- * @author wkgcass
- * 
- * @see Wire
  *
+ * @author wkgcass
+ * @see Wire
  */
 public class TypeWireHandler extends IOCController implements TypeAnnotationHandler {
 
@@ -30,12 +28,7 @@ public class TypeWireHandler extends IOCController implements TypeAnnotationHand
 
         @Override
         public boolean canHandle(Annotation[] annotations) {
-                for (Annotation ann : annotations) {
-                        if (ann.annotationType() == Wire.class) {
-                                return true;
-                        }
-                }
-                return false;
+                return true;
         }
 
         @Override
@@ -47,23 +40,31 @@ public class TypeWireHandler extends IOCController implements TypeAnnotationHand
                 if (AutoWire.class.isAssignableFrom(cls)) {
                         return inst;
                 }
-                /*******************************/
-                LOGGER.debug("--start wiring setters");
-                // setters
-                net.cassite.style.ptr<Object> $inst = ptr(inst);
-                $(cls(inst.getClass()).setters()).forEach(m -> invokeSetter($($inst), m));
-                LOGGER.debug("--finished wiring setters");
-                /*******************************/
-                LOGGER.debug("--start invoking methods");
-                // invoke
-                $(cls(inst.getClass()).allMethods()).forEach(m -> {
-                        if (m.isAnnotationPresent(Invoke.class) && !m.isStatic()) {
-                                invokeMethod(m, $($inst));
-                        }
-                });
-                LOGGER.debug("--finished invoking methods");
+                if (cls.isAnnotationPresent(Wire.class) || IOCController.externalRequiresWiring(cls)) {
+                        LOGGER.debug("This instance requires wiring.");
+                        /*******************************/
+                        LOGGER.debug("--start wiring setters");
+                        // setters
+                        net.cassite.style.ptr<Object> $inst = ptr(inst);
+                        $(cls(inst.getClass()).setters()).forEach(m -> {
+                                invokeSetter($($inst), m);
+                        });
+                        LOGGER.debug("--finished wiring setters");
+                        /*******************************/
+                        LOGGER.debug("--start invoking methods");
+                        // invoke
+                        $(cls(inst.getClass()).allMethods()).forEach(m -> {
+                                if (m.isAnnotationPresent(Invoke.class) && !m.isStatic()) {
+                                        invokeMethod(m, $($inst));
+                                }
+                        });
+                        LOGGER.debug("--finished invoking methods");
 
-                return inst;
+                        return inst;
+                } else {
+                        LOGGER.debug("This instance does not require wiring");
+                        return inst;
+                }
         }
 
 }

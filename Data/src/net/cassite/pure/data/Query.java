@@ -14,7 +14,6 @@ public class Query {
         this.dataAccess = dataAccess;
     }
 
-    @SuppressWarnings("unchecked")
     public <En> From<En> from(En entity) {
         return new From<En>(entity, dataAccess);
     }
