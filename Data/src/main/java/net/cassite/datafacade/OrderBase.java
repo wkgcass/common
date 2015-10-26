@@ -1,0 +1,22 @@
+package net.cassite.datafacade;
+
+/**
+ * 排序依据
+ */
+public class OrderBase {
+    /**
+     * 排序依据,定义在OrderType中
+     *
+     * @see OrderTypes
+     */
+    public final OrderTypes type;
+    /**
+     * 排序字段
+     */
+    public final IData<?> data;
+
+    OrderBase(OrderTypes type, IData<?> data) {
+        this.type = type;
+        this.data = data;
+    }
+}
