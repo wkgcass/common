@@ -4,13 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Created by wkgcass on 15/10/13.
+ * 在需要映射(projection)时使用的QueryParameter,由PreResult对象根据Focus和QueryParameter对象生成生成,不在外部创建
+ *
+ * @see PreResult#projection(Focus)
+ * @see Focus
+ * @see QueryParameter
  */
 class QueryParameterWithFocus extends QueryParameter {
         public final Map<IData<?>, String> focusMap = new LinkedHashMap<IData<?>, String>();
-
-        QueryParameterWithFocus() {
-        }
 
         protected QueryParameterWithFocus(QueryParameter parameter, Focus focuses) {
                 if (parameter != null) {
@@ -22,8 +23,7 @@ class QueryParameterWithFocus extends QueryParameter {
         }
 
         public QueryParameter focus(IData<?> data) {
-                focusMap.put(data, DataUtils.dataToStringUtil(data).replace('.', '_'));
-                return this;
+                return focus(data, DataUtils.dataToStringUtil(data));
         }
 
         public QueryParameter focus(IData<?> data, String alias) {

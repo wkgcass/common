@@ -16,14 +16,12 @@ import static net.cassite.datafacade.Functions.*;
  */
 public class GeneralTest extends TestCase {
         private static Query query;
+        private static Entity entity;
 
         @Before
         public void setUp() throws Exception {
                 query = new Query(new DataAccessEmptyImpl());
-        }
-
-        private Entity getEntity() {
-                return new Entity();
+                entity=new Entity();
         }
 
         private void testPreResultEquality(PreResult<Entity> preRes, Where whereClause, Map<QueryParameterTypes, Object[]> args) {
@@ -45,7 +43,7 @@ public class GeneralTest extends TestCase {
         public void testQuery() throws Exception {
                 assertEquals(DataAccessEmptyImpl.class, query.dataAccess.getClass());
 
-                Entity entity = getEntity();
+                
                 PreResult<Entity> preResult = query.from(entity).where(null);
 
                 testPreResultEquality(preResult, null, new HashMap<QueryParameterTypes, Object[]>());
@@ -55,7 +53,7 @@ public class GeneralTest extends TestCase {
         public void testOrderBy() throws Exception {
                 assertEquals(DataAccessEmptyImpl.class, query.dataAccess.getClass());
 
-                Entity entity = getEntity();
+                
 
                 OrderBase base = entity.age.desc();
                 assertEquals(OrderTypes.desc, base.type);
@@ -72,7 +70,7 @@ public class GeneralTest extends TestCase {
         public void testLimit() throws Exception {
                 assertEquals(DataAccessEmptyImpl.class, query.dataAccess.getClass());
 
-                Entity entity = getEntity();
+                
 
                 PreResult<Entity> preResult = query.from(entity).where(null).param(new QueryParameter().limit(1, 10));
 
@@ -85,7 +83,7 @@ public class GeneralTest extends TestCase {
         public void testTop() throws Exception {
                 assertEquals(DataAccessEmptyImpl.class, query.dataAccess.getClass());
 
-                Entity entity = getEntity();
+                
 
                 PreResult<Entity> preResult = query.from(entity).where(null).param(new QueryParameter().top(5));
 
@@ -114,7 +112,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testEq() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$eq(10);
 
                 testConditionEquality(condition, entity.age, eq, 10);
@@ -122,7 +120,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testNe() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$ne(10);
 
                 testConditionEquality(condition, entity.age, ne, 10);
@@ -130,7 +128,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testGt() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$gt(10);
 
                 testConditionEquality(condition, entity.age, gt, 10);
@@ -138,7 +136,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testGe() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$ge(10);
 
                 testConditionEquality(condition, entity.age, ge, 10);
@@ -146,7 +144,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLt() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$lt(10);
 
                 testConditionEquality(condition, entity.age, lt, 10);
@@ -154,7 +152,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLe() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.$le(10);
 
                 testConditionEquality(condition, entity.age, le, 10);
@@ -162,7 +160,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testBetweeen() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.between(10, 20);
 
                 testConditionEquality(condition, entity.age, between, 10, 20);
@@ -170,7 +168,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLike() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.name.like("name");
 
                 testConditionEquality(condition, entity.name, like, (Object) new Object[]{"name"});
@@ -178,7 +176,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testIsNull() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.isNull();
 
                 testConditionEquality(condition, entity.age, isNull);
@@ -186,7 +184,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testIsNotNull() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.isNotNull();
 
                 testConditionEquality(condition, entity.age, isNotNull);
@@ -194,7 +192,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testIn() throws Exception {
-                Entity entity = getEntity();
+                
                 PreResult<?> r = query.from(entity).where(null);
                 Condition condition = entity.age.in(r);
 
@@ -203,7 +201,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testNotIn() throws Exception {
-                Entity entity = getEntity();
+                
                 PreResult<?> r = query.from(entity).where(null);
                 Condition condition = entity.age.notIn(r);
 
@@ -212,7 +210,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMember() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.member(entity.oneToMany);
 
                 testConditionEquality(condition, entity.age, member, entity.oneToMany);
@@ -220,7 +218,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testNotMember() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.age.notMember(entity.oneToMany);
 
                 testConditionEquality(condition, entity.age, notMember, entity.oneToMany);
@@ -228,7 +226,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testReverseMember() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.oneToMany.reverseMember(entity.age);
 
                 testConditionEquality(condition, entity.oneToMany, reverseMember, entity.age);
@@ -236,7 +234,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testReverseNotMember() throws Exception {
-                Entity entity = getEntity();
+                
                 Condition condition = entity.oneToMany.reverseNotMember(entity.age);
 
                 testConditionEquality(condition, entity.oneToMany, reverseNotMember, entity.age);
@@ -253,7 +251,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testAdd() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.add(5);
 
                 testExpEquality(exp, add, entity.age, 5);
@@ -261,7 +259,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMinus() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.minus(5);
 
                 testExpEquality(exp, minus, entity.age, 5);
@@ -269,7 +267,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMultiple() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.multi(5);
 
                 testExpEquality(exp, multi, entity.age, 5);
@@ -277,7 +275,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testDivide() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.divide(5);
 
                 testExpEquality(exp, divide, entity.age, 5);
@@ -285,7 +283,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMod() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.mod(5);
 
                 testExpEquality(exp, mod, entity.age, 5);
@@ -293,7 +291,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testReverseMod() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.reverseMod(5);
 
                 testExpEquality(exp, mod, 5, entity.age);
@@ -301,7 +299,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testReverseMinus() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.reverseMinus(5);
 
                 testExpEquality(exp, minus, 5, entity.age);
@@ -309,7 +307,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testReverseDivide() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.reverseDivide(5);
 
                 testExpEquality(exp, divide, 5, entity.age);
@@ -317,7 +315,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testSum() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = sum(entity.age);
 
                 testExpEquality(exp, sum, entity.age);
@@ -325,7 +323,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testAvg() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = avg(entity.age);
 
                 testExpEquality(exp, avg, entity.age);
@@ -333,7 +331,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testCount() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = count(entity.age);
 
                 testExpEquality(exp, count, entity.age);
@@ -341,7 +339,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMax() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = max(entity.age);
 
                 testExpEquality(exp, max, entity.age);
@@ -349,7 +347,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testMin() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = min(entity.age);
 
                 testExpEquality(exp, min, entity.age);
@@ -357,7 +355,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testExist() throws Exception {
-                Entity entity = getEntity();
+                
                 PreResult<?> r = query.from(entity).where(null);
                 IExpression exp = exists(r);
 
@@ -366,7 +364,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testNotExist() throws Exception {
-                Entity entity = getEntity();
+                
                 PreResult<?> r = query.from(entity).where(null);
                 IExpression exp = notExists(r);
 
@@ -375,7 +373,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testUnaryNegative() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = entity.age.unary_negative();
 
                 testExpEquality(exp, unary_negative, entity.age);
@@ -383,7 +381,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testConcat1() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = concat(entity.name, "1");
 
                 testExpEquality(exp, concat, entity.name, "1");
@@ -391,7 +389,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testConcat2() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = concat("1", entity.name);
 
                 testExpEquality(exp, concat, "1", entity.name);
@@ -399,7 +397,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testConcat3() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = concat(entity.district, entity.name);
 
                 testExpEquality(exp, concat, entity.district, entity.name);
@@ -407,7 +405,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testSubstring() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = substring(entity.district, 1, 2);
 
                 testExpEquality(exp, substring, entity.district, 1, 2);
@@ -415,7 +413,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testTrim() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = trim(entity.district);
 
                 testExpEquality(exp, trim, entity.district);
@@ -423,7 +421,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLower() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = lower(entity.district);
 
                 testExpEquality(exp, lower, entity.district);
@@ -431,7 +429,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testUpper() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = upper(entity.district);
 
                 testExpEquality(exp, upper, entity.district);
@@ -439,7 +437,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLocate1() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = locate(entity.district, "a");
 
                 testExpEquality(exp, locate, entity.district, "a");
@@ -447,7 +445,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLocate2() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = locate(entity.district, entity.name);
 
                 testExpEquality(exp, locate, entity.district, entity.name);
@@ -455,7 +453,7 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testLocate3() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = locate("a", entity.name);
 
                 testExpEquality(exp, locate, "a", entity.name);
@@ -463,10 +461,136 @@ public class GeneralTest extends TestCase {
 
         @Test
         public void testlength() throws Exception {
-                Entity entity = getEntity();
+                
                 IExpression exp = length(entity.district);
 
                 testExpEquality(exp, length, entity.district);
         }
 
+        @Test
+        public void testQueryParameterWithFocus() throws Exception {
+                
+                QueryParameterWithFocus qpwf = new QueryParameterWithFocus(new QueryParameter(), new Focus().focus(entity.id).focus(entity.name, "AliasName"));
+                qpwf.focus(entity.age);
+
+                assertEquals(0, qpwf.parameters.size());
+                Map<IData<?>, Object> map = new HashMap<IData<?>, Object>();
+                map.put(entity.id, "Entity.id");
+                map.put(entity.name, "AliasName");
+                map.put(entity.age, "Entity.age");
+                for (IData<?> d : qpwf.focusMap.keySet()) {
+                        assertTrue(map.containsKey(d));
+                        assertEquals(map.get(d), qpwf.focusMap.get(d));
+                }
+        }
+
+        @Test
+        public void testUpdateEntry() throws Exception {
+                
+
+                UpdateEntry entry = entity.age.as(1);
+
+                assertEquals(entity.age, entry.data);
+                assertEquals(1, entry.updateValue);
+        }
+
+        @Test
+        public void testIExpressionEquals() {
+                
+
+                assertEquals(sum(entity.age), sum(entity.age));
+                assertNotSame(avg(entity.age), sum(entity.age));
+        }
+
+        @Test
+        public void testAndOrGeneral() throws Exception {
+                
+                PreResult<?> r = query.from(entity).where(null);
+
+                And and = entity.age.$gt(5).and(entity.name.$ne("abc").or(entity.id.$lt(8)).and(entity.district.isNull())).and(exists(r));
+                assertTrue(and.getConditionList().contains(entity.age.$gt(5)));
+                assertTrue(and.getConditionList().contains(entity.district.isNull()));
+                assertTrue(and.getExpBoolList().contains(exists(r)));
+                assertTrue(and.getOrList().get(0).getConditionList().contains(entity.name.$ne("abc")));
+                assertTrue(and.getOrList().get(0).getConditionList().contains(entity.id.$lt(8)));
+        }
+
+        @Test
+        public void testConditionInvokeAndCondition() throws Exception {
+                
+
+                And where = entity.age.$gt(10).and(entity.name.$ne("abc"));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getConditionList().contains(entity.name.$ne("abc")));
+        }
+
+        @Test
+        public void testConditionInvokeOrCondition() throws Exception {
+                
+
+                Or where = entity.age.$gt(10).or(entity.name.$ne("abc"));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getConditionList().contains(entity.name.$ne("abc")));
+        }
+
+        @Test
+        public void testConditionInvokeAndExp() throws Exception {
+                
+                PreResult<?> r = query.from(entity).where(null);
+
+                And where = entity.age.$gt(10).and(exists(r));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getExpBoolList().contains(exists(r)));
+        }
+
+        @Test
+        public void testConditionInvokeOrExp() throws Exception {
+                
+                PreResult<?> r = query.from(entity).where(null);
+
+                Or where = entity.age.$gt(10).or(exists(r));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getExpBoolList().contains(exists(r)));
+        }
+
+        @Test
+        public void testExpInvokeAndCondition() throws Exception {
+                
+                PreResult<?> r = query.from(entity).where(null);
+
+                And where = exists(r).and(entity.age.$gt(10));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getExpBoolList().contains(exists(r)));
+        }
+
+        @Test
+        public void testExpInvokeOrCondition() throws Exception {
+                
+                PreResult<?> r = query.from(entity).where(null);
+
+                Or where = exists(r).or(entity.age.$gt(10));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getExpBoolList().contains(exists(r)));
+        }
+
+        @Test
+        public void testConditionInvokeAndAnd() throws Exception {
+                
+
+                And where = entity.age.$gt(10).and(entity.name.$ne("abc").and(entity.district.isNotNull()));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getConditionList().contains(entity.name.$ne("abc")));
+                assertTrue(where.getConditionList().contains(entity.district.isNotNull()));
+        }
+
+        @Test
+        public void testConditionInvokeOrAnd() throws Exception {
+                
+
+                Or where = entity.age.$gt(10).or(entity.name.$ne("abc").and(entity.district.isNotNull()));
+                assertTrue(where.getConditionList().contains(entity.age.$gt(10)));
+                assertTrue(where.getAndList().get(0).getConditionList().contains(entity.name.$ne("abc")));
+                assertTrue(where.getAndList().get(0).getConditionList().contains(entity.district.isNotNull()));
+
+        }
 }

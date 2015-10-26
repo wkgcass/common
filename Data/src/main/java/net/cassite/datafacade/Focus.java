@@ -10,7 +10,7 @@ public class Focus {
         public Map<IData<?>, String> focusMap = new LinkedHashMap<IData<?>, String>();
 
         public Focus focus(IData<?> data) {
-                focusMap.put(data, DataUtils.dataToStringUtil(data).replace('.', '_'));
+                focusMap.put(data, DataUtils.dataToStringUtil(data));
                 return this;
         }
 
