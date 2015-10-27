@@ -1,4 +1,4 @@
-net/cassite/datafacade/DataAccessEmptyImpl.class
-net/cassite/datafacade/Entity2.class
-net/cassite/datafacade/GeneralTest.class
-net/cassite/datafacade/Entity.class
+net/cassite/daf4j/DataAccessEmptyImpl.class
+net/cassite/daf4j/Entity.class
+net/cassite/daf4j/GeneralTest.class
+net/cassite/daf4j/Entity2.class

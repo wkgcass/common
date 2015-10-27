@@ -1,0 +1,6 @@
+net/cassite/daf4j/jpa/Patient.class
+net/cassite/daf4j/jpa/User.class
+net/cassite/daf4j/jpa/Clinic.class
+net/cassite/daf4j/jpa/TestJPQLDataAccess.class
+net/cassite/daf4j/jpa/Outpatient.class
+net/cassite/daf4j/jpa/TestJPQLUpdate.class
