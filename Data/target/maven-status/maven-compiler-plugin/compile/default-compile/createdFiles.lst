@@ -3,6 +3,7 @@ net/cassite/daf4j/ParameterAggregate.class
 net/cassite/daf4j/ConditionTypes.class
 net/cassite/daf4j/DataComparable.class
 net/cassite/daf4j/QueryParameterTypes.class
+net/cassite/daf4j/stream/QueryStreamBase.class
 net/cassite/daf4j/Data.class
 net/cassite/daf4j/OrderBase.class
 net/cassite/daf4j/From.class
@@ -11,6 +12,8 @@ net/cassite/daf4j/Or.class
 net/cassite/daf4j/Functions.class
 net/cassite/daf4j/util/Location.class
 net/cassite/daf4j/OrderTypes.class
+net/cassite/daf4j/stream/QueryProjectionStream.class
+net/cassite/daf4j/util/Selectable.class
 net/cassite/daf4j/AndOr.class
 net/cassite/daf4j/QueryParameterWithFocus.class
 net/cassite/daf4j/Parameter.class
@@ -25,6 +28,7 @@ net/cassite/daf4j/DataAccess.class
 net/cassite/daf4j/Focus.class
 net/cassite/daf4j/IDataAssignable.class
 net/cassite/daf4j/Expression.class
+net/cassite/daf4j/stream/QueryStream.class
 net/cassite/daf4j/ExpressionComparable.class
 net/cassite/daf4j/DataIterable.class
 net/cassite/daf4j/Where.class

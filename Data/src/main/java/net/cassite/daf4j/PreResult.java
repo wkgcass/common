@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * PreResult用于规定返回结果的形式/执行的功能
@@ -64,8 +65,8 @@ public class PreResult<En> {
          * @return 查询结果List[Map{字段名,值}]
          * @see DataAccess#projection(Object, Where, QueryParameterWithFocus)
          */
-        public List<Map<String, Object>> projection() {
-                return projection(null);
+        public List<Map<String, Object>> selectAll() {
+                return select(null);
         }
 
         /**
@@ -75,7 +76,7 @@ public class PreResult<En> {
          * @return 查询结果List[Map{字段名,值}]
          * @see DataAccess#projection(Object, Where, QueryParameterWithFocus)
          */
-        public List<Map<String, Object>> projection(Focus focus) {
+        public List<Map<String, Object>> select(Focus focus) {
                 return dataAccess.projection(entity, whereClause, new QueryParameterWithFocus(parameter, focus));
         }
 
@@ -125,7 +126,9 @@ public class PreResult<En> {
          * @return 计数结果(long)
          */
         public long count() {
-                return dataAccess.count(entity, whereClause);
+                String alias = "count";
+                List<Map<String, Object>> res = dataAccess.projection(entity, whereClause, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.count(entity), alias)));
+                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
         }
 
         @Override

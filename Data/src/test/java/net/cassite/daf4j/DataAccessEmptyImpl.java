@@ -36,24 +36,4 @@ public class DataAccessEmptyImpl implements DataAccess {
         public void save(Object[] entities) {
 
         }
-
-        @Override
-        public <E> List<E> find(Object query, QueryParameter parameter) {
-                return null;
-        }
-
-        @Override
-        public List<Map<String, Object>> find(Object query, QueryParameterWithFocus parameter) {
-                return null;
-        }
-
-        @Override
-        public void execute(Object query) {
-
-        }
-
-        @Override
-        public long count(Object entity, Where whereClause) {
-                return 0;
-        }
 }

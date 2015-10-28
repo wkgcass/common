@@ -1,17 +1,19 @@
 package net.cassite.daf4j;
 
+import net.cassite.daf4j.util.Selectable;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 在需要映射(projection)时使用的QueryParameter,由PreResult对象根据Focus和QueryParameter对象生成生成,不在外部创建
+ * 在需要映射(select)时使用的QueryParameter,由PreResult对象根据Focus和QueryParameter对象生成生成,不在外部创建
  *
- * @see PreResult#projection(Focus)
+ * @see PreResult#select(Focus)
  * @see Focus
  * @see QueryParameter
  */
 public class QueryParameterWithFocus extends QueryParameter {
-        public final Map<IData<?>, String> focusMap = new LinkedHashMap<IData<?>, String>();
+        public final Map<Selectable, String> focusMap = new LinkedHashMap<Selectable, String>();
 
         public QueryParameterWithFocus(QueryParameter parameter, Focus focuses) {
                 if (parameter != null) {
@@ -22,12 +24,12 @@ public class QueryParameterWithFocus extends QueryParameter {
                 }
         }
 
-        public QueryParameter focus(IData<?> data) {
+        public QueryParameterWithFocus focus(IData<?> data) {
                 return focus(data, DataUtils.dataToStringUtil(data));
         }
 
-        public QueryParameter focus(IData<?> data, String alias) {
-                focusMap.put(data, alias);
+        public QueryParameterWithFocus focus(Selectable selectable, String alias) {
+                focusMap.put(selectable, alias);
                 return this;
         }
 

@@ -39,6 +39,16 @@ public class Functions {
         }
 
         /**
+         * 计数
+         *
+         * @param toCount 要计数的实体
+         * @return 可进行比较的表达式
+         */
+        public static ExpressionComparable count(Object toCount) {
+                return new ExpressionComparable(ExpressionTypes.count, toCount);
+        }
+
+        /**
          * 最大值
          *
          * @param col 要进行比较的字段

@@ -1,5 +1,7 @@
 package net.cassite.daf4j;
 
+import net.cassite.daf4j.stream.QueryStream;
+
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,10 @@ public class Query {
                 return new From<En>(entity, dataAccess);
         }
 
+        public <En> QueryStream<En> stream(En entity) {
+                return new QueryStream<En>(entity, dataAccess);
+        }
+
         /**
          * 持久化实体
          *
@@ -26,64 +32,6 @@ public class Query {
          */
         public void save(Object... entities) {
                 dataAccess.save(entities);
-        }
-
-        /**
-         * 查询实体
-         *
-         * @param query 查询语句
-         * @param <E>   实体类型
-         * @return List[实体]
-         * @see DataAccess#find(Object, QueryParameter)
-         */
-        public <E> List<E> find(Object query) {
-                return find(query, null);
-        }
-
-        /**
-         * 查询实体
-         *
-         * @param query     查询语句
-         * @param parameter 查询参数
-         * @param <E>       实体类型
-         * @return List[实体]
-         * @see DataAccess#find(Object, QueryParameter)
-         */
-        public <E> List<E> find(Object query, QueryParameter parameter) {
-                return dataAccess.find(query, parameter);
-        }
-
-        /**
-         * 查询部分字段
-         *
-         * @param query 查询语句
-         * @return List[Map{字段名,值}]
-         * @see DataAccess#find(Object, QueryParameterWithFocus)
-         */
-        public List<Map<String, Object>> findMap(Object query) {
-                return findMap(query, null);
-        }
-
-        /**
-         * 查询部分字段
-         *
-         * @param query     查询语句
-         * @param parameter 查询参数
-         * @return List[Map{字段名,值}]
-         * @see DataAccess#find(Object, QueryParameterWithFocus)
-         */
-        public List<Map<String, Object>> findMap(Object query, QueryParameterWithFocus parameter) {
-                return dataAccess.find(query, parameter);
-        }
-
-        /**
-         * 执行语句
-         *
-         * @param query 语句
-         * @see DataAccess#execute(Object)
-         */
-        public void execute(Object query) {
-                dataAccess.execute(query);
         }
 
         /**

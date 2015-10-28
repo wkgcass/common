@@ -2,3 +2,4 @@ net/cassite/daf4j/DataAccessEmptyImpl.class
 net/cassite/daf4j/Entity.class
 net/cassite/daf4j/GeneralTest.class
 net/cassite/daf4j/Entity2.class
+net/cassite/daf4j/stream/StreamTestUtils.class

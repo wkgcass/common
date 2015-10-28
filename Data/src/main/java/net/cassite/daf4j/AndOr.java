@@ -3,7 +3,7 @@ package net.cassite.daf4j;
 /**
  * 表示能够执行"与","或"逻辑操作的对象
  */
-public interface AndOr {
+public interface AndOr extends Where {
     /**
      * 和一个Condition对象进行与操作
      *

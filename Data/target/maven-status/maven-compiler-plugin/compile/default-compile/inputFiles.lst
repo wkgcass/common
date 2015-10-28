@@ -1,8 +1,10 @@
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/util/AliasMap.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/IExpression.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/DataAccess.java
+/Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/stream/QueryProjectionStream.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/DataComparable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/UpdateEntry.java
+/Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/util/Selectable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/Or.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/ExpressionComparable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/From.java
@@ -23,6 +25,7 @@
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/IData.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/OrderTypes.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/OrderBase.java
+/Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/stream/QueryStreamBase.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/Where.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/IDataAssignable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/AndOr.java
@@ -31,5 +34,6 @@
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/DataIterable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/ParameterComparable.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/ConditionTypes.java
+/Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/stream/QueryStream.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/ParameterAggregate.java
 /Volumes/PROJECTS/git/java/common/Data/src/main/java/net/cassite/daf4j/QueryParameter.java
