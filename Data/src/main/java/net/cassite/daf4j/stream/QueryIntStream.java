@@ -37,6 +37,15 @@ public class QueryIntStream<E> extends QueryStreamBase<E, QueryIntStream<E>> imp
                 return DataUtils.executeMinInt(entity, andOr, parameter, intData, dataAccess);
         }
 
+        @Override
+        public QueryIntStream<E> sorted() {
+                try {
+                        return super.sorted();
+                } catch (UnsupportedOperationException e) {
+                        return sorted(intData.asc());
+                }
+        }
+
 
         @Override
         public Iterator<Integer> iterator() {

@@ -1,6 +1,5 @@
 package net.cassite.daf4j;
 
-import junit.framework.TestCase;
 import net.cassite.daf4j.stream.QueryProjectionStream;
 import net.cassite.daf4j.stream.QueryStream;
 import net.cassite.daf4j.stream.StreamTestUtils;
@@ -599,7 +598,7 @@ public class GeneralTest {
         @Test
         public void testQueryStreamGeneral() throws Exception {
                 Entity entity = new Entity();
-                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1, 20);
+                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sorted(entity.age.asc()).limit(1, 20);
 
                 assertEquals(entity, StreamTestUtils.getEntity(stream));
                 assertEquals(entity.age.$gt(18), StreamTestUtils.getAndOr(stream));
@@ -623,7 +622,7 @@ public class GeneralTest {
         @Test
         public void testQueryStreamTop() throws Exception {
                 Entity entity = new Entity();
-                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1);
+                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sorted(entity.age.asc()).limit(1);
 
                 QueryParameter parameter = StreamTestUtils.getParameter(stream);
                 Map<QueryParameterTypes, Object[]> args = new HashMap<QueryParameterTypes, Object[]>();

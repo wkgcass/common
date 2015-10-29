@@ -450,4 +450,16 @@ public class DataUtils {
                 List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.min(data), alias)));
                 return (res == null || res.size() == 0) ? 0D : Double.parseDouble(res.get(0).get(alias).toString());
         }
+
+        /**
+         * 返回OrderBase数组<br>
+         * 此处直接返回输入的参数<br>
+         * 用于快速实现SortedEntity接口
+         *
+         * @param bases 排序依据
+         * @return 输入的OrderBase组成的数组(实际上是直接返回输入的参数)
+         */
+        public static OrderBase[] sorted(OrderBase... bases) {
+                return bases;
+        }
 }

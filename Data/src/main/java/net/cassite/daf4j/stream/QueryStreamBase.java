@@ -38,7 +38,17 @@ public abstract class QueryStreamBase<E, T extends QueryStreamBase<E, T>> {
         }
 
         @SuppressWarnings("unchecked")
-        public T sort(OrderBase... order) {
+        public T sorted() {
+                if (entity instanceof SortedEntity) {
+                        sorted(((SortedEntity) entity).sorted());
+                } else {
+                        throw new UnsupportedOperationException("Entity is not a SortedEntity");
+                }
+                return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T sorted(OrderBase... order) {
                 if (parameter == null) {
                         parameter = new QueryParameter();
                 }
