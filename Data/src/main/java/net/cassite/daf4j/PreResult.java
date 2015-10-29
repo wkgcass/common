@@ -1,10 +1,13 @@
 package net.cassite.daf4j;
 
+import net.cassite.daf4j.types.XDouble;
+import net.cassite.daf4j.types.XInt;
+import net.cassite.daf4j.types.XLong;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * PreResult用于规定返回结果的形式/执行的功能
@@ -126,9 +129,187 @@ public class PreResult<En> {
          * @return 计数结果(long)
          */
         public long count() {
-                String alias = "count";
-                List<Map<String, Object>> res = dataAccess.projection(entity, whereClause, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.count(entity), alias)));
-                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
+                return DataUtils.executeCount(entity, whereClause, parameter, dataAccess);
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param toSum 要求和字段
+         * @return 求和结果(long)
+         */
+        public long sumLong(DataComparable<? extends Number> toSum) {
+                return DataUtils.executeSumLong(entity, whereClause, parameter, toSum, dataAccess);
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param toSum 要求和字段
+         * @return 求和结果(long)
+         */
+        public long sum(XLong toSum) {
+                return DataUtils.executeSumLong(entity, whereClause, parameter, toSum, dataAccess);
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param toSum 要求和字段
+         * @return 求和结果(long)
+         */
+        public long sum(XInt toSum) {
+                return DataUtils.executeSumLong(entity, whereClause, parameter, toSum, dataAccess);
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param toSum 要求和字段
+         * @return 求和结果(double)
+         */
+        public long sumDouble(DataComparable<Double> toSum) {
+                return DataUtils.executeSumLong(entity, whereClause, parameter, toSum, dataAccess);
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param toSum 要求和字段
+         * @return 求和结果(double)
+         */
+        public double sum(XDouble toSum) {
+                return DataUtils.executeSumLong(entity, whereClause, parameter, toSum, dataAccess);
+        }
+
+        /**
+         * 执行求平均值
+         *
+         * @param toAvg 要求平均值字段
+         * @return 求平均值结果(double)
+         */
+        public double avg(DataComparable<? extends Number> toAvg) {
+                return DataUtils.executeAvg(entity, whereClause, parameter, toAvg, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(int)
+         */
+        public int maxInt(DataComparable<Integer> toMax) {
+                return DataUtils.executeMaxInt(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(long)
+         */
+        public long maxLong(DataComparable<Long> toMax) {
+                return DataUtils.executeMaxLong(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(double)
+         */
+        public double maxDbl(DataComparable<Double> toMax) {
+                return DataUtils.executeMaxDouble(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(int)
+         */
+        public int max(XInt toMax) {
+                return DataUtils.executeMaxInt(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(long)
+         */
+        public long max(XLong toMax) {
+                return DataUtils.executeMaxLong(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param toMax 要求最大值字段
+         * @return 求最大值结果(double)
+         */
+        public double maxDbl(XDouble toMax) {
+                return DataUtils.executeMaxDouble(entity, whereClause, parameter, toMax, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(int)
+         */
+        public int minInt(DataComparable<Integer> toMin) {
+                return DataUtils.executeMinInt(entity, whereClause, parameter, toMin, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(long)
+         */
+        public long minLong(DataComparable<Long> toMin) {
+                return DataUtils.executeMinLong(entity, whereClause, parameter, toMin, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(double)
+         */
+        public double minDbl(DataComparable<Double> toMin) {
+                return DataUtils.executeMinDouble(entity, whereClause, parameter, toMin, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(int)
+         */
+        public int min(XInt toMin) {
+                return DataUtils.executeMinInt(entity, whereClause, parameter, toMin, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(long)
+         */
+        public long min(XLong toMin) {
+                return DataUtils.executeMinLong(entity, whereClause, parameter, toMin, dataAccess);
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param toMin 要求最小值字段
+         * @return 求最小值结果(double)
+         */
+        public double min(XDouble toMin) {
+                return DataUtils.executeMinDouble(entity, whereClause, parameter, toMin, dataAccess);
         }
 
         @Override

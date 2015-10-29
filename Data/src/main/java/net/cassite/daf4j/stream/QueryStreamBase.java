@@ -14,7 +14,7 @@ public abstract class QueryStreamBase<E, T extends QueryStreamBase<E, T>> {
         AndOr andOr;
         QueryParameter parameter;
 
-        public QueryStreamBase(E entity, DataAccess dataAccess) {
+        protected QueryStreamBase(E entity, DataAccess dataAccess) {
                 this.entity = entity;
                 this.dataAccess = dataAccess;
         }
@@ -64,12 +64,4 @@ public abstract class QueryStreamBase<E, T extends QueryStreamBase<E, T>> {
                 return (T) this;
         }
 
-        public QueryProjectionStream<E> mapAll() {
-                return map(null);
-        }
-
-        public QueryProjectionStream<E> map(Focus focus) {
-                QueryParameterWithFocus p = new QueryParameterWithFocus(parameter, focus);
-                return new QueryProjectionStream<E>(entity, dataAccess, andOr, p);
-        }
 }

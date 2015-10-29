@@ -4,7 +4,6 @@ import junit.framework.TestCase;
 import net.cassite.daf4j.stream.QueryProjectionStream;
 import net.cassite.daf4j.stream.QueryStream;
 import net.cassite.daf4j.stream.StreamTestUtils;
-import net.cassite.daf4j.util.Selectable;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,10 +14,12 @@ import static net.cassite.daf4j.ConditionTypes.*;
 import static net.cassite.daf4j.ExpressionTypes.*;
 import static net.cassite.daf4j.Functions.*;
 
+import static junit.framework.TestCase.*;
+
 /**
  * Created by wkgcass on 15/10/26.
  */
-public class GeneralTest extends TestCase {
+public class GeneralTest {
         private static Query query;
         private static Entity entity;
 
@@ -475,11 +476,11 @@ public class GeneralTest extends TestCase {
                 qpwf.focus(entity.age);
 
                 assertEquals(0, qpwf.parameters.size());
-                Map<IData<?>, Object> map = new HashMap<IData<?>, Object>();
+                Map<Selectable, Object> map = new HashMap<Selectable, Object>();
                 map.put(entity.id, "Entity.id");
                 map.put(entity.name, "AliasName");
                 map.put(entity.age, "Entity.age");
-                for (Object d : qpwf.focusMap.keySet()) {
+                for (Selectable d : qpwf.focusMap.keySet()) {
                         assertTrue(map.containsKey(d));
                         assertEquals(map.get(d), qpwf.focusMap.get(d));
                 }
@@ -598,7 +599,7 @@ public class GeneralTest extends TestCase {
         @Test
         public void testQueryStreamGeneral() throws Exception {
                 Entity entity = new Entity();
-                QueryStream<Entity> stream = query.stream(entity).filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1, 20);
+                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1, 20);
 
                 assertEquals(entity, StreamTestUtils.getEntity(stream));
                 assertEquals(entity.age.$gt(18), StreamTestUtils.getAndOr(stream));
@@ -622,7 +623,7 @@ public class GeneralTest extends TestCase {
         @Test
         public void testQueryStreamTop() throws Exception {
                 Entity entity = new Entity();
-                QueryStream<Entity> stream = query.stream(entity).filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1);
+                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).sort(entity.age.asc()).limit(1);
 
                 QueryParameter parameter = StreamTestUtils.getParameter(stream);
                 Map<QueryParameterTypes, Object[]> args = new HashMap<QueryParameterTypes, Object[]>();
@@ -642,7 +643,7 @@ public class GeneralTest extends TestCase {
         @Test
         public void testQueryStreamNonParameter() throws Exception {
                 Entity entity = new Entity();
-                QueryStream<Entity> stream = query.stream(entity).filter(entity.age.$gt(18));
+                QueryStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18));
 
                 assertEquals(null, StreamTestUtils.getParameter(stream));
         }
@@ -650,7 +651,7 @@ public class GeneralTest extends TestCase {
         @Test
         public void testQueryProjectionStream() throws Exception {
                 Entity entity = new Entity();
-                QueryProjectionStream<Entity> stream = query.stream(entity).filter(entity.age.$gt(18)).map(new Focus().focus(entity.name));
+                QueryProjectionStream<Entity> stream = query.from(entity).stream().filter(entity.age.$gt(18)).map(new Focus().focus(entity.name));
 
                 Map<Selectable, String> map = new HashMap<Selectable, String>();
                 map.put(entity.name, "Entity.name");

@@ -1,7 +1,5 @@
 package net.cassite.daf4j;
 
-import net.cassite.daf4j.util.Selectable;
-
 /**
  * 表示实体中的字段
  *

@@ -4,6 +4,7 @@ import net.cassite.daf4j.*;
 import net.cassite.daf4j.util.ConstantMap;
 import net.cassite.daf4j.util.AliasMap;
 import net.cassite.daf4j.util.Location;
+import net.cassite.daf4j.util.Selectable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,13 +210,22 @@ public class JPQLDataAccess implements DataAccess {
                 } else if (args.obj instanceof IExpression) {
                         return generateExpression(args.fillExp((IExpression) args.obj));
                 } else {
-                        throw new UnsupportedOperationException(args.obj.getClass() + " not supported");
+                        if (args.entity == args.obj) {
+                                return args.aliasMap.get(new Location(null));
+                        }
+                        try {
+                                Location l = findEntity(args.obj, args);
+                                return args.aliasMap.get(l);
+                        } catch (IllegalArgumentException e) {
+                                throw new UnsupportedOperationException(args.obj.getClass() + " not supported");
+                        }
                 }
         }
 
         /**
          * 获取实体的调用位置<br>
-         * 使用广度优先搜索
+         * 使用广度优先搜索<br>
+         * 找到时自动加入AliasMap
          *
          * @param entity          从该实体开始寻找
          * @param toFind          要寻找的实体
@@ -561,15 +571,33 @@ public class JPQLDataAccess implements DataAccess {
                                 }
                         }
                         boolean isFirst = true;
-                        for (IData<?> o : ((QueryParameterWithFocus) args.queryParameter).focusMap.keySet()) {
+                        for (Selectable o : ((QueryParameterWithFocus) args.queryParameter).focusMap.keySet()) {
                                 if (isFirst) {
                                         isFirst = false;
                                 } else {
                                         args.sb.append(", ");
                                 }
-                                String alias = ((QueryParameterWithFocus) args.queryParameter).focusMap.get(o);
-                                args.sb.append(entityAlias).append(".").append(DataUtils.findFieldNameByIData(o));
-                                args.selectNonAggregationAliases.add(alias);
+                                if (o instanceof IData) {
+                                        String alias = ((QueryParameterWithFocus) args.queryParameter).focusMap.get(o);
+                                        args.sb.append(entityAlias).append(".").append(DataUtils.findFieldNameByIData((IData<?>) o));
+                                        args.selectNonAggregationAliases.add(alias);
+                                } else if (o instanceof IExpression) {
+                                        args.sb.append(generateExpression(args.fillExp((IExpression) o)));
+                                        if (!DataUtils.expressionIsAggregate((IExpression) o)) {
+                                                // analyse IData
+                                                IExpression exp = (IExpression) o;
+                                                Object[] objs = exp.expArgs();
+                                                for (Object obj : objs) {
+                                                        if (obj instanceof IData) {
+                                                                Location location = findEntity(((IData<?>) obj).getEntity(), args);
+                                                                List<String> locList = location.getLocation();
+                                                                locList.add(DataUtils.findFieldNameByIData((IData<?>) obj));
+                                                                Location loc = DataUtils.generateLocationAndFillMap(locList, args.aliasMap);
+                                                                args.selectNonAggregationAliases.add(args.aliasMap.get(loc));
+                                                        }
+                                                }
+                                        }
+                                }
                         }
                 } else {
                         args.sb.append(entityAlias);
@@ -877,56 +905,5 @@ public class JPQLDataAccess implements DataAccess {
                 for (Object e : entities) {
                         entityManager.persist(e);
                 }
-        }
-
-        /**
-         * 执行查询,返回实体
-         *
-         * @param query     JPQL查询语句
-         * @param parameter 查询参数
-         * @param <E>       实体类型
-         * @return List&lt;实体&gt;
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public <E> List<E> find(Object query, QueryParameter parameter) {
-                return (List<E>) entityManager.createQuery((String) query).getResultList();
-        }
-
-        /**
-         * 执行查询,返回字段Map
-         *
-         * @param query     JPQL查询语句
-         * @param parameter 查询参数
-         * @return List&lt;Map&lt;字段名,值&gt;&gt;
-         */
-        @SuppressWarnings("unchecked")
-        @Override
-        public List<Map<String, Object>> find(Object query, QueryParameterWithFocus parameter) {
-                return listToMap(entityManager.createQuery((String) query).getResultList(), parameter);
-        }
-
-        @Override
-        public void execute(Object query) {
-                entityManager.createQuery((String) query).executeUpdate();
-        }
-
-        @Override
-        public long count(Object entity, Where whereClause) {
-                Args args = new Args();
-                initArgs(args, entity, whereClause, null);
-                String entityAlias = args.aliasMap.get(new Location(null));
-                args.sb.append("SELECT COUNT(").append(entityAlias).append(")");
-                args.sb.append(" FROM ").append(args.entityClass.getSimpleName()).append(" ").append(entityAlias);
-                generateJoinWhere(args);
-                generateGroupByHaving(args);
-
-                logger.debug("Generated JPQL Query is : {} ---- WITH PARAMETERS {}", args.sb.toString(), args.constantMap);
-
-                Query query = entityManager.createQuery(args.sb.toString());
-                setConstants(query, args.constantMap);
-
-                Object o = query.getResultList().get(0);
-                return (Long) o;
         }
 }

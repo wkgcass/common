@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 工具类
@@ -288,5 +289,165 @@ public class DataUtils {
          */
         public static <E, T extends Iterable<E>> void set(DataIterable<E, T> data, T val) {
                 data.set(val);
+        }
+
+        /**
+         * 执行计数<br>
+         * 直接将 count(实体) 作为映射依据
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param dataAccess DataAccess实例
+         * @return long类型的计数结果
+         */
+        public static long executeCount(Object entity, Where where, QueryParameter parameter, DataAccess dataAccess) {
+                String alias = "countRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.count(entity), alias)));
+                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求和字段
+         * @param dataAccess DataAccess实例
+         * @return long类型的求和结果
+         */
+        public static long executeSumLong(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "sumRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.sum(data), alias)));
+                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求和
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求和字段
+         * @param dataAccess DataAccess实例
+         * @return double类型的求和结果
+         */
+        public static double executeSumDouble(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "sumRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.sum(data), alias)));
+                return (res == null || res.size() == 0) ? 0D : Double.parseDouble(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求平均数
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求平均数字段
+         * @param dataAccess DataAccess实例
+         * @return double类型的平均值结果
+         */
+        public static double executeAvg(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "avgRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.avg(data), alias)));
+                return (res == null || res.size() == 0) ? 0D : Double.parseDouble(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最大值字段
+         * @param dataAccess DataAccess实例
+         * @return int类型的求最大值结果
+         */
+        public static int executeMaxInt(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "maxRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.max(data), alias)));
+                return (res == null || res.size() == 0) ? 0 : Integer.parseInt(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最大值字段
+         * @param dataAccess DataAccess实例
+         * @return long类型的求最大值结果
+         */
+        public static long executeMaxLong(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "maxRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.max(data), alias)));
+                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最大值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最大值字段
+         * @param dataAccess DataAccess实例
+         * @return double类型的求最大值结果
+         */
+        public static double executeMaxDouble(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "maxRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.max(data), alias)));
+                return (res == null || res.size() == 0) ? 0D : Double.parseDouble(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最小值字段
+         * @param dataAccess DataAccess实例
+         * @return int类型的求最小值结果
+         */
+        public static int executeMinInt(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "minRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.min(data), alias)));
+                return (res == null || res.size() == 0) ? 0 : Integer.parseInt(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最小值字段
+         * @param dataAccess DataAccess实例
+         * @return long类型的求最小值结果
+         */
+        public static long executeMinLong(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "minRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.min(data), alias)));
+                return (res == null || res.size() == 0) ? 0L : Long.parseLong(res.get(0).get(alias).toString());
+        }
+
+        /**
+         * 执行求最小值
+         *
+         * @param entity     查询实体
+         * @param where      查询条件
+         * @param parameter  查询参数
+         * @param data       求最小值字段
+         * @param dataAccess DataAccess实例
+         * @return double类型的求最小值结果
+         */
+        public static double executeMinDouble(Object entity, Where where, QueryParameter parameter, DataComparable<? extends Number> data, DataAccess dataAccess) {
+                String alias = "minRes";
+                List<Map<String, Object>> res = dataAccess.projection(entity, where, new QueryParameterWithFocus(parameter, new Focus().focus(Functions.min(data), alias)));
+                return (res == null || res.size() == 0) ? 0D : Double.parseDouble(res.get(0).get(alias).toString());
         }
 }

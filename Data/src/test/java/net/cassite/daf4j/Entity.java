@@ -1,15 +1,19 @@
 package net.cassite.daf4j;
 
+import net.cassite.daf4j.types.XInt;
+import net.cassite.daf4j.types.XList;
+import net.cassite.daf4j.types.XString;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Entity {
-        public final DataComparable<Integer> id = new DataComparable<Integer>(this);
-        public final Data<String> name = new Data<String>(this);
-        public final Data<String> district = new Data<String>(this);
-        public final DataComparable<Integer> age = new DataComparable<Integer>(this);
+        public final XInt id = new XInt(this);
+        public final XString name = new XString(this);
+        public final XString district = new XString(this);
+        public final XInt age = new XInt(this);
 
-        public final DataIterable<Entity2, List<Entity2>> oneToMany = new DataIterable<Entity2, List<Entity2>>(new ArrayList<Entity2>(), this);
+        public final XList<Entity2> oneToMany = new XList<Entity2>(this);
 
         public Integer getId() {
                 return id.get();

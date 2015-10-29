@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: net.cassite.daf4j.jpa.TestJPQLDataAccess
 -------------------------------------------------------------------------------
-Tests run: 36, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.439 sec
+Tests run: 41, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.53 sec

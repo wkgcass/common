@@ -20,10 +20,6 @@ public class Query {
                 return new From<En>(entity, dataAccess);
         }
 
-        public <En> QueryStream<En> stream(En entity) {
-                return new QueryStream<En>(entity, dataAccess);
-        }
-
         /**
          * 持久化实体
          *

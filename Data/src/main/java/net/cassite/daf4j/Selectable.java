@@ -1,4 +1,4 @@
-package net.cassite.daf4j.util;
+package net.cassite.daf4j;
 
 /**
  * 表示可以被选取为结果的类型<br>

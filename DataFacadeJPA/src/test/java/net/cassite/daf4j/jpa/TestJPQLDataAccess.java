@@ -1,6 +1,7 @@
 package net.cassite.daf4j.jpa;
 
 import junit.framework.TestCase;
+import net.cassite.daf4j.Focus;
 import net.cassite.daf4j.Query;
 import org.junit.*;
 
@@ -10,7 +11,9 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import static junit.framework.Assert.assertNotNull;
 import static net.cassite.daf4j.Functions.*;
 
 import static junit.framework.Assert.assertEquals;
@@ -492,6 +495,59 @@ public class TestJPQLDataAccess {
                 List<User> list = query.from(user).where(notExists(query.from(user).where(user.name.$eq("wkg").and(outpatient.id.member(user.outpatients))))).list();
 
                 TestCase.assertEquals(2, list.size());
+        }
+
+        @Test
+        public void testSelectIData() throws Exception {
+                User user = new User();
+                List<Map<String, Object>> list = query.from(user).where(null).selectAll();
+
+                TestCase.assertEquals(2, list.size());
+                for (Map<String, Object> map : list) {
+                        assertNotNull(map.get("User.name"));
+                        if (map.get("User.name").equals(userVcassv.getName())) {
+                                TestCase.assertEquals(userVcassv.getPassword(), map.get("User.password"));
+                        } else if (map.get("User.name").equals(userWkgcass.getName())) {
+                                TestCase.assertEquals(userWkgcass.getPassword(), map.get("User.password"));
+                        }
+                }
+        }
+
+        @Test
+        public void testSelectExp() throws Exception {
+                Outpatient outpatient = new Outpatient();
+                List<Map<String, Object>> list = query.from(outpatient).where(null).select(new Focus().focus(sum(outpatient.price), "price"));
+
+                TestCase.assertEquals(1, list.size());
+                TestCase.assertEquals(100999L, list.get(0).get("price"));
+        }
+
+        @Test
+        public void testSelectExpWithIData() throws Exception {
+                Outpatient outpatient = new Outpatient();
+                List<Map<String, Object>> list = query.from(outpatient).where(null).select(new Focus().focus(outpatient.user).focus(sum(outpatient.price), "price"));
+
+                TestCase.assertEquals(1, list.size());
+                TestCase.assertEquals(100999L, list.get(0).get("price"));
+                TestCase.assertEquals(userVcassv.getName(), ((User) list.get(0).get("Outpatient.user")).getName());
+        }
+
+        @Test
+        public void testSelectCount() throws Exception {
+                Outpatient outpatient = new Outpatient();
+                List<Map<String, Object>> list = query.from(outpatient).where(null).select(new Focus().focus(count(outpatient), "count"));
+
+                TestCase.assertEquals(1, list.size());
+                TestCase.assertEquals(2L, list.get(0).get("count"));
+        }
+
+        @Test
+        public void testStreamAdaptabilityWithCount() throws Exception {
+                Outpatient outpatient = new Outpatient();
+                List<Map<String, Object>> list = query.stream(outpatient).map(new Focus().focus(count(outpatient), "count")).list();
+
+                TestCase.assertEquals(1, list.size());
+                TestCase.assertEquals(2L, list.get(0).get("count"));
         }
 
         @After

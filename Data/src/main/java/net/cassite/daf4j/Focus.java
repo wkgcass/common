@@ -1,7 +1,5 @@
 package net.cassite.daf4j;
 
-import net.cassite.daf4j.util.Selectable;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
